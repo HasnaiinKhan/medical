@@ -27,13 +27,19 @@ class Order extends Model
         'status',
         'is_dispatched',
         'cancellation_reason',
+<<<<<<< HEAD
         'cancelled_by',
         'cancelled_at',
+=======
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     ];
 
     protected $casts = [
         'is_dispatched' => 'boolean',
+<<<<<<< HEAD
         'cancelled_at'  => 'datetime',
+=======
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     ];
 
     // Valid status transitions

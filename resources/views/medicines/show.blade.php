@@ -131,6 +131,7 @@
             <div class="rounded-xl border border-slate-200 bg-white p-3">
                 <p class="text-xs text-slate-500 mb-1">Payment Options</p>
                 <div class="flex flex-wrap gap-1.5">
+<<<<<<< HEAD
                     <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-blue-200">
                     <div class=lock style="width:20px;">
                         <img src="{{ asset('images/credit-card.png') }}"
@@ -144,6 +145,10 @@
                             alt="lock"> 
                             </div>
                     COD</span>
+=======
+                    <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-blue-200">💳 Online</span>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">💵 COD</span>
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                 </div>
             </div>
         </div>
@@ -181,10 +186,14 @@
 
         {{-- Delivery note --}}
         <div class="mt-4 flex items-center gap-2 rounded-xl bg-blue-50 border border-blue-100 px-4 py-3">
+<<<<<<< HEAD
             <span class="text-lg">    <div class=lock style="width:40px;">
                             <img src="{{ asset('images/free-delivery.png') }}"
                             alt="lock"> 
                             </div></span>
+=======
+            <span class="text-lg">🚚</span>
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
             <p class="text-xs text-slate-700">
                 <strong>Free delivery</strong> on orders above ₹500. Enter your pincode above to check availability.
             </p>

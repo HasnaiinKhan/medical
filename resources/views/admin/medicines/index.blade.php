@@ -6,6 +6,7 @@
 @section('content')
 
 {{-- Toolbar --}}
+<<<<<<< HEAD
 <div class="mb-5 flex flex-col gap-3">
     <form action="{{ route('admin.medicines.index') }}" method="get" class="flex gap-2 flex-wrap items-center">
         @if(request('category'))
@@ -18,6 +19,20 @@
         </div>
         <select name="category" onchange="this.form.submit()"
             class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none flex-1 min-w-[140px]">
+=======
+<div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <form action="{{ route('admin.medicines.index') }}" method="get" class="flex gap-2 flex-1 flex-wrap sm:flex-nowrap items-center">
+        @if(request('category'))
+            <input type="hidden" name="category" value="{{ request('category') }}">
+        @endif
+        <div class="relative">
+            <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                 <input type="search" name="q" value="{{ $q }}" placeholder="Search medicines…"
+                     class="rounded-xl border border-slate-200 bg-white pl-9 pr-4 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 w-full sm:w-64">
+        </div>
+        <select name="category" onchange="this.form.submit()"
+            class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none w-full sm:w-auto">
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
             <option value="">All Categories</option>
             @foreach($categories as $cat)
                 <option value="{{ $cat->slug }}" {{ request('category') === $cat->slug ? 'selected' : '' }}>{{ $cat->name }}</option>
@@ -25,16 +40,28 @@
         </select>
     </form>
 
+<<<<<<< HEAD
     <div class="flex flex-wrap gap-2">
         <a href="{{ route('admin.medicines.import.form') }}"
            class="btn-sm inline-flex items-center gap-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl">
             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
             Import
+=======
+    <div class="flex gap-2">
+        <a href="{{ route('admin.medicines.import.form') }}"
+           class="btn-sm inline-flex items-center gap-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl">
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            Import CSV
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
         </a>
         <a href="{{ route('admin.medicines.export') }}"
            class="btn-sm inline-flex items-center gap-1.5 bg-blue-700 text-white hover:bg-blue-800 rounded-xl">
             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+<<<<<<< HEAD
             Export
+=======
+            Export CSV
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
         </a>
         <a href="{{ route('admin.medicines.create') }}"
            class="btn-sm inline-flex items-center gap-1.5 bg-blue-700 text-white hover:bg-blue-800 rounded-xl">
@@ -97,7 +124,11 @@
                         <td class="text-right">
                             <div class="flex items-center justify-end gap-1.5 flex-wrap sm:flex-nowrap">
                                 <a href="{{ route('admin.medicines.edit', $m) }}"
+<<<<<<< HEAD
                                    class="btn-sm bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-800 w-full sm:w-auto" style="text-align:center;">
+=======
+                                   class="btn-sm bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-800 w-full sm:w-auto">
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                                     Edit
                                 </a>
                                 <form method="post" action="{{ route('admin.medicines.destroy', $m) }}"

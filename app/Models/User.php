@@ -30,6 +30,7 @@ class User extends Authenticatable
         return $this->hasMany(\App\Models\Order::class);
     }
 
+<<<<<<< HEAD
     public function addresses(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(\App\Models\UserAddress::class)->orderByDesc('is_default')->orderByDesc('updated_at');
@@ -40,6 +41,8 @@ class User extends Authenticatable
         return $this->hasOne(\App\Models\UserAddress::class)->where('is_default', true)->latestOfMany();
     }
 
+=======
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     /**
      * The attributes that should be hidden for serialization.
      *

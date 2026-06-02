@@ -23,10 +23,13 @@ Route::post('/webhooks/razorpay', [WebhookController::class, 'razorpay'])
     ->name('webhooks.razorpay')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
+<<<<<<< HEAD
 // ── Chatbot ───────────────────────────────────────────────────────────────────
 Route::post('/chatbot', [\App\Http\Controllers\ChatbotController::class, 'chat'])->name('chatbot.chat');
 Route::post('/chatbot/order-detail', [\App\Http\Controllers\ChatbotController::class, 'orderDetail'])->name('chatbot.orderDetail')->middleware('auth');
 
+=======
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
 // ── Public ────────────────────────────────────────────────────────────────────
 Route::get('/', HomeController::class)->name('home');
 

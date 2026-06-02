@@ -122,8 +122,13 @@
     {{-- Centre content --}}
     <div style="position:relative;z-index:1;">
         {{-- Big medical cross icon --}}
+<<<<<<< HEAD
         <div style="width:100px;height:100px;border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:48px;margin-bottom:28px;">
             <img src="{{ asset('images/medical-report.png') }}" alt="Medical report">
+=======
+        <div style="width:100px;height:100px;background:rgba(255,255,255,.15);border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:48px;margin-bottom:28px;border:1px solid rgba(255,255,255,.2);">
+            💊
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
         </div>
         <h2 style="color:#fff;font-size:30px;font-weight:900;line-height:1.2;margin-bottom:14px;">
             Your Health,<br>Our Priority
@@ -134,6 +139,7 @@
 
         {{-- Feature pills --}}
         <div style="display:flex;flex-direction:column;gap:10px;">
+<<<<<<< HEAD
             <div class="feature-pill">
              <div style="width:30px;height:10px;border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:48px;margin:10px 0px 10px 0px;">    
             <img src="{{ asset('images/delivery-bike.png') }}" alt="Medical report"></div> Free delivery on orders above ₹500
@@ -145,6 +151,11 @@
 
 
             <div class="feature-pill"><div style="width:30px;height:10px;border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:48px;margin:10px 0px 10px 0px;"><img src="{{ asset('images/atm-card.png') }}" alt="Medical report"></div> COD & online payment</div>
+=======
+            <div class="feature-pill"><span>🚚</span> Free delivery on orders above ₹500</div>
+            <div class="feature-pill"><span>✅</span> 100% genuine medicines</div>
+            <div class="feature-pill"><span>💳</span> COD & online payment</div>
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
         </div>
     </div>
 
@@ -237,6 +248,13 @@
            onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#fff'">
             Create a free account
         </a>
+<<<<<<< HEAD
+=======
+
+        <p style="margin-top:20px;text-align:center;font-size:12px;color:#94a3b8;">
+            Demo: <span style="font-weight:600;color:#64748b;">new@example.com</span> / <span style="font-weight:600;color:#64748b;">123456</span>
+        </p>
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     </div>
 </div>
 

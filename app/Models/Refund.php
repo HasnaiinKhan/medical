@@ -75,12 +75,21 @@ class Refund extends Model
     public function statusBadge(): array
     {
         return match ($this->status) {
+<<<<<<< HEAD
             'requested'  => ['bg-amber-100 text-amber-800',  'Requested'],
             'approved'   => ['bg-blue-100 text-blue-800',    'Approved'],
             'processing' => ['bg-purple-100 text-purple-800','Processing'],
             'processed'  => ['bg-green-100 text-green-800',  'Processed'],
             'failed'     => ['bg-red-100 text-red-800',      'Failed'],
             'rejected'   => ['bg-slate-100 text-slate-700',  'Rejected'],
+=======
+            'requested'  => ['bg-amber-100 text-amber-800',  '⏳ Requested'],
+            'approved'   => ['bg-blue-100 text-blue-800',    '✅ Approved'],
+            'processing' => ['bg-purple-100 text-purple-800','⚙️ Processing'],
+            'processed'  => ['bg-green-100 text-green-800',  '💚 Processed'],
+            'failed'     => ['bg-red-100 text-red-800',      '❌ Failed'],
+            'rejected'   => ['bg-slate-100 text-slate-700',  '🚫 Rejected'],
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
             default      => ['bg-slate-100 text-slate-700',  ucfirst($this->status)],
         };
     }

@@ -961,12 +961,16 @@
                     <p class="text-sm text-slate-500 leading-relaxed">Your trusted online pharmacy in Ahmedabad. Genuine medicines, fast delivery, cash on delivery.</p>
                     <div class="mt-4 flex gap-2">
                         <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">✓ Verified</span>
+<<<<<<< HEAD
                         <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">
                         <div class=lock style="width:20px;">
                         <img src="{{ asset('images/locked.png') }}" 
                         alt="lock"> 
                         </div>
                         Secure</span>
+=======
+                        <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">🔒 Secure</span>
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                     </div>
                 </div>
 
@@ -1048,8 +1052,13 @@
             </div>
 
             <div class="mt-8 border-t border-slate-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+<<<<<<< HEAD
                 <p class="text-xs text-slate-400">© {{ date('Y') }} Medikart — Ahmedabad, Gujarat</p>
                 <p class="text-xs text-slate-400">Built by <a href="https://softgenixinfotech.com/" class="text-blue-500 hover:underline" style="margin-right:25px;">SoftGenix Infotech</a></p>
+=======
+                <p class="text-xs text-slate-400">© {{ date('Y') }} Medikart Demo — Ahmedabad, Gujarat</p>
+                <p class="text-xs text-slate-400">Built by <a href="https://softgenixinfotech.com/" class="text-blue-500 hover:underline">SoftGenix Infotech</a></p>
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
             </div>
         </div>
     </footer>
@@ -1630,6 +1639,7 @@
 
     @stack('scripts')
 
+<<<<<<< HEAD
     {{-- ═══════════════════════════════════════
          MEDIBOT — AI Medicine Assistant
          ─────────────────────────────────────── --}}
@@ -2481,6 +2491,8 @@
     })();
     </script>
 
+=======
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     <x-whatsapp-button />
 </body>
 </html>

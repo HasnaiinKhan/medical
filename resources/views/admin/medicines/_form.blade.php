@@ -45,9 +45,14 @@
                     </div>
                     <div x-show="!creating">
                         <select name="category_id"
+<<<<<<< HEAD
                                 :required="!creating"
                                 class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20">
                             <option value="">— Select a category —</option>
+=======
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20">
+                            <option value="">Select category…</option>
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                             @foreach($categories as $cat)
                                 <option value="{{ $cat->id }}"
                                     {{ old('category_id', $medicine->category_id ?? '') == $cat->id ? 'selected' : '' }}>
@@ -55,12 +60,15 @@
                                 </option>
                             @endforeach
                         </select>
+<<<<<<< HEAD
                         @error('category_id')
                             <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
                                 <svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 {{ $message }}
                             </p>
                         @enderror
+=======
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                     </div>
                     <div x-show="creating" x-cloak>
                         <input name="new_category_name"
@@ -68,6 +76,10 @@
                                class="w-full rounded-xl border border-blue-300 bg-blue-50 px-4 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20">
                         <p class="mt-1 text-xs text-blue-700">Category will be created automatically on save.</p>
                     </div>
+<<<<<<< HEAD
+=======
+                    @error('category_id')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+>>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                 </div>
 
                 <div class="sm:col-span-2">
