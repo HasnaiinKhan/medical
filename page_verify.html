@@ -1,0 +1,3298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0">
+    <title>Medicines - Pharmacy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://kit.fontawesome.com/e2d123f69f.js" crossorigin="anonymous"></script>
+    <link rel="preload" as="style" href="http://127.0.0.1/medical/public/build/assets/app-Dv3qZOcf.css" /><link rel="preload" as="style" href="http://127.0.0.1/medical/public/build/assets/app-BNWJ7Zcm.css" /><link rel="modulepreload" as="script" href="http://127.0.0.1/medical/public/build/assets/app-DF8LBExB.js" /><link rel="stylesheet" href="http://127.0.0.1/medical/public/build/assets/app-Dv3qZOcf.css" /><link rel="stylesheet" href="http://127.0.0.1/medical/public/build/assets/app-BNWJ7Zcm.css" /><script type="module" src="http://127.0.0.1/medical/public/build/assets/app-DF8LBExB.js"></script>    <style>
+
+        
+        .new {
+            width: 200px;
+        }
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #bfdbfe;
+            --accent: #3b82f6;
+            --surface: #ffffff;
+            --surface-2: #f8faff;
+            --border: #bfdbfe;
+            --text: #1e3a5f;
+            --text-muted: #5b7fa6;
+            --radius: 14px;
+            --shadow-sm: 0 1px 3px rgba(59,130,246,.08), 0 1px 2px rgba(59,130,246,.05);
+            --shadow-md: 0 4px 16px rgba(59,130,246,.12), 0 2px 6px rgba(59,130,246,.06);
+            --shadow-lg: 0 12px 40px rgba(59,130,246,.14), 0 4px 12px rgba(59,130,246,.07);
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+            background: #f0f7ff;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* ── Header ── */
+        .site-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 40%, #2563eb 70%, #3b82f6 100%);
+            box-shadow: 0 2px 20px rgba(30,58,138,.35);
+        }
+        .pin-bar {
+            background: rgba(30,58,138,.25);
+            border-top: 1px solid rgba(255,255,255,.15);
+        }
+
+        /* ── Logo ── */
+        .logo-text {
+            background: linear-gradient(135deg, #fff 30%, #b0d0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── Buttons ── */
+        .btn-primary {
+            background: linear-gradient(135deg, #1e40af, #2563eb);
+            color: #fff;
+            font-weight: 700;
+            border-radius: var(--radius);
+            transition: all .25s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 2px 8px rgba(37,99,235,.35);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,.15), transparent);
+            opacity: 0;
+            transition: opacity .25s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37,99,235,.5);
+        }
+        .btn-primary:hover::after { opacity: 1; }
+        .btn-primary:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(37,99,235,.35); }
+
+        .btn-outline {
+            background: #fff;
+            border: 1.5px solid var(--border);
+            color: var(--text);
+            font-weight: 600;
+            border-radius: var(--radius);
+            transition: all .25s cubic-bezier(.4,0,.2,1);
+        }
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #eff6ff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37,99,235,.15);
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: var(--shadow-sm);
+            transition: transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s cubic-bezier(.4,0,.2,1), border-color .25s;
+        }
+        .card:hover {
+            border-color: #93c5fd;
+            box-shadow: 0 12px 32px rgba(37,99,235,.12);
+            transform: translateY(-3px);
+        }
+        .card-static {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ── Medicine card image zoom ── */
+        .med-img-wrap {
+            overflow: hidden;
+            border-radius: 14px 14px 0 0;
+            background: linear-gradient(135deg, #dce8f8, #e8f0fb);
+        }
+        .med-img-wrap img {
+            transition: transform .4s cubic-bezier(.4,0,.2,1);
+        }
+        .card:hover .med-img-wrap img {
+            transform: scale(1.07);
+        }
+
+        /* ── Category pill ── */
+        .cat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .02em;
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        /* ── Badges ── */
+        .badge-discount {
+            background: linear-gradient(135deg, #1e40af, #2563eb);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+            letter-spacing: .03em;
+        }
+        .badge-rx {
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+            border: 1px solid #fde68a;
+        }
+
+        /* ── Cart badge ── */
+        .cart-badge {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        /* ── Nav link underline ── */
+        .nav-link { position: relative; }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 50%;
+            width: 0; height: 2px;
+            background: rgba(255,255,255,.8);
+            border-radius: 2px;
+            transition: all .2s;
+            transform: translateX(-50%);
+        }
+        .nav-link:hover::after { width: 80%; }
+
+        /* ── Alerts ── */
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .alert-animate {
+            animation: slideDown .3s ease;
+            transition: opacity .2s ease, transform .2s ease;
+        }
+        .alert-animate.is-hiding {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+
+        /* ── Section headings ── */
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -.02em;
+        }
+
+        /* ── Input focus ── */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(32,64,128,.15);
+        }
+
+        /* ── Cursor ── */
+        #cursor-ring {
+            position: fixed; top: 0; left: 0;
+            width: 34px; height: 34px;
+            border: 2px solid rgba(32,64,128,.7);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999;
+            transform: translate(-50%,-50%);
+            transition: width .18s, height .18s, border-color .18s, background .18s, opacity .18s;
+        }
+        #cursor-dot {
+            position: fixed; top: 0; left: 0;
+            width: 6px; height: 6px;
+            background: #2563eb;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999;
+            transform: translate(-50%,-50%);
+            transition: transform .08s;
+        }
+
+        /* ── Skeleton shimmer ── */
+        @keyframes shimmer {
+            0%   { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 800px 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 8px;
+        }
+
+        /* ── Smooth page transitions ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        main > * { animation: fadeUp .35s ease both; }
+
+        /* ── Gradient hero ── */
+        .gradient-hero {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 40%, #2563eb 70%, #3b82f6 100%);
+        }
+
+        /* ── Category card hover ── */
+        .category-card {
+            border-radius: 18px;
+            transition: transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s, border-color .25s;
+        }
+        .category-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 28px rgba(37,99,235,.15);
+            border-color: #93c5fd !important;
+        }
+        .category-card .cat-icon {
+            transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+        }
+        .category-card:hover .cat-icon {
+            transform: scale(1.2) rotate(-6deg);
+        }
+
+        /* ── Pagination ── */
+        nav[aria-label="pagination"] span,
+        nav[aria-label="pagination"] a {
+            border-radius: 10px !important;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .whyus {
+            width:100px;
+            height:800px;
+        }
+
+        .hover:hover {
+            color: blue;
+            background-color:white;
+            cursor: pointer;
+        }
+
+        /* ── Premium animations ── */
+
+        /* Smooth page entry */
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(18px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        main > * { animation: fadeUp .4s cubic-bezier(.4,0,.2,1) both; }
+        main > *:nth-child(2) { animation-delay:.06s; }
+        main > *:nth-child(3) { animation-delay:.12s; }
+        main > *:nth-child(4) { animation-delay:.18s; }
+
+        /* Input focus glow */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 3px rgba(37,99,235,.18) !important;
+            transition: box-shadow .2s, border-color .2s;
+        }
+
+        /* Trust / feature cards lift */
+        .trust-card {
+            transition: transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s;
+        }
+        .trust-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(37,99,235,.12);
+        }
+
+        /* Medicine cards in grid */
+        .medicine-card {
+            transition: transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s, border-color .25s;
+        }
+        .medicine-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(37,99,235,.14);
+            border-color: #93c5fd !important;
+        }
+        .medicine-card:hover img {
+            transform: scale(1.06);
+        }
+        .medicine-card img {
+            transition: transform .4s cubic-bezier(.4,0,.2,1);
+        }
+
+        /* Order / cart row hover */
+        .order-row {
+            transition: background .2s, box-shadow .2s;
+        }
+        .order-row:hover {
+            background: #f0f7ff;
+            box-shadow: inset 3px 0 0 #2563eb;
+        }
+
+        /* Smooth link colour transitions */
+        a { transition: color .18s, opacity .18s; }
+
+        /* Badge pop on hover */
+        .badge-discount, .badge-rx {
+            transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+        }
+        .badge-discount:hover, .badge-rx:hover {
+            transform: scale(1.1);
+        }
+
+        /* Sidebar links (admin) */
+        .sidebar-link {
+            transition: background .18s, color .18s, transform .18s;
+        }
+        .sidebar-link:hover {
+            transform: translateX(3px);
+        }
+
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-900 antialiased">
+
+    
+    <header id="site-header" class="sticky top-0 z-50 site-header">
+        
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8" x-data="{ mobileMenuOpen: false }">
+                
+                <a href="http://127.0.0.1/medical/public" class="flex items-center gap-2.5 group flex-shrink-0">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-lg font-black text-white group-hover:bg-white/25 transition-all ring-1 ring-white/20">
+                        ✚
+                    </div>
+                    <div class="leading-none">
+                        <span class="logo-text text-xl font-extrabold tracking-tight">Medikart</span>
+                        <span class="ml-1.5 hidden text-[10px] font-semibold text-white sm:inline tracking-widest logo-text">Pharmacy</span>
+                    </div>
+                </a>
+
+                
+                <button @click="mobileMenuOpen = !mobileMenuOpen"
+                        class="inline-flex items-center justify-center h-11 w-11 rounded-xl bg-white/15 text-white hover:bg-white/25 transition-all sm:hidden">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+
+                
+                <form action="http://127.0.0.1/medical/public/medicines" method="get"
+                      class="relative z-[120] hidden flex-1 max-w-xl mx-6 lg:flex"
+                      data-medicine-suggest-form>
+               
+                    <div class="flex w-full items-center rounded-xl overflow-hidden bg-white/95 shadow-lg ring-1 ring-white/30">
+                    <input type="search" name="q" value=""
+                           data-medicine-suggest-input
+                           autocomplete="off"
+                           aria-autocomplete="list"
+                           aria-expanded="false"
+                           placeholder="Search medicines, brands, categories…"
+                           class="flex-1 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 bg-transparent focus:outline-none">
+                    <button type="submit"
+                            class="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold transition-colors">
+                        Search
+                    </button>
+                    </div>
+                    <div data-medicine-suggestions
+                         class="absolute left-0 right-0 top-full z-[130] mt-2 hidden w-full min-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                    </div>
+                </form>
+
+                
+                <nav class="flex items-center gap-1 sm:gap-1.5">
+<a href="http://127.0.0.1/medical/public/medicines"
+                        class="nav-link hidden sm:inline-flex items-center gap-1.5 rounded-lg px-4 py-3 text-sm font-semibold text-white/85 hover:text-white hover:bg-white/10 transition-all">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        Medicines
+                    </a>
+
+                    
+                    <a id="cart-nav-link" href="http://127.0.0.1/medical/public/cart"
+                       class="relative inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-3 py-2 text-sm font-bold text-white hover:bg-white/25 transition-all ring-1 ring-white/20">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        Cart
+                        <span
+                            id="cart-count-badge"
+                            class="cart-badge absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full text-white shadow-md hidden"
+                        >
+                            0
+                        </span>
+                    </a>
+
+                                            <a href="http://127.0.0.1/medical/public/login"
+                           class="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-white/25 px-3 py-2 text-sm font-semibold text-white hover:bg-white/10 transition-all">
+                            Sign In
+                        </a>
+                        <a href="http://127.0.0.1/medical/public/register"
+                           class="hidden sm:inline-flex items-center rounded-xl bg-white px-3.5 py-2 text-sm font-bold text-blue-700 hover:bg-blue-50 transition-all shadow-md">
+                            Register
+                        </a>
+                                    </nav>
+            </div>
+
+            
+            <div x-show="mobileMenuOpen" x-cloak
+                 x-transition.opacity
+                 class="fixed inset-0 z-40 bg-black/40 lg:hidden"
+                 @click="mobileMenuOpen = false"
+                 aria-hidden="true"></div>
+
+            <div x-show="mobileMenuOpen" x-cloak
+                 x-transition.origin-top.duration.200
+                 class="fixed inset-x-0 top-0 z-50 mt-16 bg-slate-950/95 backdrop-blur-lg border-b border-slate-800 lg:hidden shadow-2xl">
+                <div class="mx-auto max-w-7xl px-4 pb-4 pt-4 sm:px-6">
+                    <div class="space-y-3">
+                        <form action="http://127.0.0.1/medical/public/medicines" method="get" class="relative" data-medicine-suggest-form>
+                            <div class="flex items-center rounded-2xl bg-white px-3 py-2 shadow-sm ring-1 ring-slate-200">
+                                <input type="search" name="q" value="" data-medicine-suggest-input
+                                       autocomplete="off"
+                                       placeholder="Search medicines, brands, categories…"
+                                       class="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none">
+                                <button type="submit" class="ml-3 rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Search</button>
+                            </div>
+                        </form>
+
+<nav class="space-y-1">
+                             <a href="http://127.0.0.1/medical/public/medicines" class="block rounded-2xl px-5 py-4 text-sm font-semibold text-white hover:bg-white/10">
+                                 Medicines
+                             </a>
+                                                          <a href="http://127.0.0.1/medical/public/cart" class="flex items-center justify-between rounded-2xl px-5 py-4 text-sm font-semibold text-white hover:bg-white/10">
+                                 <span>Cart</span>
+                                 <span class="inline-flex h-7 min-w-[26px] items-center justify-center rounded-full bg-blue-500 px-3 text-[12px] font-bold text-white">0</span>
+                             </a>
+                                                              <a href="http://127.0.0.1/medical/public/login" class="block rounded-2xl px-5 py-4 text-sm font-semibold text-white hover:bg-white/10">Sign In</a>
+                                 <a href="http://127.0.0.1/medical/public/register" class="block rounded-2xl px-5 py-4 text-sm font-semibold text-blue-200 hover:bg-white/10">Register</a>
+                                                      </nav>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="px-4 pb-3 lg:hidden">
+                <form action="http://127.0.0.1/medical/public/medicines" method="get"
+                      class="relative z-[120]"
+                      data-medicine-suggest-form>
+                    <div class="flex items-center rounded-xl overflow-hidden bg-white/95 shadow-md">
+                    <svg class="ml-3 h-4 w-4 flex-shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="search" name="q" value=""
+                           data-medicine-suggest-input
+                           autocomplete="off"
+                           aria-autocomplete="list"
+                           aria-expanded="false"
+                           placeholder="Search medicines…"
+                           class="flex-1 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 bg-transparent focus:outline-none">
+                    <button type="submit"
+                            class="px-4 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold transition-colors">
+                        Go
+                    </button>
+                    </div>
+                    <div data-medicine-suggestions
+                         class="absolute left-0 right-0 top-full z-[130] mt-2 hidden w-full min-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                    </div>
+                </form>
+            </div>
+
+        
+        <div class="pin-bar">
+            <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-2 sm:px-6">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <div class="text-white">
+                    Delivery
+                    </div>
+                </div>
+                <div class="flex flex-1 flex-wrap items-center gap-2">
+                    <input id="pin-input" maxlength="6" inputmode="numeric" placeholder="Enter pincode (e.g. 380028)"
+       class="new h-auto rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-xs text-white placeholder:text-blue-300/60 focus:border-white/40 focus:bg-white/15 focus:outline-none transition-all">
+                    <button type="button" id="pin-lookup-btn"
+                            class="rounded-lg bg-white/10 border border-white/20 px-3 py-1.5 text-xs font-bold text-white hover transition-all">
+                        Check
+                    </button>
+                    <button type="button" id="pin-confirm-btn" hidden
+                            class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-500 transition-all hover shadow-sm">
+                        ✓ Deliver here
+                    </button>
+                </div>
+                <div id="pin-status" class="location text-xs font-semibold text-white"></div>
+            </div>
+        </div>
+    </header>
+
+    
+    <style>
+
+        #page-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 55%, #2563eb 100%);
+            transition: opacity .45s ease, visibility .45s ease;
+        }
+        #page-loader.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* ── Pill capsule ── */
+        .loader-pill {
+            position: relative;
+            width: 90px;
+            height: 36px;
+            border-radius: 99px;
+            overflow: hidden;
+            box-shadow: 0 0 0 3px rgba(255,255,255,.15), 0 8px 32px rgba(0,0,0,.3);
+            animation: pillBounce 1.1s ease-in-out infinite;
+        }
+        .loader-pill-left {
+            position: absolute;
+            left: 0; top: 0;
+            width: 50%; height: 100%;
+            background: linear-gradient(135deg, #dce8f8, #b0d0f0);
+        }
+        .loader-pill-right {
+            position: absolute;
+            right: 0; top: 0;
+            width: 50%; height: 100%;
+            background: linear-gradient(135deg, #1e40af, #2563eb);
+        }
+        .loader-pill-divider {
+            position: absolute;
+            left: 50%; top: 0;
+            width: 2px; height: 100%;
+            background: rgba(255,255,255,.5);
+            transform: translateX(-50%);
+        }
+        /* shine sweep */
+        .loader-pill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.35) 50%, transparent 65%);
+            animation: pillShine 1.6s ease-in-out infinite;
+        }
+        @keyframes pillBounce {
+            0%,100% { transform: translateY(0) rotate(-4deg); }
+            50%      { transform: translateY(-10px) rotate(4deg); }
+        }
+        @keyframes pillShine {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
+        /* ── Orbiting dots ── */
+        .loader-orbit {
+            position: absolute;
+            width: 110px;
+            height: 110px;
+            animation: orbitSpin 2.4s linear infinite;
+        }
+        .loader-orbit-dot {
+            position: absolute;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.55);
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+        }
+        .loader-orbit-dot:nth-child(2) {
+            top: auto; bottom: 0;
+            background: rgba(176,208,240,.7);
+        }
+        @keyframes orbitSpin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+
+        /* ── Pulsing cross ── */
+        .loader-cross {
+            margin-top: 28px;
+            position: relative;
+            width: 28px; height: 28px;
+            animation: crossPulse 1.1s ease-in-out infinite;
+        }
+        .loader-cross::before,
+        .loader-cross::after {
+            content: '';
+            position: absolute;
+            background: rgba(255,255,255,.9);
+            border-radius: 3px;
+        }
+        .loader-cross::before { width: 100%; height: 30%; top: 35%; left: 0; }
+        .loader-cross::after  { width: 30%; height: 100%; top: 0; left: 35%; }
+        @keyframes crossPulse {
+            0%,100% { transform: scale(1);    opacity: .9; }
+            50%      { transform: scale(1.25); opacity: 1; }
+        }
+
+        /* ── Brand text ── */
+        .loader-brand {
+            margin-top: 20px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -.02em;
+            background: linear-gradient(135deg, #fff 30%, #b0d0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .loader-tagline {
+            margin-top: 4px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: rgba(176,208,240,.7);
+        }
+
+        /* ── Progress bar ── */
+        .loader-bar-track {
+            margin-top: 32px;
+            width: 180px;
+            height: 4px;
+            background: rgba(255,255,255,.12);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .loader-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #80c0e0, #b0d0f0, #dce8f8);
+            border-radius: 99px;
+            transition: width .08s linear;
+            box-shadow: 0 0 8px rgba(128,192,224,.6);
+        }
+
+        /* ── Floating pills (background decoration) ── */
+        .loader-bg-pill {
+            position: absolute;
+            border-radius: 99px;
+            opacity: .07;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            from { transform: translateY(110vh) rotate(0deg); }
+            to   { transform: translateY(-20vh) rotate(360deg); }
+        }
+        .margeein {
+            margin-top:100px;
+        }
+    </style>
+
+    <div id="page-loader" role="status" aria-label="Loading Medikart">
+        
+                    <div class="loader-bg-pill" style="
+                width:18px; height:7px;
+                left:8%;
+                background:white;
+                animation-duration:7s;
+                animation-delay:0s;
+            "></div>
+                    <div class="loader-bg-pill" style="
+                width:28px; height:11px;
+                left:22%;
+                background:white;
+                animation-duration:9s;
+                animation-delay:1.2s;
+            "></div>
+                    <div class="loader-bg-pill" style="
+                width:14px; height:6px;
+                left:40%;
+                background:white;
+                animation-duration:6s;
+                animation-delay:0.5s;
+            "></div>
+                    <div class="loader-bg-pill" style="
+                width:22px; height:9px;
+                left:58%;
+                background:white;
+                animation-duration:8s;
+                animation-delay:2s;
+            "></div>
+                    <div class="loader-bg-pill" style="
+                width:16px; height:7px;
+                left:72%;
+                background:white;
+                animation-duration:7.5s;
+                animation-delay:0.8s;
+            "></div>
+                    <div class="loader-bg-pill" style="
+                width:30px; height:12px;
+                left:85%;
+                background:white;
+                animation-duration:10s;
+                animation-delay:1.6s;
+            "></div>
+                    <div class="loader-bg-pill" style="
+                width:12px; height:5px;
+                left:93%;
+                background:white;
+                animation-duration:6.5s;
+                animation-delay:3s;
+            "></div>
+        
+        
+        <div style="position:relative; display:flex; align-items:center; justify-content:center; width:110px; height:110px;">
+            <div class="loader-orbit">
+                <div class="loader-orbit-dot"></div>
+                <div class="loader-orbit-dot"></div>
+            </div>
+            <div class="loader-pill">
+                <div class="loader-pill-left"></div>
+                <div class="loader-pill-right"></div>
+                <div class="loader-pill-divider"></div>
+            </div>
+        </div>
+
+        
+        <div class="loader-cross"></div>
+
+        
+        <p class="loader-brand">Medikart</p>
+        <!-- <p class="loader-tagline">Ahmedabad · Fast Delivery</p> -->
+
+        
+        <div class="loader-bar-track">
+            <div class="loader-bar-fill" id="loader-bar"></div>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        const loader  = document.getElementById('page-loader');
+        const bar     = document.getElementById('loader-bar');
+        let   pct     = 0;
+        let   rafId   = null;
+
+        // Smoothly animate the bar to a target %
+        function animateTo(target, speed) {
+            cancelAnimationFrame(rafId);
+            (function step() {
+                if (pct < target) {
+                    pct = Math.min(pct + speed, target);
+                    bar.style.width = pct + '%';
+                    rafId = requestAnimationFrame(step);
+                }
+            })();
+        }
+
+        // Phase 1: race to 70% quickly
+        animateTo(70, 1.2);
+
+        // Phase 2: slow crawl to 90% while page loads
+        setTimeout(() => animateTo(90, 0.25), 600);
+
+        // Phase 3: on load, fill to 100% then hide
+        function finish() {
+            cancelAnimationFrame(rafId);
+            pct = 90;
+            animateTo(100, 2.5);
+            setTimeout(() => loader.classList.add('hide'), 420);
+            setTimeout(() => loader.remove(), 900);
+        }
+
+        if (document.readyState === 'complete') {
+            finish();
+        } else {
+            window.addEventListener('load', finish, { once: true });
+            // Safety fallback — never block the user
+            setTimeout(finish, 4000);
+        }
+    })();
+    </script>
+    <div id="flash-message-root" class="pointer-events-none fixed right-4 z-[99999] flex w-[calc(100%-2rem)] max-w-sm flex-col gap-3 sm:w-80" style="z-index: 99999;">
+                       </div>
+
+    
+    <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        
+<div id="medicines-page-summary" class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-900">All Medicines</h1>
+<p class="text-sm text-slate-500 mt-0.5">
+            Browse our complete catalogue of 45 medicines
+    </p>
+</div>
+
+<div class="flex flex-col gap-6 lg:flex-row">
+    <aside class="w-full lg:w-72 flex-shrink-0">
+        <div id="medicines-filters-container" class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden sticky top-36">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100"
+     style="background: linear-gradient(135deg,#1e3a8a,#2563eb);">
+    <div class="flex items-center gap-2">
+        <i class="fa-solid fa-sliders text-white text-sm"></i>
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider">Filters</h3>
+    </div>
+    </div>
+
+    
+    <div class="border-b border-slate-100">
+        <button type="button" onclick="toggleSection('cat-section', 'cat-chevron')"
+                class="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition-colors">
+            <span class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600">
+                <i class="fa-solid fa-table-cells-large text-blue-500 text-xs"></i>
+                Shop by Category
+            </span>
+            <svg id="cat-chevron" class="h-4 w-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+
+        <div id="cat-section" class="px-3 pb-3">
+            <ul class="space-y-0.5" id="cat-list">
+                <li>
+                    <a href="http://127.0.0.1/medical/public/medicines"
+                       class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors bg-blue-700 font-semibold text-white">
+                        <span>All Medicines</span>
+                                                    <svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+                                            </a>
+                </li>
+                                    <li class="cat-item "
+                        data-default-hidden="false">
+                        <a href="http://127.0.0.1/medical/public/medicines?category=bone-joint"
+                           class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors text-slate-700 hover:bg-slate-50">
+                            <span>Bone &amp; Joint</span>
+                                                    </a>
+                    </li>
+                                    <li class="cat-item "
+                        data-default-hidden="false">
+                        <a href="http://127.0.0.1/medical/public/medicines?category=cold-allergy"
+                           class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors text-slate-700 hover:bg-slate-50">
+                            <span>Cold &amp; Allergy</span>
+                                                    </a>
+                    </li>
+                                    <li class="cat-item "
+                        data-default-hidden="false">
+                        <a href="http://127.0.0.1/medical/public/medicines?category=diabetes"
+                           class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors text-slate-700 hover:bg-slate-50">
+                            <span>Diabetes Care</span>
+                                                    </a>
+                    </li>
+                                    <li class="cat-item "
+                        data-default-hidden="false">
+                        <a href="http://127.0.0.1/medical/public/medicines?category=digestive"
+                           class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors text-slate-700 hover:bg-slate-50">
+                            <span>Digestive Care</span>
+                                                    </a>
+                    </li>
+                                    <li class="cat-item "
+                        data-default-hidden="false">
+                        <a href="http://127.0.0.1/medical/public/medicines?category=eye-ear"
+                           class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors text-slate-700 hover:bg-slate-50">
+                            <span>Eye &amp; Ear Care</span>
+                                                    </a>
+                    </li>
+                                    <li class="cat-item hidden"
+                        data-default-hidden="true">
+                        <a href="http://127.0.0.1/medical/public/medicines?category=fever-pain"
+                           class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors text-slate-700 hover:bg-slate-50">
+                            <span>Fever &amp; Pain</span>
+                                                    </a>
+                    </li>
+                                    <li class="cat-item hidden"
+                        data-default-hidden="true">
+                        <a href="http://127.0.0.1/medical/public/medicines?category=heart-bp"
+                           class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors text-slate-700 hover:bg-slate-50">
+                            <span>Heart &amp; BP</span>
+                                                    </a>
+                    </li>
+                                    <li class="cat-item hidden"
+                        data-default-hidden="true">
+                        <a href="http://127.0.0.1/medical/public/medicines?category=immunity"
+                           class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors text-slate-700 hover:bg-slate-50">
+                            <span>Immunity Boosters</span>
+                                                    </a>
+                    </li>
+                                    <li class="cat-item hidden"
+                        data-default-hidden="true">
+                        <a href="http://127.0.0.1/medical/public/medicines?category=sexual-desire"
+                           class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors text-slate-700 hover:bg-slate-50">
+                            <span>Sexual &amp; Desire</span>
+                                                    </a>
+                    </li>
+                                    <li class="cat-item hidden"
+                        data-default-hidden="true">
+                        <a href="http://127.0.0.1/medical/public/medicines?category=skin"
+                           class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors text-slate-700 hover:bg-slate-50">
+                            <span>Skin Care</span>
+                                                    </a>
+                    </li>
+                                    <li class="cat-item hidden"
+                        data-default-hidden="true">
+                        <a href="http://127.0.0.1/medical/public/medicines?category=vitamins"
+                           class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors text-slate-700 hover:bg-slate-50">
+                            <span>Vitamins &amp; Supplements</span>
+                                                    </a>
+                    </li>
+                            </ul>
+
+                            <button type="button" onclick="toggleSeeMore('cat-item', 'cat-more-btn')"
+                        id="cat-more-btn"
+                        class="mt-2 flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-colors">
+                    <span class="btn-label">See 6 more</span>
+                    <svg class="btn-icon h-3.5 w-3.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                    </div>
+    </div>
+
+    
+    <div>
+        <button type="button" onclick="toggleSection('brand-section', 'brand-chevron')"
+                class="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition-colors">
+            <span class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600">
+                <i class="fa-solid fa-tag text-blue-500 text-xs"></i>
+                Shop by Brand
+            </span>
+            <svg id="brand-chevron" class="h-4 w-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+
+        <div id="brand-section" class="px-3 pb-3">
+            <div class="relative mb-3">
+                <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input id="brand-search-input" type="search"
+                       placeholder="Search brands..."
+                       class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none">
+            </div>
+
+            <form id="brand-filter-form" action="http://127.0.0.1/medical/public/medicines" method="get" data-medicine-results-form>
+                <input type="hidden" name="q" value="">
+                
+                <div id="brand-filter-list" class="space-y-1.5">
+                                            <label class="brand-filter-item  flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="abbott"
+                               data-default-hidden="false">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Abbott"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Abbott</span>
+                            </span>
+                            <span class="text-xs text-slate-400">2</span>
+                        </label>
+                                            <label class="brand-filter-item  flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="akumentis"
+                               data-default-hidden="false">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Akumentis"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Akumentis</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item  flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="alcon"
+                               data-default-hidden="false">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Alcon"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Alcon</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item  flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="apex labs"
+                               data-default-hidden="false">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Apex Labs"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Apex Labs</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item  flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="aristo"
+                               data-default-hidden="false">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Aristo"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Aristo</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="bayer"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Bayer"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Bayer</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="centaur"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Centaur"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Centaur</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="cipla"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Cipla"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Cipla</span>
+                            </span>
+                            <span class="text-xs text-slate-400">2</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="dabur"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Dabur"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Dabur</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="dr reddy"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Dr Reddy"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Dr Reddy</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="fdc"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="FDC"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">FDC</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="galderma"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Galderma"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Galderma</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="glenmark"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Glenmark"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Glenmark</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="gsk"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="GSK"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">GSK</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="himalaya"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Himalaya"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Himalaya</span>
+                            </span>
+                            <span class="text-xs text-slate-400">4</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="merck"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Merck"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Merck</span>
+                            </span>
+                            <span class="text-xs text-slate-400">2</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="meyer"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Meyer"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Meyer</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="micro labs"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Micro Labs"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Micro Labs</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="morepen"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Morepen"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Morepen</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="napp pharma"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Napp Pharma"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Napp Pharma</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="neurobion forte"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Neurobion Forte"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Neurobion Forte</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="novartis"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Novartis"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Novartis</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="pfizer"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Pfizer"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Pfizer</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="reckitt"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Reckitt"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Reckitt</span>
+                            </span>
+                            <span class="text-xs text-slate-400">2</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="roche"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Roche"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Roche</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="roop mantra"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Roop Mantra"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Roop Mantra</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="sanofi"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Sanofi"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Sanofi</span>
+                            </span>
+                            <span class="text-xs text-slate-400">3</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="sun pharma"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Sun Pharma"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Sun Pharma</span>
+                            </span>
+                            <span class="text-xs text-slate-400">5</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="torrent"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Torrent"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Torrent</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="usv"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="USV"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">USV</span>
+                            </span>
+                            <span class="text-xs text-slate-400">1</span>
+                        </label>
+                                            <label class="brand-filter-item hidden flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
+                               data-brand-name="zydus"
+                               data-default-hidden="true">
+                            <span class="flex min-w-0 items-center gap-2">
+                                <input type="checkbox"
+                                       name="brand[]"
+                                       value="Zydus"
+                                       class="h-4 w-4 flex-shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                       >
+                                <span class="truncate">Zydus</span>
+                            </span>
+                            <span class="text-xs text-slate-400">2</span>
+                        </label>
+                                    </div>
+
+                                    <button type="button" onclick="toggleSeeMore('brand-filter-item', 'brand-more-btn')"
+                            id="brand-more-btn"
+                            class="mt-2 flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-colors">
+                        <span class="btn-label">See 26 more</span>
+                        <svg class="btn-icon h-3.5 w-3.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                            </form>
+        </div>
+    </div>
+        </div>
+    </aside>
+
+    <section class="min-w-0 flex-1">
+        <div id="medicines-results-container" class="space-y-6">
+            <form id="medicine-search-form"
+      action="http://127.0.0.1/medical/public/medicines"
+      method="get"
+      class="relative z-[120] mb-5 flex gap-2 overflow-visible"
+      data-medicine-results-form
+      data-medicine-suggest-form>
+                <div class="flex-1">
+        <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="search" name="q" value=""
+               data-medicine-suggest-input
+               autocomplete="off"
+               aria-autocomplete="list"
+               aria-expanded="false"
+               placeholder="Search by name, brand, or description..."
+               class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20">
+    </div>
+    <button type="submit"
+            class="btn-primary rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm">
+        Search
+    </button>
+        <div data-medicine-suggestions
+         class="absolute left-0 right-0 top-full mt-2 hidden w-full min-w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl max-h-96"
+         style="z-index:999999;">
+    </div>
+</form>
+
+<p class="mb-4 text-xs text-slate-500">
+    Showing 1-12 of 45 results
+</p>
+
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    <article data-product-url="http://127.0.0.1/medical/public/medicines/abzorb-dusting-powder" data-product-id="28" class="medicine-card cursor-pointer flex flex-col rounded-2xl bg-white shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+            <div class="relative h-24 overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100">
+                <img src="https://cdn01.pharmeasy.in/dam/products_otc/Q84402/abzorb-total-skin-relief-dusting-powder-20-extra-bottle-of-120gm-6.1-1718197859.jpg?dim=700x0&amp;dpr=1&amp;q=100"
+                     alt="Abzorb Dusting Powder"
+                     class="h-full w-full object-contain object-center p-2 transition-transform duration-300 hover:scale-105"
+                     loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="absolute inset-0 hidden items-center justify-center">
+                    <span class="text-4xl font-black text-slate-300/60 select-none">A</span>
+                </div>
+                                                    <span class="absolute top-2 right-2 rounded-md bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                        5% OFF
+                    </span>
+                            </div>
+
+            <div class="flex flex-1 flex-col p-4">
+                <p class="mb-0.5 text-xs font-medium text-blue-700">Skin Care</p>
+                <h2 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">Abzorb Dusting Powder</h2>
+                <p class="mt-0.5 text-xs text-slate-500">Sun Pharma</p>
+
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold text-slate-900">&#8377;156.00</span>
+                                            <span class="text-xs text-slate-400 line-through">&#8377;164.00</span>
+                        <span class="text-xs font-semibold text-blue-700">Save &#8377;8.00</span>
+                                    </div>
+
+                <div class="mt-auto pt-3">
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/add" class="js-add-to-cart-form w-full ">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="medicine_id" value="28">
+                        <button type="submit"
+                                class="btn-primary w-full rounded-2xl py-3 text-sm font-black text-white shadow-sm">
+                            Add to Cart
+                        </button>
+                    </form>
+
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/abzorb-dusting-powder"
+                          class="js-cart-update-form mt-3 flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 hidden"
+                          data-cart-medicine-id="28">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="_method" value="PATCH">                        <button type="button"
+                                class="js-card-qty-minus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Decrease quantity">-</button>
+                        <input type="number" name="quantity" value="1" min="0" max="99" readonly
+                               class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
+                        <button type="button"
+                                class="js-card-qty-plus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Increase quantity">+</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+                    <article data-product-url="http://127.0.0.1/medical/public/medicines/accu-chek-active-strips-50" data-product-id="22" class="medicine-card cursor-pointer flex flex-col rounded-2xl bg-white shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+            <div class="relative h-24 overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
+                <img src="https://cdn01.pharmeasy.in/dam/products_otc/000665/accu-chek-active-glucometer-test-strips-box-of-50-6.1-1734607563.jpg?dim=700x0&amp;dpr=1&amp;q=100"
+                     alt="Accu-Chek Active Strips (50)"
+                     class="h-full w-full object-contain object-center p-2 transition-transform duration-300 hover:scale-105"
+                     loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="absolute inset-0 hidden items-center justify-center">
+                    <span class="text-4xl font-black text-slate-300/60 select-none">A</span>
+                </div>
+                                                    <span class="absolute top-2 right-2 rounded-md bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                        8% OFF
+                    </span>
+                            </div>
+
+            <div class="flex flex-1 flex-col p-4">
+                <p class="mb-0.5 text-xs font-medium text-blue-700">Diabetes Care</p>
+                <h2 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">Accu-Chek Active Strips (50)</h2>
+                <p class="mt-0.5 text-xs text-slate-500">Roche</p>
+
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold text-slate-900">&#8377;1,026.00</span>
+                                            <span class="text-xs text-slate-400 line-through">&#8377;1,115.00</span>
+                        <span class="text-xs font-semibold text-blue-700">Save &#8377;89.00</span>
+                                    </div>
+
+                <div class="mt-auto pt-3">
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/add" class="js-add-to-cart-form w-full ">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="medicine_id" value="22">
+                        <button type="submit"
+                                class="btn-primary w-full rounded-2xl py-3 text-sm font-black text-white shadow-sm">
+                            Add to Cart
+                        </button>
+                    </form>
+
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/accu-chek-active-strips-50"
+                          class="js-cart-update-form mt-3 flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 hidden"
+                          data-cart-medicine-id="22">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="_method" value="PATCH">                        <button type="button"
+                                class="js-card-qty-minus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Decrease quantity">-</button>
+                        <input type="number" name="quantity" value="1" min="0" max="99" readonly
+                               class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
+                        <button type="button"
+                                class="js-card-qty-plus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Increase quantity">+</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+                    <article data-product-url="http://127.0.0.1/medical/public/medicines/allegra-120mg-tablet" data-product-id="31" class="medicine-card cursor-pointer flex flex-col rounded-2xl bg-white shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+            <div class="relative h-24 overflow-hidden bg-gradient-to-br from-purple-50 to-violet-100">
+                <img src="https://cdn01.pharmeasy.in/dam/productsnowatermark/005715/allegra-120mg-strip-of-10-tablets-box-front-1-1756894044-non-watermarked.jpg?dim=320x320&amp;dpr=1&amp;q=100"
+                     alt="Allegra 120mg Tablet"
+                     class="h-full w-full object-contain object-center p-2 transition-transform duration-300 hover:scale-105"
+                     loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="absolute inset-0 hidden items-center justify-center">
+                    <span class="text-4xl font-black text-slate-300/60 select-none">A</span>
+                </div>
+                                    <span class="absolute top-2 left-2 rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">Rx</span>
+                                                    <span class="absolute top-2 right-2 rounded-md bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                        9% OFF
+                    </span>
+                            </div>
+
+            <div class="flex flex-1 flex-col p-4">
+                <p class="mb-0.5 text-xs font-medium text-blue-700">Cold &amp; Allergy</p>
+                <h2 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">Allegra 120mg Tablet</h2>
+                <p class="mt-0.5 text-xs text-slate-500">Sanofi</p>
+
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold text-slate-900">&#8377;218.00</span>
+                                            <span class="text-xs text-slate-400 line-through">&#8377;240.00</span>
+                        <span class="text-xs font-semibold text-blue-700">Save &#8377;22.00</span>
+                                    </div>
+
+                <div class="mt-auto pt-3">
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/add" class="js-add-to-cart-form w-full ">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="medicine_id" value="31">
+                        <button type="submit"
+                                class="btn-primary w-full rounded-2xl py-3 text-sm font-black text-white shadow-sm">
+                            Add to Cart
+                        </button>
+                    </form>
+
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/allegra-120mg-tablet"
+                          class="js-cart-update-form mt-3 flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 hidden"
+                          data-cart-medicine-id="31">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="_method" value="PATCH">                        <button type="button"
+                                class="js-card-qty-minus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Decrease quantity">-</button>
+                        <input type="number" name="quantity" value="1" min="0" max="99" readonly
+                               class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
+                        <button type="button"
+                                class="js-card-qty-plus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Increase quantity">+</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+                    <article data-product-url="http://127.0.0.1/medical/public/medicines/atorva-20mg-tablet" data-product-id="25" class="medicine-card cursor-pointer flex flex-col rounded-2xl bg-white shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+            <div class="relative h-24 overflow-hidden bg-gradient-to-br from-amber-50 to-orange-100">
+                <img src="https://cdn01.pharmeasy.in/dam/productsnowatermark/O78617/atorva-20mg-strip-of-15-tablets-box-front-1-1756954857-non-watermarked.jpg?dim=320x320&amp;dpr=1&amp;q=100"
+                     alt="Atorva 20mg Tablet"
+                     class="h-full w-full object-contain object-center p-2 transition-transform duration-300 hover:scale-105"
+                     loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="absolute inset-0 hidden items-center justify-center">
+                    <span class="text-4xl font-black text-slate-300/60 select-none">A</span>
+                </div>
+                                    <span class="absolute top-2 left-2 rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">Rx</span>
+                                                    <span class="absolute top-2 right-2 rounded-md bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                        14% OFF
+                    </span>
+                            </div>
+
+            <div class="flex flex-1 flex-col p-4">
+                <p class="mb-0.5 text-xs font-medium text-blue-700">Heart &amp; BP</p>
+                <h2 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">Atorva 20mg Tablet</h2>
+                <p class="mt-0.5 text-xs text-slate-500">Zydus</p>
+
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold text-slate-900">&#8377;155.00</span>
+                                            <span class="text-xs text-slate-400 line-through">&#8377;180.00</span>
+                        <span class="text-xs font-semibold text-blue-700">Save &#8377;25.00</span>
+                                    </div>
+
+                <div class="mt-auto pt-3">
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/add" class="js-add-to-cart-form w-full ">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="medicine_id" value="25">
+                        <button type="submit"
+                                class="btn-primary w-full rounded-2xl py-3 text-sm font-black text-white shadow-sm">
+                            Add to Cart
+                        </button>
+                    </form>
+
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/atorva-20mg-tablet"
+                          class="js-cart-update-form mt-3 flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 hidden"
+                          data-cart-medicine-id="25">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="_method" value="PATCH">                        <button type="button"
+                                class="js-card-qty-minus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Decrease quantity">-</button>
+                        <input type="number" name="quantity" value="1" min="0" max="99" readonly
+                               class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
+                        <button type="button"
+                                class="js-card-qty-plus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Increase quantity">+</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+                    <article data-product-url="http://127.0.0.1/medical/public/medicines/becosules-capsule" data-product-id="7" class="medicine-card cursor-pointer flex flex-col rounded-2xl bg-white shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+            <div class="relative h-24 overflow-hidden bg-gradient-to-br from-rose-50 to-pink-100">
+                <img src="https://d1s24u4ln0wd0i.cloudfront.net/med/1315/BECOSULES%20CAP%201X20_1.webp"
+                     alt="Becosules Capsule"
+                     class="h-full w-full object-contain object-center p-2 transition-transform duration-300 hover:scale-105"
+                     loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="absolute inset-0 hidden items-center justify-center">
+                    <span class="text-4xl font-black text-slate-300/60 select-none">B</span>
+                </div>
+                                                    <span class="absolute top-2 right-2 rounded-md bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                        9% OFF
+                    </span>
+                            </div>
+
+            <div class="flex flex-1 flex-col p-4">
+                <p class="mb-0.5 text-xs font-medium text-blue-700">Vitamins &amp; Supplements</p>
+                <h2 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">Becosules Capsule</h2>
+                <p class="mt-0.5 text-xs text-slate-500">Pfizer</p>
+
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold text-slate-900">&#8377;86.00</span>
+                                            <span class="text-xs text-slate-400 line-through">&#8377;95.00</span>
+                        <span class="text-xs font-semibold text-blue-700">Save &#8377;9.00</span>
+                                    </div>
+
+                <div class="mt-auto pt-3">
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/add" class="js-add-to-cart-form w-full ">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="medicine_id" value="7">
+                        <button type="submit"
+                                class="btn-primary w-full rounded-2xl py-3 text-sm font-black text-white shadow-sm">
+                            Add to Cart
+                        </button>
+                    </form>
+
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/becosules-capsule"
+                          class="js-cart-update-form mt-3 flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 hidden"
+                          data-cart-medicine-id="7">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="_method" value="PATCH">                        <button type="button"
+                                class="js-card-qty-minus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Decrease quantity">-</button>
+                        <input type="number" name="quantity" value="1" min="0" max="99" readonly
+                               class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
+                        <button type="button"
+                                class="js-card-qty-plus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Increase quantity">+</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+                    <article data-product-url="http://127.0.0.1/medical/public/medicines/brufen-400mg-tablet" data-product-id="4" class="medicine-card cursor-pointer flex flex-col rounded-2xl bg-white shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+            <div class="relative h-24 overflow-hidden bg-gradient-to-br from-sky-50 to-cyan-100">
+                <img src="https://d1s24u4ln0wd0i.cloudfront.net/med/23645/brufen-400mg-tablet-20s_17371089741b28f1de6240468e9406c7a00e0bf52f.webp"
+                     alt="Brufen 400mg Tablet"
+                     class="h-full w-full object-contain object-center p-2 transition-transform duration-300 hover:scale-105"
+                     loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="absolute inset-0 hidden items-center justify-center">
+                    <span class="text-4xl font-black text-slate-300/60 select-none">B</span>
+                </div>
+                                                    <span class="absolute top-2 right-2 rounded-md bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                        15% OFF
+                    </span>
+                            </div>
+
+            <div class="flex flex-1 flex-col p-4">
+                <p class="mb-0.5 text-xs font-medium text-blue-700">Fever &amp; Pain</p>
+                <h2 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">Brufen 400mg Tablet</h2>
+                <p class="mt-0.5 text-xs text-slate-500">Abbott</p>
+
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold text-slate-900">&#8377;55.00</span>
+                                            <span class="text-xs text-slate-400 line-through">&#8377;65.00</span>
+                        <span class="text-xs font-semibold text-blue-700">Save &#8377;10.00</span>
+                                    </div>
+
+                <div class="mt-auto pt-3">
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/add" class="js-add-to-cart-form w-full ">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="medicine_id" value="4">
+                        <button type="submit"
+                                class="btn-primary w-full rounded-2xl py-3 text-sm font-black text-white shadow-sm">
+                            Add to Cart
+                        </button>
+                    </form>
+
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/brufen-400mg-tablet"
+                          class="js-cart-update-form mt-3 flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 hidden"
+                          data-cart-medicine-id="4">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="_method" value="PATCH">                        <button type="button"
+                                class="js-card-qty-minus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Decrease quantity">-</button>
+                        <input type="number" name="quantity" value="1" min="0" max="99" readonly
+                               class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
+                        <button type="button"
+                                class="js-card-qty-plus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Increase quantity">+</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+                    <article data-product-url="http://127.0.0.1/medical/public/medicines/calcimax-forte-tablet" data-product-id="39" class="medicine-card cursor-pointer flex flex-col rounded-2xl bg-white shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+            <div class="relative h-24 overflow-hidden bg-gradient-to-br from-lime-50 to-green-100">
+                <img src="https://cdn01.pharmeasy.in/dam/products_otc/207833/calcimax-forte-plus-strip-of-30-tablets-3-1671741011.jpg?dim=700x0&amp;dpr=1&amp;q=100"
+                     alt="Calcimax Forte Tablet"
+                     class="h-full w-full object-contain object-center p-2 transition-transform duration-300 hover:scale-105"
+                     loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="absolute inset-0 hidden items-center justify-center">
+                    <span class="text-4xl font-black text-slate-300/60 select-none">C</span>
+                </div>
+                                                    <span class="absolute top-2 right-2 rounded-md bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                        10% OFF
+                    </span>
+                            </div>
+
+            <div class="flex flex-1 flex-col p-4">
+                <p class="mb-0.5 text-xs font-medium text-blue-700">Bone &amp; Joint</p>
+                <h2 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">Calcimax Forte Tablet</h2>
+                <p class="mt-0.5 text-xs text-slate-500">Meyer</p>
+
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold text-slate-900">&#8377;252.00</span>
+                                            <span class="text-xs text-slate-400 line-through">&#8377;280.00</span>
+                        <span class="text-xs font-semibold text-blue-700">Save &#8377;28.00</span>
+                                    </div>
+
+                <div class="mt-auto pt-3">
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/add" class="js-add-to-cart-form w-full ">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="medicine_id" value="39">
+                        <button type="submit"
+                                class="btn-primary w-full rounded-2xl py-3 text-sm font-black text-white shadow-sm">
+                            Add to Cart
+                        </button>
+                    </form>
+
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/calcimax-forte-tablet"
+                          class="js-cart-update-form mt-3 flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 hidden"
+                          data-cart-medicine-id="39">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="_method" value="PATCH">                        <button type="button"
+                                class="js-card-qty-minus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Decrease quantity">-</button>
+                        <input type="number" name="quantity" value="1" min="0" max="99" readonly
+                               class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
+                        <button type="button"
+                                class="js-card-qty-plus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Increase quantity">+</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+                    <article data-product-url="http://127.0.0.1/medical/public/medicines/cetaphil-sun-spf-50-gel" data-product-id="26" class="medicine-card cursor-pointer flex flex-col rounded-2xl bg-white shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+            <div class="relative h-24 overflow-hidden bg-gradient-to-br from-fuchsia-50 to-pink-100">
+                <img src="https://cdn01.pharmeasy.in/dam/products_otc/L28261/cetaphil-sun-spf-50-light-gel-sensitive-skin-50-ml-6.1-1768556573.jpg?dim=700x0&amp;dpr=1&amp;q=100"
+                     alt="Cetaphil Sun SPF 50 Gel"
+                     class="h-full w-full object-contain object-center p-2 transition-transform duration-300 hover:scale-105"
+                     loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="absolute inset-0 hidden items-center justify-center">
+                    <span class="text-4xl font-black text-slate-300/60 select-none">C</span>
+                </div>
+                                                    <span class="absolute top-2 right-2 rounded-md bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                        5% OFF
+                    </span>
+                            </div>
+
+            <div class="flex flex-1 flex-col p-4">
+                <p class="mb-0.5 text-xs font-medium text-blue-700">Skin Care</p>
+                <h2 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">Cetaphil Sun SPF 50 Gel</h2>
+                <p class="mt-0.5 text-xs text-slate-500">Galderma</p>
+
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold text-slate-900">&#8377;1,235.00</span>
+                                            <span class="text-xs text-slate-400 line-through">&#8377;1,299.00</span>
+                        <span class="text-xs font-semibold text-blue-700">Save &#8377;64.00</span>
+                                    </div>
+
+                <div class="mt-auto pt-3">
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/add" class="js-add-to-cart-form w-full ">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="medicine_id" value="26">
+                        <button type="submit"
+                                class="btn-primary w-full rounded-2xl py-3 text-sm font-black text-white shadow-sm">
+                            Add to Cart
+                        </button>
+                    </form>
+
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/cetaphil-sun-spf-50-gel"
+                          class="js-cart-update-form mt-3 flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 hidden"
+                          data-cart-medicine-id="26">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="_method" value="PATCH">                        <button type="button"
+                                class="js-card-qty-minus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Decrease quantity">-</button>
+                        <input type="number" name="quantity" value="1" min="0" max="99" readonly
+                               class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
+                        <button type="button"
+                                class="js-card-qty-plus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Increase quantity">+</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+                    <article data-product-url="http://127.0.0.1/medical/public/medicines/chyawanprash-500g" data-product-id="40" class="medicine-card cursor-pointer flex flex-col rounded-2xl bg-white shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+            <div class="relative h-24 overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100">
+                <img src="https://cdn01.pharmeasy.in/dam/products_otc/O67098/baidyanath-chyawanprash-special-ayurvedic-immunity-booster-500g-with-75g-extra-2-1756960391.jpg?dim=700x0&amp;dpr=1&amp;q=100"
+                     alt="Chyawanprash 500g"
+                     class="h-full w-full object-contain object-center p-2 transition-transform duration-300 hover:scale-105"
+                     loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="absolute inset-0 hidden items-center justify-center">
+                    <span class="text-4xl font-black text-slate-300/60 select-none">C</span>
+                </div>
+                                                    <span class="absolute top-2 right-2 rounded-md bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                        10% OFF
+                    </span>
+                            </div>
+
+            <div class="flex flex-1 flex-col p-4">
+                <p class="mb-0.5 text-xs font-medium text-blue-700">Immunity Boosters</p>
+                <h2 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">Chyawanprash 500g</h2>
+                <p class="mt-0.5 text-xs text-slate-500">Dabur</p>
+
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold text-slate-900">&#8377;256.00</span>
+                                            <span class="text-xs text-slate-400 line-through">&#8377;285.00</span>
+                        <span class="text-xs font-semibold text-blue-700">Save &#8377;29.00</span>
+                                    </div>
+
+                <div class="mt-auto pt-3">
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/add" class="js-add-to-cart-form w-full ">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="medicine_id" value="40">
+                        <button type="submit"
+                                class="btn-primary w-full rounded-2xl py-3 text-sm font-black text-white shadow-sm">
+                            Add to Cart
+                        </button>
+                    </form>
+
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/chyawanprash-500g"
+                          class="js-cart-update-form mt-3 flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 hidden"
+                          data-cart-medicine-id="40">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="_method" value="PATCH">                        <button type="button"
+                                class="js-card-qty-minus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Decrease quantity">-</button>
+                        <input type="number" name="quantity" value="1" min="0" max="99" readonly
+                               class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
+                        <button type="button"
+                                class="js-card-qty-plus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Increase quantity">+</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+                    <article data-product-url="http://127.0.0.1/medical/public/medicines/cipla-ciplox-eye-drops" data-product-id="35" class="medicine-card cursor-pointer flex flex-col rounded-2xl bg-white shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+            <div class="relative h-24 overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
+                <img src="https://cdn01.pharmeasy.in/dam/productsnowatermark/254580/ciplox-03-e-e-drops-10ml-combo-3-1756826283-non-watermarked.jpg?dim=640x640&amp;q=75"
+                     alt="Cipla Ciplox Eye Drops"
+                     class="h-full w-full object-contain object-center p-2 transition-transform duration-300 hover:scale-105"
+                     loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="absolute inset-0 hidden items-center justify-center">
+                    <span class="text-4xl font-black text-slate-300/60 select-none">C</span>
+                </div>
+                                    <span class="absolute top-2 left-2 rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">Rx</span>
+                                                    <span class="absolute top-2 right-2 rounded-md bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                        11% OFF
+                    </span>
+                            </div>
+
+            <div class="flex flex-1 flex-col p-4">
+                <p class="mb-0.5 text-xs font-medium text-blue-700">Eye &amp; Ear Care</p>
+                <h2 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">Cipla Ciplox Eye Drops</h2>
+                <p class="mt-0.5 text-xs text-slate-500">Cipla</p>
+
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold text-slate-900">&#8377;58.00</span>
+                                            <span class="text-xs text-slate-400 line-through">&#8377;65.00</span>
+                        <span class="text-xs font-semibold text-blue-700">Save &#8377;7.00</span>
+                                    </div>
+
+                <div class="mt-auto pt-3">
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/add" class="js-add-to-cart-form w-full ">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="medicine_id" value="35">
+                        <button type="submit"
+                                class="btn-primary w-full rounded-2xl py-3 text-sm font-black text-white shadow-sm">
+                            Add to Cart
+                        </button>
+                    </form>
+
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/cipla-ciplox-eye-drops"
+                          class="js-cart-update-form mt-3 flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 hidden"
+                          data-cart-medicine-id="35">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="_method" value="PATCH">                        <button type="button"
+                                class="js-card-qty-minus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Decrease quantity">-</button>
+                        <input type="number" name="quantity" value="1" min="0" max="99" readonly
+                               class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
+                        <button type="button"
+                                class="js-card-qty-plus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Increase quantity">+</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+                    <article data-product-url="http://127.0.0.1/medical/public/medicines/combiflam-tablet" data-product-id="3" class="medicine-card cursor-pointer flex flex-col rounded-2xl bg-white shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+            <div class="relative h-24 overflow-hidden bg-gradient-to-br from-purple-50 to-violet-100">
+                <img src="https://cdn01.pharmeasy.in/dam/productsnowatermark/I00375/combiflam-strip-of-20-tablets-box-front-1-1756885218-non-watermarked.jpg?dim=320x320&amp;dpr=1&amp;q=100"
+                     alt="Combiflam Tablet"
+                     class="h-full w-full object-contain object-center p-2 transition-transform duration-300 hover:scale-105"
+                     loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="absolute inset-0 hidden items-center justify-center">
+                    <span class="text-4xl font-black text-slate-300/60 select-none">C</span>
+                </div>
+                                                    <span class="absolute top-2 right-2 rounded-md bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                        15% OFF
+                    </span>
+                            </div>
+
+            <div class="flex flex-1 flex-col p-4">
+                <p class="mb-0.5 text-xs font-medium text-blue-700">Fever &amp; Pain</p>
+                <h2 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">Combiflam Tablet</h2>
+                <p class="mt-0.5 text-xs text-slate-500">Sanofi</p>
+
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold text-slate-900">&#8377;41.00</span>
+                                            <span class="text-xs text-slate-400 line-through">&#8377;48.00</span>
+                        <span class="text-xs font-semibold text-blue-700">Save &#8377;7.00</span>
+                                    </div>
+
+                <div class="mt-auto pt-3">
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/add" class="js-add-to-cart-form w-full ">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="medicine_id" value="3">
+                        <button type="submit"
+                                class="btn-primary w-full rounded-2xl py-3 text-sm font-black text-white shadow-sm">
+                            Add to Cart
+                        </button>
+                    </form>
+
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/combiflam-tablet"
+                          class="js-cart-update-form mt-3 flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 hidden"
+                          data-cart-medicine-id="3">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="_method" value="PATCH">                        <button type="button"
+                                class="js-card-qty-minus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Decrease quantity">-</button>
+                        <input type="number" name="quantity" value="1" min="0" max="99" readonly
+                               class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
+                        <button type="button"
+                                class="js-card-qty-plus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Increase quantity">+</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+                    <article data-product-url="http://127.0.0.1/medical/public/medicines/crocin-advance-tablet" data-product-id="2" class="medicine-card cursor-pointer flex flex-col rounded-2xl bg-white shadow-sm overflow-hidden transition-shadow hover:shadow-md">
+            <div class="relative h-24 overflow-hidden bg-gradient-to-br from-amber-50 to-orange-100">
+                <img src="https://d1s24u4ln0wd0i.cloudfront.net/med_op/2947_1.webp"
+                     alt="Crocin Advance Tablet"
+                     class="h-full w-full object-contain object-center p-2 transition-transform duration-300 hover:scale-105"
+                     loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="absolute inset-0 hidden items-center justify-center">
+                    <span class="text-4xl font-black text-slate-300/60 select-none">C</span>
+                </div>
+                                                    <span class="absolute top-2 right-2 rounded-md bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                        15% OFF
+                    </span>
+                            </div>
+
+            <div class="flex flex-1 flex-col p-4">
+                <p class="mb-0.5 text-xs font-medium text-blue-700">Fever &amp; Pain</p>
+                <h2 class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">Crocin Advance Tablet</h2>
+                <p class="mt-0.5 text-xs text-slate-500">GSK</p>
+
+                <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="text-base font-bold text-slate-900">&#8377;44.00</span>
+                                            <span class="text-xs text-slate-400 line-through">&#8377;52.00</span>
+                        <span class="text-xs font-semibold text-blue-700">Save &#8377;8.00</span>
+                                    </div>
+
+                <div class="mt-auto pt-3">
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/add" class="js-add-to-cart-form w-full ">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="medicine_id" value="2">
+                        <button type="submit"
+                                class="btn-primary w-full rounded-2xl py-3 text-sm font-black text-white shadow-sm">
+                            Add to Cart
+                        </button>
+                    </form>
+
+                    <form method="post" action="http://127.0.0.1/medical/public/cart/crocin-advance-tablet"
+                          class="js-cart-update-form mt-3 flex w-full items-center justify-between overflow-hidden rounded-2xl border border-slate-200 hidden"
+                          data-cart-medicine-id="2">
+                        <input type="hidden" name="_token" value="Qn7SwHIVBAs1flD643U2ZBBViVuyhce8uDgDBIS0" autocomplete="off">                        <input type="hidden" name="_method" value="PATCH">                        <button type="button"
+                                class="js-card-qty-minus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Decrease quantity">-</button>
+                        <input type="number" name="quantity" value="1" min="0" max="99" readonly
+                               class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
+                        <button type="button"
+                                class="js-card-qty-plus w-14 bg-slate-50 text-lg font-bold leading-none text-slate-700 transition-colors hover:bg-slate-100"
+                                aria-label="Increase quantity">+</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <div class="mt-8 flex justify-center">
+        <nav role="navigation" aria-label="Pagination Navigation">
+
+        <div class="flex gap-2 items-center justify-between sm:hidden">
+
+                            <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 cursor-not-allowed leading-5 rounded-md dark:text-gray-300 dark:bg-gray-700 dark:border-gray-600">
+                    &laquo; Previous
+                </span>
+            
+                            <a href="http://127.0.0.1/medical/public/medicines?page=2" rel="next" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-800 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-700 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-800 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 dark:focus:border-blue-700 dark:active:bg-gray-700 dark:active:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 dark:hover:text-gray-200">
+                    Next &raquo;
+                </a>
+            
+        </div>
+
+        <div class="hidden sm:flex-1 sm:flex sm:gap-2 sm:items-center sm:justify-between">
+
+            <div>
+                <p class="text-sm text-gray-700 leading-5 dark:text-gray-600">
+                    Showing
+                                            <span class="font-medium">1</span>
+                        to
+                        <span class="font-medium">12</span>
+                                        of
+                    <span class="font-medium">45</span>
+                    results
+                </p>
+            </div>
+
+            <div>
+                <span class="inline-flex rtl:flex-row-reverse shadow-sm rounded-md">
+
+                    
+                                            <span aria-disabled="true" aria-label="&amp;laquo; Previous">
+                            <span class="inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-not-allowed rounded-l-md leading-5 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400" aria-hidden="true">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                        </span>
+                    
+                    
+                                            
+                        
+                        
+                                                                                                                        <span aria-current="page">
+                                        <span class="inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-gray-200 border border-gray-300 cursor-default leading-5 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300">1</span>
+                                    </span>
+                                                                                                                                <a href="http://127.0.0.1/medical/public/medicines?page=2" class="inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-700 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:text-gray-300 dark:active:bg-gray-700 dark:focus:border-blue-800 hover:bg-gray-100 dark:hover:bg-gray-900" aria-label="Go to page 2">
+                                        2
+                                    </a>
+                                                                                                                                <a href="http://127.0.0.1/medical/public/medicines?page=3" class="inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-700 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:text-gray-300 dark:active:bg-gray-700 dark:focus:border-blue-800 hover:bg-gray-100 dark:hover:bg-gray-900" aria-label="Go to page 3">
+                                        3
+                                    </a>
+                                                                                                                                <a href="http://127.0.0.1/medical/public/medicines?page=4" class="inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-700 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:text-gray-300 dark:active:bg-gray-700 dark:focus:border-blue-800 hover:bg-gray-100 dark:hover:bg-gray-900" aria-label="Go to page 4">
+                                        4
+                                    </a>
+                                                                                                        
+                    
+                                            <a href="http://127.0.0.1/medical/public/medicines?page=2" rel="next" class="inline-flex items-center px-2 py-2 -ml-px text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md leading-5 hover:text-gray-400 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-500 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:active:bg-gray-700 dark:focus:border-blue-800 dark:text-gray-300 dark:hover:bg-gray-900 dark:hover:text-gray-300" aria-label="Next &amp;raquo;">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                                    </span>
+            </div>
+        </div>
+    </nav>
+
+    </div>
+        </div>
+    </section>
+</div>
+
+    </main>
+
+    
+    <footer class="mt-16 border-t border-slate-200 bg-white">
+        <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+            <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-700 text-white font-black text-base shadow-md">✚</div>
+                        <span class="text-lg font-extrabold text-slate-900 tracking-tight">Medikart</span>
+                    </div>
+                    <p class="text-sm text-slate-500 leading-relaxed">Your trusted online pharmacy in Ahmedabad. Genuine medicines, fast delivery, cash on delivery.</p>
+                    <div class="mt-4 flex gap-2">
+                        <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">✓ Verified</span>
+                        <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">🔒 Secure
+                    </div>
+                </div>
+               <div>
+    <h4 class="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Quick Links</h4>
+    <ul class="space-y-1.5">
+        <li>
+            <a href="http://127.0.0.1/medical/public"
+               class="group flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-blue-50 hover:text-blue-700 hover:pl-4">
+                <span class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-house" style="color: rgb(30, 48, 80);"></i>
+                    Home
+                </span>
+                <svg class="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </a>
+        </li>
+        <li>
+            <a href="http://127.0.0.1/medical/public/medicines"
+               class="group flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-blue-50 hover:text-blue-700 hover:pl-4">
+                <span class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-capsules" style="color: rgb(30, 48, 80);"></i>
+                    All Medicines
+                </span>
+                <svg class="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </a>
+        </li>
+        <li>
+            <a href="http://127.0.0.1/medical/public/cart"
+               class="group flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-blue-50 hover:text-blue-700 hover:pl-4">
+                <span class="flex items-center gap-2.5">
+               <i class="fa-solid fa-cart-shopping" style="color: rgb(30, 48, 80);"></i>
+               My Cart
+                <svg class="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </a>
+        </li>
+            </ul>
+</div>
+                <div>
+                    <h4 class="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Delivery Info</h4>
+                    <ul class="space-y-2.5 text-sm text-slate-500">
+                        <li class="flex items-center gap-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs">✓</span>Free delivery on ₹500+</li>
+                        <li class="flex items-center gap-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs">✓</span>Cash on delivery</li>
+                        <li class="flex items-center gap-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs">✓</span>Online payment via Razorpay</li>
+                        <li class="flex items-center gap-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs">✓</span>Ahmedabad area — 32+ pincodes</li>
+                    </ul>
+                </div>
+               <div>
+    <h4 class="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Find Us</h4>
+    <div class="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+        <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1836.3173545045674!2d72.53278670825017!3d23.000456439426888!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e85809d72668f%3A0xb5733724a2cd1031!2sMedikart%20Pharmacy!5e0!3m2!1sen!2sin!4v1778824188302!5m2!1sen!2sin"
+            width="100%"
+            height="180"
+            style="border:0; display:block;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+    </div>
+    <p class="mt-2 text-xs text-slate-500 flex items-center gap-1 " style="margin-top:20px;">
+        📍 Shop 54/04, opp. Unigold Hospital Main Gate, near Jivraj, Sarni kamdhar Society, Police Chowki, Jivraj Park, Ahmedabad, Gujarat 380051
+    </p>
+</div>
+            </div>
+            <div class=" border-t border-slate-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3" style="padding-right:40px;">
+                <p class="text-xs text-slate-400">© 2026 Medikart — Ahmedabad, Gujarat</p>
+                <p class="text-xs text-slate-400">Built by<a href="https://softgenixinfotech.com/" style="color:blue"> SoftGenix Infotech</p></a>
+            </div>
+        </div>
+    </footer>
+    <script>
+    (function () {
+        const siteHeader = document.getElementById('site-header');
+        const cartNavLink = document.getElementById('cart-nav-link');
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        const badge = document.getElementById('cart-count-badge');
+        const flashRoot = document.getElementById('flash-message-root');
+        let flashTimeoutId = null;
+
+        function positionFlashRoot() {
+            if (!flashRoot || !siteHeader) return;
+
+            const headerBottom = siteHeader.getBoundingClientRect().bottom;
+            const topOffset = Math.max(16, Math.round(headerBottom + 12));
+            flashRoot.style.top = `${topOffset}px`;
+
+            if (window.innerWidth < 640 || !cartNavLink) {
+                flashRoot.style.right = '1rem';
+                flashRoot.style.left = '1rem';
+                flashRoot.style.width = 'calc(100% - 2rem)';
+                return;
+            }
+
+            flashRoot.style.right = '1rem';
+            flashRoot.style.left = 'auto';
+            flashRoot.style.width = `${Math.min(320, window.innerWidth - 32)}px`;
+        }
+
+        function dismissFlash() {
+            if (!flashRoot) return;
+
+            flashRoot.querySelectorAll('.alert-animate').forEach((alert) => {
+                alert.classList.add('is-hiding');
+            });
+
+            window.setTimeout(() => {
+                flashRoot.replaceChildren();
+            }, 220);
+        }
+
+        function scheduleFlashDismiss(delay = 3500) {
+            window.clearTimeout(flashTimeoutId);
+            flashTimeoutId = window.setTimeout(dismissFlash, delay);
+        }
+
+        function showFlash(message, type = 'success') {
+            if (!flashRoot || !message) return;
+
+const isError = type === 'error';
+             const alert = document.createElement('div');
+             alert.className = isError
+                 ? 'alert-animate pointer-events-auto flex items-center gap-3 rounded-2xl border border-white/20 bg-gradient-to-r from-blue-800 to-blue-600 px-4 py-3 text-sm font-medium text-white shadow-lg'
+                 : 'alert-animate pointer-events-auto flex items-center gap-3 rounded-2xl border border-transparent bg-gradient-to-r from-blue-500 to-blue-700 px-4 py-3 text-sm font-medium text-white shadow-lg';
+            alert.innerHTML = `
+                <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-white/15">
+                    <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="${
+                            isError ? 'M6 18L18 6M6 6l12 12' : 'M5 13l4 4L19 7'
+                        }"/>
+                    </svg>
+                </div>
+            `;
+
+            const text = document.createElement('span');
+            text.textContent = message;
+            alert.appendChild(text);
+
+            positionFlashRoot();
+            flashRoot.replaceChildren(alert);
+            scheduleFlashDismiss();
+        }
+
+        positionFlashRoot();
+        window.addEventListener('resize', positionFlashRoot);
+        window.addEventListener('scroll', positionFlashRoot, { passive: true });
+        if (flashRoot && flashRoot.children.length > 0) {
+            scheduleFlashDismiss();
+        }
+
+        function updateCartBadge(count) {
+            if (!badge || typeof count !== 'number') return;
+
+            badge.textContent = count;
+            badge.classList.toggle('hidden', count < 1);
+        }
+
+        function formatCurrency(paise) {
+            return '₹' + (paise / 100).toFixed(2);
+        }
+
+        function updateCartCounts(linesCount) {
+            const countEl = document.getElementById('cart-items-count');
+            if (!countEl || typeof linesCount !== 'number') return;
+            countEl.textContent = linesCount > 0
+                ? `${linesCount} ${linesCount === 1 ? 'item' : 'items'} in your cart`
+                : 'Your cart is empty';
+        }
+
+        function updateCartSummary(subtotalPaise, linesCount) {
+            const subtotalEl = document.getElementById('cart-summary-subtotal');
+            const countEl = document.getElementById('cart-summary-items-count');
+            const labelEl = document.getElementById('cart-summary-items-label');
+            const deliveryTextEl = document.getElementById('cart-delivery-text');
+            const totalAmountEl = document.getElementById('cart-total-amount');
+
+            if (typeof subtotalPaise === 'number' && subtotalEl) {
+                subtotalEl.textContent = formatCurrency(subtotalPaise);
+            }
+            if (typeof linesCount === 'number' && countEl && labelEl) {
+                countEl.textContent = linesCount;
+                labelEl.textContent = linesCount === 1 ? 'item' : 'items';
+            }
+            if (typeof subtotalPaise === 'number' && deliveryTextEl && totalAmountEl) {
+                const deliveryFee = subtotalPaise >= 50000 ? 0 : 4000;
+                deliveryTextEl.textContent = deliveryFee === 0
+                    ? '🎉 You qualify for free delivery!'
+                    : `Add ₹${((50000 - subtotalPaise) / 100).toFixed(2)} more for free delivery!`;
+                totalAmountEl.textContent = formatCurrency(subtotalPaise + deliveryFee);
+                const deliveryFeeEl = document.getElementById('cart-summary-delivery-fee');
+                if (deliveryFeeEl) {
+                    deliveryFeeEl.textContent = deliveryFee === 0 ? 'FREE' : formatCurrency(deliveryFee);
+                    deliveryFeeEl.className = deliveryFee === 0 ? 'font-semibold text-blue-700' : 'font-medium text-slate-900';
+                }
+            }
+        }
+
+        function showEmptyCart() {
+            const pageContent = document.getElementById('cart-page-content');
+            if (!pageContent) return;
+
+            pageContent.innerHTML = `
+                <div class="col-span-3 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white py-16 text-center shadow-sm">
+                    <img src="${"http:\/\/127.0.0.1\/medical\/public\/images\/emptycart1.png"}"
+                         alt="Empty cart"
+                         class="h-36 w-auto object-contain mb-4 opacity-80"
+                         loading="lazy">
+                    <h2 class="text-xl font-bold text-slate-700">Your cart is empty</h2>
+                    <p class="mt-2 text-sm text-slate-500 max-w-xs">Looks like you haven't added any medicines yet. Browse our catalogue to get started.</p>
+                    <a href="${"\/medicines"}"
+                       class="btn-primary mt-6 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white shadow-md">
+                        Browse Medicines →
+                    </a>
+                </div>
+            `;
+        }
+
+        positionFlashRoot();
+        window.addEventListener('resize', positionFlashRoot);
+        window.addEventListener('scroll', positionFlashRoot, { passive: true });
+
+        const cartUpdateTimers = new WeakMap();
+        document.addEventListener('input', function (event) {
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement) || target.name !== 'quantity') return;
+            const form = target.closest('form.js-cart-update-form');
+            if (!form) return;
+
+            const existing = cartUpdateTimers.get(form);
+            if (existing) {
+                clearTimeout(existing);
+            }
+
+            cartUpdateTimers.set(form, setTimeout(() => {
+                form.requestSubmit();
+            }, 650));
+        });
+
+        document.addEventListener('click', function (event) {
+            const target = event.target;
+
+            const minus = target.closest('.js-card-qty-minus');
+            if (minus) {
+                event.preventDefault();
+                const form = minus.closest('form.js-cart-update-form');
+                if (!form) return;
+                const qtyInput = form.querySelector('input[name="quantity"]');
+                if (!qtyInput) return;
+                const quantity = Math.max(0, Number(qtyInput.value || 0) - 1);
+                qtyInput.value = quantity;
+                form.requestSubmit();
+                return;
+            }
+
+            const plus = target.closest('.js-card-qty-plus');
+            if (plus) {
+                event.preventDefault();
+                const form = plus.closest('form.js-cart-update-form');
+                if (!form) return;
+                const qtyInput = form.querySelector('input[name="quantity"]');
+                if (!qtyInput) return;
+                const quantity = Math.min(99, Number(qtyInput.value || 0) + 1);
+                qtyInput.value = quantity;
+                form.requestSubmit();
+                return;
+            }
+
+            const card = target.closest('.medicine-card[data-product-url]');
+            if (!card) return;
+            if (target.closest('form') || target.closest('button') || target.closest('a')) return;
+            const url = card.dataset.productUrl;
+            if (url) {
+                window.location.href = url;
+            }
+        });
+
+        document.addEventListener('submit', async function (event) {
+            const form = event.target;
+            if (!(form instanceof HTMLFormElement)) return;
+
+            const isAddToCart = form.classList.contains('js-add-to-cart-form');
+            const isCartUpdate = form.classList.contains('js-cart-update-form');
+            const isCartRemove = form.classList.contains('js-cart-remove-form');
+            if (!isAddToCart && !isCartUpdate && !isCartRemove) return;
+
+            event.preventDefault();
+
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalLabel = submitButton?.innerHTML;
+            const loadingLabel = isCartRemove ? 'Removing...' : isCartUpdate ? 'Updating...' : 'Adding...';
+
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.classList.add('opacity-70', 'cursor-not-allowed');
+                submitButton.innerHTML = loadingLabel;
+            }
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                    },
+                    body: new FormData(form),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not update the cart.');
+                }
+
+                updateCartBadge(Number(data.cartCount || 0));
+                if (typeof data.linesCount === 'number') {
+                    updateCartCounts(data.linesCount);
+                }
+                if (typeof data.subtotalPaise === 'number') {
+                    updateCartSummary(data.subtotalPaise, data.linesCount);
+                }
+
+                const card = form.closest('.medicine-card[data-product-id]');
+                if (card) {
+                    const addForm = card.querySelector('.js-add-to-cart-form');
+                    const updateForm = card.querySelector('.js-cart-update-form');
+
+                    if (isAddToCart || isCartUpdate) {
+                        if (updateForm && typeof data.quantity === 'number') {
+                            const qtyInput = updateForm.querySelector('input[name="quantity"]');
+                            if (qtyInput) {
+                                qtyInput.value = data.quantity;
+                            }
+                        }
+                    }
+
+                    if (isAddToCart) {
+                        if (addForm) {
+                            addForm.classList.add('hidden');
+                        }
+                        if (updateForm) {
+                            updateForm.classList.remove('hidden');
+                        }
+                    }
+
+                    if (isCartUpdate && typeof data.quantity === 'number' && updateForm) {
+                        if (data.quantity === 0) {
+                            updateForm.classList.add('hidden');
+                            if (addForm) {
+                                addForm.classList.remove('hidden');
+                            }
+                        } else {
+                            updateForm.classList.remove('hidden');
+                            if (addForm) {
+                                addForm.classList.add('hidden');
+                            }
+                        }
+                    }
+                }
+
+                if (isCartUpdate) {
+                    const itemId = form.dataset.cartMedicineId;
+                    const row = itemId ? document.querySelector(`[data-cart-row-id="${itemId}"]`) : null;
+                    if (row) {
+                        const qtyInput = row.querySelector('input[name="quantity"]');
+                        if (qtyInput && typeof data.quantity === 'number') {
+                            qtyInput.value = data.quantity;
+                        }
+                        const lineTotal = document.querySelector(`[data-cart-line-total-id="${itemId}"]`);
+                        if (lineTotal && typeof data.lineTotalPaise === 'number') {
+                            lineTotal.textContent = formatCurrency(data.lineTotalPaise);
+                        }
+                    }
+                }
+
+                if (isCartRemove) {
+                    const itemId = form.dataset.cartMedicineId;
+                    const row = itemId ? document.querySelector(`[data-cart-row-id="${itemId}"]`) : null;
+                    if (row) {
+                        row.remove();
+                    }
+                    if (typeof data.linesCount === 'number' && data.linesCount === 0) {
+                        showEmptyCart();
+                    }
+                }
+
+                showFlash(data.message || (isCartRemove ? 'Removed from cart.' : 'Cart updated.'));
+            } catch (error) {
+                showFlash(error.message || 'Something went wrong. Please try again.', 'error');
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.classList.remove('opacity-70', 'cursor-not-allowed');
+                    submitButton.innerHTML = originalLabel;
+                }
+            }
+        });
+    })();
+    </script>
+    <script>
+    (function () {
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        const input = document.getElementById('pin-input');
+        const btnLookup = document.getElementById('pin-lookup-btn');
+        const btnConfirm = document.getElementById('pin-confirm-btn');
+        const status = document.getElementById('pin-status');
+        let lastOk = null;
+
+        if (!input) return;
+
+        async function lookup() {
+            const pin = (input.value || '').replace(/\D/g, '');
+            if (pin.length !== 6) {
+                status.textContent = '⚠ Enter a 6-digit pincode.';
+                status.className = 'text-xs font-medium text-amber-300';
+                btnConfirm.hidden = true;
+                lastOk = null;
+                return;
+            }
+            status.textContent = 'Checking…';
+            status.className = 'text-xs font-medium text-white';
+            try {
+                const url = new URL("\/pincode\/lookup", window.location.origin);
+                url.searchParams.set('pin', pin);
+                const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
+                const data = await res.json();
+                if (!data.ok) {
+                    status.textContent = '✗ ' + (data.message || 'Not serviceable.');
+                    status.className = 'text-xs font-medium text-red-300';
+                    btnConfirm.hidden = true;
+                    lastOk = null;
+                    return;
+                }
+                lastOk = pin;
+                status.textContent = '📍 ' + data.label;
+                status.className = 'text-xs font-medium text-white';
+                btnConfirm.hidden = false;
+            } catch (e) {
+                status.textContent = '✗ Network error. Try again.';
+                status.className = 'text-xs font-medium text-red-300';
+            }
+        }
+
+        async function confirmDelivery() {
+            if (!lastOk) return;
+            try {
+                const res = await fetch("\/delivery-pin", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                    },
+                    body: JSON.stringify({ pin: lastOk }),
+                });
+                const data = await res.json();
+                if (!data.ok) {
+                    status.textContent = '✗ ' + (data.message || 'Could not save.');
+                    status.className = 'text-xs font-medium text-red-300';
+                    return;
+                }
+                status.textContent = '✓ Delivering to: ' + data.label;
+                status.className = 'text-xs font-medium text-white';
+                btnConfirm.hidden = true;
+            } catch (e) {
+                status.textContent = '✗ Network error. Try again.';
+                status.className = 'text-xs font-medium text-red-300';
+            }
+        }
+
+        btnLookup.addEventListener('click', lookup);
+        btnConfirm.addEventListener('click', confirmDelivery);
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); lookup(); }
+        });
+        input.addEventListener('input', function () {
+            if (this.value.replace(/\D/g,'').length === 6) lookup();
+        });
+    })();
+    </script>
+    <script>
+    (function () {
+        const suggestionsUrl = "\/medicines\/suggestions";
+        const debounceTimers = new WeakMap();
+        const activeRequest = new WeakMap();
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getSuggestionParts(form) {
+            if (!(form instanceof HTMLFormElement) || !form.matches('[data-medicine-suggest-form]')) {
+                return null;
+            }
+
+            const input = form.querySelector('[data-medicine-suggest-input]');
+            const box = form.querySelector('[data-medicine-suggestions]');
+            if (!(input instanceof HTMLInputElement) || !(box instanceof HTMLElement)) {
+                return null;
+            }
+
+            return { form, input, box };
+        }
+
+        function hideSuggestions(form) {
+            const parts = getSuggestionParts(form);
+            if (!parts) return;
+
+            parts.box.classList.add('hidden');
+            parts.box.innerHTML = '';
+            parts.input.setAttribute('aria-expanded', 'false');
+        }
+
+        function showSuggestions(form) {
+            const parts = getSuggestionParts(form);
+            if (!parts) return;
+
+            parts.box.classList.remove('hidden');
+            parts.input.setAttribute('aria-expanded', 'true');
+        }
+
+        function renderLoadingSuggestions(form) {
+            const parts = getSuggestionParts(form);
+            if (!parts) return;
+
+            parts.box.innerHTML = Array.from({ length: 3 }).map(() => `
+                <div class="flex animate-pulse items-center gap-3 px-4 py-3">
+                    <div class="h-14 w-14 rounded-xl bg-slate-200"></div>
+                    <div class="min-w-0 flex-1 space-y-2">
+                        <div class="h-4 w-3/4 rounded-full bg-slate-200"></div>
+                        <div class="h-3 w-1/2 rounded-full bg-slate-200"></div>
+                        <div class="mt-2 flex items-center justify-between gap-2">
+                            <div class="h-3 w-1/4 rounded-full bg-slate-200"></div>
+                            <div class="h-3 w-1/5 rounded-full bg-slate-200"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            showSuggestions(form);
+        }
+
+        function renderSuggestions(form, items) {
+            const parts = getSuggestionParts(form);
+            if (!parts) return;
+
+            if (!items.length) {
+                parts.box.innerHTML = `
+                    <div class="px-4 py-3 text-sm text-slate-500">
+                        No matching medicines found.
+                    </div>
+                `;
+                showSuggestions(form);
+                return;
+            }
+
+            parts.box.innerHTML = items.map((item) => `
+                <a href="${escapeHtml(item.url)}"
+                   class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50 ${item.prescription_required ? 'bg-amber-50/40' : ''}">
+                    <div class="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50 p-1">
+                        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" class="h-full w-full object-contain" loading="lazy">
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <p class="truncate text-sm font-semibold text-slate-900">${escapeHtml(item.name)}</p>
+                            ${item.prescription_required ? '<span class="rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">Rx</span>' : ''}
+                        </div>
+                        <p class="truncate text-xs text-slate-500">${escapeHtml(item.manufacturer || '')}</p>
+                        <div class="mt-1 flex items-center justify-between gap-2">
+                            <span class="truncate text-[11px] font-medium uppercase tracking-wide text-blue-700">${escapeHtml(item.category || '')}</span>
+                            <span class="text-sm font-bold text-slate-900">&#8377;${escapeHtml(item.price)}</span>
+                        </div>
+                    </div>
+                </a>
+            `).join('');
+
+            showSuggestions(form);
+        }
+
+        async function fetchSuggestions(form) {
+            const parts = getSuggestionParts(form);
+            if (!parts) return;
+
+            const query = parts.input.value.trim();
+            if (query.length < 2) {
+                hideSuggestions(form);
+                return;
+            }
+
+            const requestId = (activeRequest.get(form) || 0) + 1;
+            activeRequest.set(form, requestId);
+            const url = new URL(suggestionsUrl, window.location.origin);
+            const formData = new FormData(form);
+
+            url.searchParams.set('q', query);
+
+            const category = String(formData.get('category') || '').trim();
+            if (category !== '') {
+                url.searchParams.set('category', category);
+            }
+
+            renderLoadingSuggestions(form);
+
+            try {
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Could not load suggestions.');
+                }
+
+                const data = await response.json();
+                if (requestId !== activeRequest.get(form)) return;
+
+                renderSuggestions(form, Array.isArray(data.suggestions) ? data.suggestions : []);
+            } catch (error) {
+                hideSuggestions(form);
+            }
+        }
+
+        document.addEventListener('input', function (event) {
+            if (!(event.target instanceof HTMLInputElement) || !event.target.matches('[data-medicine-suggest-input]')) {
+                return;
+            }
+
+            const form = event.target.closest('form[data-medicine-suggest-form]');
+            if (!form) return;
+
+            const existing = debounceTimers.get(form);
+            if (existing) {
+                window.clearTimeout(existing);
+            }
+
+            debounceTimers.set(form, window.setTimeout(() => {
+                fetchSuggestions(form);
+            }, 220));
+        });
+
+        document.addEventListener('focusin', function (event) {
+            if (!(event.target instanceof HTMLInputElement) || !event.target.matches('[data-medicine-suggest-input]')) {
+                return;
+            }
+
+            const form = event.target.closest('form[data-medicine-suggest-form]');
+            const parts = getSuggestionParts(form);
+            if (!parts) return;
+
+            if (parts.input.value.trim().length >= 2 && parts.box.innerHTML.trim() !== '') {
+                showSuggestions(form);
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (!(event.target instanceof HTMLInputElement) || !event.target.matches('[data-medicine-suggest-input]')) {
+                return;
+            }
+
+            if (event.key === 'Escape') {
+                const form = event.target.closest('form[data-medicine-suggest-form]');
+                if (form) {
+                    hideSuggestions(form);
+                }
+            }
+        });
+
+        document.addEventListener('click', function (event) {
+            document.querySelectorAll('form[data-medicine-suggest-form]').forEach(function (form) {
+                if (!form.contains(event.target)) {
+                    hideSuggestions(form);
+                }
+            });
+        });
+
+        document.addEventListener('submit', function (event) {
+            const form = event.target;
+            if (!(form instanceof HTMLFormElement) || !form.matches('[data-medicine-suggest-form]')) {
+                return;
+            }
+
+            hideSuggestions(form);
+        });
+    })();
+    </script>
+    <script>
+(function () {
+    const resultsContainer = document.getElementById('medicines-results-container');
+    const filtersContainer = document.getElementById('medicines-filters-container');
+    const summaryContainer = document.getElementById('medicines-page-summary');
+
+    if (!resultsContainer || !summaryContainer || !filtersContainer) return;
+
+    async function loadResults(url, pushState = true) {
+        resultsContainer.classList.add('opacity-60', 'pointer-events-none');
+        filtersContainer.classList.add('opacity-60', 'pointer-events-none');
+
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Could not load medicines.');
+            }
+
+            resultsContainer.innerHTML = data.resultsHtml || '';
+            summaryContainer.innerHTML = data.headingHtml || '';
+            filtersContainer.innerHTML = data.filtersHtml || filtersContainer.innerHTML;
+
+            if (pushState) {
+                window.history.pushState({ url }, '', url);
+            }
+        } catch (error) {
+            window.location.href = url;
+        } finally {
+            resultsContainer.classList.remove('opacity-60', 'pointer-events-none');
+            filtersContainer.classList.remove('opacity-60', 'pointer-events-none');
+        }
+    }
+
+    function buildUrlFromForm(form) {
+        const formData = new FormData(form);
+        const url = new URL(form.action, window.location.origin);
+
+        for (const [key, value] of formData.entries()) {
+            const trimmedValue = String(value).trim();
+            if (trimmedValue !== '') {
+                if (key.endsWith('[]')) {
+                    url.searchParams.append(key, trimmedValue);
+                } else {
+                    url.searchParams.set(key, trimmedValue);
+                }
+            }
+        }
+
+        return url.toString();
+    }
+
+    function isMedicineResultsForm(form) {
+        return form instanceof HTMLFormElement && (form.id === 'medicine-search-form' || form.matches('[data-medicine-results-form]'));
+    }
+
+    function toggleSection(sectionId, chevronId) {
+        const section = document.getElementById(sectionId);
+        const chevron = document.getElementById(chevronId);
+        if (!section) return;
+
+        const isHidden = section.classList.toggle('hidden');
+        if (chevron) {
+            chevron.classList.toggle('-rotate-180', !isHidden);
+        }
+    }
+
+    function toggleSeeMore(itemClass, btnId) {
+        const items = Array.from(document.querySelectorAll(`.${itemClass}`));
+        const button = document.getElementById(btnId);
+        if (!button || !items.length) return;
+
+        const expanded = button.dataset.expanded === 'true';
+        const showAll = !expanded;
+        const itemCount = items.length;
+        const label = button.querySelector('.btn-label');
+        const icon = button.querySelector('.btn-icon');
+
+        items.forEach((item) => {
+            const defaultHidden = item.dataset.defaultHidden === 'true';
+            if (showAll) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.toggle('hidden', defaultHidden);
+            }
+        });
+
+        button.dataset.expanded = showAll ? 'true' : 'false';
+        if (label) {
+            label.textContent = showAll ? 'Show less' : `See ${Math.max(itemCount - 5, 0)} more`;
+        }
+        if (icon) {
+            icon.classList.toggle('rotate-180', showAll);
+        }
+    }
+
+    window.toggleSection = toggleSection;
+    window.toggleSeeMore = toggleSeeMore;
+
+    document.addEventListener('submit', function (event) {
+        const form = event.target;
+        if (!isMedicineResultsForm(form)) {
+            return;
+        }
+
+        event.preventDefault();
+        loadResults(buildUrlFromForm(form));
+    });
+
+    document.addEventListener('change', function (event) {
+        const input = event.target;
+        if (!(input instanceof HTMLInputElement)) return;
+
+        const form = input.closest('form[data-medicine-results-form]');
+        if (!form || form.id !== 'brand-filter-form') return;
+
+        loadResults(buildUrlFromForm(form));
+    });
+
+    document.addEventListener('input', function (event) {
+        if (!(event.target instanceof HTMLInputElement) || event.target.id !== 'brand-search-input') return;
+
+        const query = event.target.value.trim().toLowerCase();
+        const items = document.querySelectorAll('#brand-filter-list .brand-filter-item');
+
+        items.forEach((item, index) => {
+            const name = (item.dataset.brandName || item.textContent || '').toLowerCase();
+            const matches = name.includes(query);
+            const defaultHidden = item.dataset.defaultHidden === 'true';
+
+            if (query === '') {
+                item.classList.toggle('hidden', defaultHidden);
+            } else {
+                item.classList.toggle('hidden', !matches);
+            }
+        });
+    });
+
+    document.addEventListener('click', function (event) {
+        const link = event.target.closest('.js-medicine-results-link, .js-medicine-filter-link, #medicines-results-container nav[aria-label="pagination"] a');
+        if (!link) return;
+
+        const url = link.getAttribute('href');
+        if (!url) return;
+
+        event.preventDefault();
+        loadResults(url);
+    });
+
+    window.addEventListener('popstate', function () {
+        loadResults(window.location.href, false);
+    });
+})();
+</script>
+
+    
+    <!-- <style>
+        #cursor-ring {
+            position: fixed;
+            top: 0; left: 0;
+            width: 36px; height: 36px;
+            border: 2px solid #1e3a8a;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999;
+            transform: translate(-50%, -50%);
+            transition: width .2s, height .2s, border-color .2s, background .2s;
+        }
+        #cursor-dot {
+            position: fixed;
+            top: 0; left: 0;
+            width: 8px; height: 8px;
+            background: #204080;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999;
+            transform: translate(-50%, -50%);
+        }
+        /* Grow ring on hover over links/buttons */
+        a:hover ~ #cursor-ring,
+        button:hover ~ #cursor-ring { width: 52px; height: 52px; }
+    </style> -->
+    <!-- <div id="cursor-ring"></div>
+    <div id="cursor-dot"></div>
+    <script>
+    (function(){
+     const ring = document.getElementById('cursor-ring');
+        const dot  = document.getElementById('cursor-dot');
+        let rx = -100, ry = -100;   // ring lags behind
+        let mx = -100, my = -100;   // dot snaps instantly
+
+        window.addEventListener('mousemove', e => {
+            mx = e.clientX;
+            my = e.clientY;
+            dot.style.left = mx + 'px';
+            dot.style.top  = my + 'px';
+        });
+
+        Smooth ring follow with lerp
+        (function loop(){
+            rx += (mx - rx) * 0.12;
+            ry += (my - ry) * 0.12;
+            ring.style.left = rx + 'px';
+            ring.style.top  = ry + 'px';
+            requestAnimationFrame(loop);
+        })();
+
+        // Enlarge ring when hovering interactive elements
+        document.querySelectorAll('a, button, input, label, select, textarea').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                ring.style.width  = '52px';
+                ring.style.height = '52px';
+                ring.style.borderColor = '#1e3a8a';
+                ring.style.background  = 'rgba(59,130,246,0.08)';
+            });
+            el.addEventListener('mouseleave', () => {
+                ring.style.width  = '36px';
+                ring.style.height = '36px';
+                ring.style.borderColor = '#1e3a8a';
+                ring.style.background  = 'transparent';
+            });
+        });
+    })();
+    </script> -->
+
+    
+
+    
+    <style>
+        .wave-heading .wave-char {
+            display: inline-block;
+            transition: transform .25s ease, color .25s ease;
+        }
+        .wave-heading:hover .wave-char {
+            animation: waveChar .5s ease forwards;
+        }
+        @keyframes waveChar {
+            0%   { transform: translateY(0); }
+            30%  { transform: translateY(-6px); }
+            60%  { transform: translateY(2px); }
+            100% { transform: translateY(0); }
+        }
+    </style>
+    <script>
+    (function () {
+        function wrapLetters(el) {
+            if (el.dataset.waved) return;
+            el.dataset.waved = '1';
+            el.classList.add('wave-heading');
+
+            // Walk only direct text nodes to avoid breaking child elements
+            el.childNodes.forEach(node => {
+                if (node.nodeType !== Node.TEXT_NODE) return;
+                const text = node.textContent;
+                if (!text.trim()) return;
+                const frag = document.createDocumentFragment();
+                [...text].forEach((ch, i) => {
+                    if (ch === ' ') {
+                        frag.appendChild(document.createTextNode(' '));
+                    } else {
+                        const span = document.createElement('span');
+                        span.className = 'wave-char';
+                        span.style.animationDelay = (i * 35) + 'ms';
+                        span.textContent = ch;
+                        frag.appendChild(span);
+                    }
+                });
+                node.replaceWith(frag);
+            });
+        }
+
+        document.querySelectorAll('h1, h2, h3').forEach(wrapLetters);
+    })();
+    </script>
+
+    <div id="wa-widget" style="position:fixed;bottom:24px;right:24px;z-index:99998;font-family:'Plus Jakarta Sans',sans-serif;">
+
+    
+    <div id="wa-panel"
+         style="display:none;position:absolute;bottom:72px;right:0;width:320px;
+                background:#fff;border-radius:20px;overflow:hidden;
+                box-shadow:0 20px 60px rgba(0,0,0,.18);
+                animation:waPanelIn .25s cubic-bezier(.4,0,.2,1);">
+
+        
+        <div style="background:linear-gradient(135deg,#075e54,#128c7e);padding:16px 18px;display:flex;align-items:center;gap:12px;">
+            <div style="width:44px;height:44px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.845L0 24l6.335-1.508A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.373l-.36-.213-3.727.977.994-3.634-.234-.374A9.818 9.818 0 1112 21.818z"/>
+                </svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+                <p style="color:#fff;font-size:14px;font-weight:700;margin:0;line-height:1.2;">Medikart Support</p>
+                <p style="color:rgba(255,255,255,.8);font-size:12px;margin:3px 0 0;display:flex;align-items:center;gap:5px;">
+                    <span style="width:7px;height:7px;background:#4ade80;border-radius:50%;display:inline-block;"></span>
+                    Typically replies within minutes
+                </p>
+            </div>
+            <button onclick="toggleWA()" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,.7);padding:4px;line-height:1;">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        
+        <div style="background:#e5ddd5;padding:16px 14px;">
+            <div style="background:#fff;border-radius:0 12px 12px 12px;padding:12px 14px;max-width:85%;box-shadow:0 1px 2px rgba(0,0,0,.1);">
+                <p style="font-size:13px;color:#1a1a1a;line-height:1.5;margin:0;">
+                    👋 Hi! Welcome to <strong>Medikart</strong>.<br>
+                    How can we help you today?
+                </p>
+                <p style="font-size:10px;color:#94a3b8;margin:6px 0 0;text-align:right;">09:38 AM</p>
+            </div>
+        </div>
+
+        
+        <div style="background:#f8fafc;padding:12px 14px;border-top:1px solid #f1f5f9;">
+            <p style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px;">Quick Messages</p>
+            <div style="display:flex;flex-direction:column;gap:6px;" id="wa-quick-btns">
+                                    <button onclick="selectQuick(this)"
+                            data-msg="I need help with my order"
+                            style="text-align:left;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;color:#374151;cursor:pointer;transition:all .15s;font-family:inherit;"
+                            onmouseover="this.style.borderColor='#25d366';this.style.color='#075e54'"
+                            onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#374151'">
+                        I need help with my order
+                    </button>
+                                    <button onclick="selectQuick(this)"
+                            data-msg="Check medicine availability"
+                            style="text-align:left;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;color:#374151;cursor:pointer;transition:all .15s;font-family:inherit;"
+                            onmouseover="this.style.borderColor='#25d366';this.style.color='#075e54'"
+                            onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#374151'">
+                        Check medicine availability
+                    </button>
+                                    <button onclick="selectQuick(this)"
+                            data-msg="Ask about a prescription"
+                            style="text-align:left;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;color:#374151;cursor:pointer;transition:all .15s;font-family:inherit;"
+                            onmouseover="this.style.borderColor='#25d366';this.style.color='#075e54'"
+                            onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#374151'">
+                        Ask about a prescription
+                    </button>
+                                    <button onclick="selectQuick(this)"
+                            data-msg="Refund / cancellation help"
+                            style="text-align:left;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;color:#374151;cursor:pointer;transition:all .15s;font-family:inherit;"
+                            onmouseover="this.style.borderColor='#25d366';this.style.color='#075e54'"
+                            onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#374151'">
+                        Refund / cancellation help
+                    </button>
+                            </div>
+        </div>
+
+        
+        <div style="padding:12px 14px;background:#fff;border-top:1px solid #f1f5f9;">
+            <div style="display:flex;gap:8px;align-items:flex-end;">
+                <textarea id="wa-msg-input"
+                          placeholder="Type a message…"
+                          rows="2"
+                          style="flex:1;border:1.5px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:13px;font-family:inherit;resize:none;outline:none;transition:border-color .2s;line-height:1.4;"
+                          onfocus="this.style.borderColor='#25d366'"
+                          onblur="this.style.borderColor='#e2e8f0'"></textarea>
+                <button onclick="startChat()"
+                        style="background:#25d366;border:none;border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .2s;"
+                        onmouseover="this.style.background='#128c7e'"
+                        onmouseout="this.style.background='#25d366'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+            <p style="font-size:10px;color:#94a3b8;margin:8px 0 0;text-align:center;">
+                Opens WhatsApp · <a href="https://wa.me/917600264090" target="_blank" style="color:#25d366;text-decoration:none;">+917600264090</a>
+            </p>
+        </div>
+    </div>
+
+    
+    <button id="wa-fab"
+            onclick="toggleWA()"
+            aria-label="Chat on WhatsApp"
+            style="width:58px;height:58px;background:#25d366;border:none;border-radius:50%;cursor:pointer;
+                   display:flex;align-items:center;justify-content:center;
+                   box-shadow:0 4px 20px rgba(37,211,102,.5);
+                   transition:transform .2s,box-shadow .2s;
+                   position:relative;"
+            onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 6px 28px rgba(37,211,102,.65)'"
+            onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(37,211,102,.5)'">
+
+        
+        <span style="position:absolute;inset:0;border-radius:50%;background:#25d366;animation:waPulse 2s ease-out infinite;"></span>
+        <span style="position:absolute;inset:0;border-radius:50%;background:#25d366;animation:waPulse 2s ease-out infinite .6s;"></span>
+
+        
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="white" style="position:relative;z-index:1;">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.845L0 24l6.335-1.508A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.373l-.36-.213-3.727.977.994-3.634-.234-.374A9.818 9.818 0 1112 21.818z"/>
+        </svg>
+    </button>
+</div>
+
+<style>
+@keyframes waPulse {
+    0%   { transform: scale(1);   opacity: .6; }
+    100% { transform: scale(1.8); opacity: 0; }
+}
+@keyframes waPanelIn {
+    from { opacity: 0; transform: translateY(12px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+</style>
+
+<script>
+(function () {
+    const PHONE = '917600264090';
+
+    window.toggleWA = function () {
+        const panel = document.getElementById('wa-panel');
+        const isOpen = panel.style.display !== 'none';
+        panel.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) {
+            // re-trigger animation
+            panel.style.animation = 'none';
+            panel.offsetHeight; // reflow
+            panel.style.animation = '';
+        }
+    };
+
+    window.selectQuick = function (btn) {
+        document.getElementById('wa-msg-input').value = btn.dataset.msg;
+        // highlight selected
+        document.querySelectorAll('#wa-quick-btns button').forEach(b => {
+            b.style.borderColor = '#e2e8f0';
+            b.style.color = '#374151';
+            b.style.background = '#fff';
+        });
+        btn.style.borderColor = '#25d366';
+        btn.style.color = '#075e54';
+        btn.style.background = '#f0fdf4';
+    };
+
+    window.startChat = function () {
+        const msg = document.getElementById('wa-msg-input').value.trim()
+                    || 'Hello! I need help with Medikart.';
+        const url = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(msg);
+        window.open(url, '_blank');
+    };
+
+    // Allow Enter key to send (Shift+Enter for newline)
+    document.getElementById('wa-msg-input')?.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            window.startChat();
+        }
+    });
+})();
+</script>
+</body>
+</html>
+
