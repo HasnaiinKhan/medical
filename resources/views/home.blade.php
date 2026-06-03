@@ -219,22 +219,14 @@
      HERO
      ============================================================ --}}
 
-<<<<<<< HEAD
 <section class="relative mb-6 overflow-hidden rounded-2xl shadow-2xl hero-gradient-bg min-h-[420px] sm:min-h-[500px]">
-=======
-<section class="relative mb-6 overflow-hidden rounded-2xl shadow-2xl hero-gradient-bg min-h-[320px] sm:min-h-[380px]">
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
 
          {{-- Hero image --}}
     <div class="pointer-events-none absolute bottom-0 right-6 hidden sm:block">
         <img src="{{ asset('Images/handwithphonemedicine.png') }}"
              alt="Order medicines on your phone"
-<<<<<<< HEAD
              class="h-128 w-auto object-contain object-bottom"
              style="margin-bottom:100px;"
-=======
-             class="mb-12 h-[200px] w-auto object-contain object-bottom"
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
              draggable="false">
     </div>
 
@@ -984,7 +976,6 @@
     
    /* ── Progress bars ── */
 .stat-bar-track {
-<<<<<<< HEAD
     margin-top: 14px;
     height: 6px;
     width: 80px;
@@ -997,26 +988,11 @@
     width: 35%;
     border-radius: 999px;
     transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-=======
-    margin-top: 16px;
-    height: 4px;
-    width: 64px;
-    border-radius: 999px;
-    overflow: hidden;
-    background: rgba(0,0,0,0.06);
-}
-.stat-bar-fill {
-    height: 100%;
-    width: 0%;
-    border-radius: 999px;
-    transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
 }
 .stat-bar-fill.blue  { background: #3b82f6; }
 .stat-bar-fill.amber { background: #f59e0b; }
 .stat-bar-fill.green { background: #22c55e; }
 
-<<<<<<< HEAD
 /* Expand to full on card hover */
 .stat-card:hover .stat-bar-fill { width: 100%; }
 
@@ -1041,10 +1017,6 @@
 .stat-card:hover .stat-num-green,
 .stat-card:hover .stat-plus-green,
 .stat-card:hover .stat-star { color: #fff !important; }
-=======
-/* Only expand on card hover */
-.stat-card:hover .stat-bar-fill { width: 100%; }
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     </style>
 
     {{-- Section Header --}}
@@ -1067,31 +1039,18 @@
     <div class="mb-4  stats-section relative z-10 grid grid-cols-1 gap-5 sm:grid-cols-3">
 
         {{-- ── Card 1: Services ── --}}
-<<<<<<< HEAD
         <div class="stat-card reveal delay-1 rounded-2xl bg-white border border-slate-100 shadow-md px-5 py-5 text-center cursor-default group">
-=======
-        <div class="p-4 stat-card reveal delay-1 rounded-2xl bg-white border border-slate-100 shadow-md p-7 text-center cursor-default group">
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
             <div class="absolute -top-8 -left-8 h-32 w-32 rounded-full bg-blue-500 opacity-0 group-hover:opacity-10 blur-2xl transition-opacity duration-500"></div>
             <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-700 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
             <div class="relative z-10 flex flex-col items-center">
-<<<<<<< HEAD
                 <div class="stat-icon-wrap inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 group-hover:bg-white/20 transition-colors duration-300 mb-3 text-blue-600 group-hover:text-white">
-=======
-                <div class="stat-icon-wrap inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 group-hover:bg-white/20 transition-colors duration-300 mb-4 text-blue-600 group-hover:text-white">
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                     <i class="fa-solid fa-box-open fa-lg"></i>
                 </div>
 
                 <div class="flex items-start justify-center leading-none mb-1">
-<<<<<<< HEAD
                     <span class="stat-num stat-num-glow stat-num-blue text-4xl font-black transition-colors duration-300" data-target="32">0</span>
                     <span class="stat-plus-blue text-xl font-black mt-1 ml-0.5 transition-colors duration-300">+</span>
-=======
-                    <span class="stat-num stat-num-glow text-5xl font-black group-hover:text-white" data-target="32" style="color:#1d4ed8;">0</span>
-                    <span class="text-2xl font-black mt-1 ml-0.5 group-hover:text-white transition-colors duration-300" style="color:#93c5fd;">+</span>
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                 </div>
 
                 <p class="text-sm font-bold text-slate-800 group-hover:text-white transition-colors duration-300">Services Offered</p>
@@ -1104,42 +1063,24 @@
         </div>
 
         {{-- ── Card 2: Rating ── --}}
-<<<<<<< HEAD
         <div class="stat-card reveal delay-2 rounded-2xl bg-white border border-slate-100 shadow-md px-5 py-5 text-center cursor-default group">
-=======
-        <div class="p-4 stat-card reveal delay-2 rounded-2xl bg-white border border-slate-100 shadow-md p-7 text-center cursor-default group">
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
             <div class="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-amber-400 opacity-0 group-hover:opacity-10 blur-2xl transition-opacity duration-500"></div>
             <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
             <div class="relative z-10 flex flex-col items-center">
-<<<<<<< HEAD
                 <div class="stat-icon-wrap inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 group-hover:bg-white/20 transition-colors duration-300 mb-3 text-amber-500 group-hover:text-white">
-=======
-                <div class="stat-icon-wrap inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 group-hover:bg-white/20 transition-colors duration-300 mb-4 text-amber-500 group-hover:text-white">
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                     <i class="fa-solid fa-star fa-lg"></i>
                 </div>
 
                 <div class="flex items-baseline justify-center gap-0.5 mb-1">
-<<<<<<< HEAD
                     <span class="stat-num-glow stat-num-amber text-4xl font-black transition-colors duration-300">5.0</span>
                     <span class="stat-plus-amber text-lg font-bold transition-colors duration-300">/5</span>
-=======
-                    <span class="stat-num-glow text-5xl font-black group-hover:text-white transition-colors duration-300" style="color:#d97706;">5.0</span>
-                    <span class="text-xl font-bold group-hover:text-white/80 transition-colors duration-300" style="color:#fbbf24;">/5</span>
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                 </div>
 
                 <div class="flex justify-center gap-1 my-1.5 stars-row">
                     @for($i = 0; $i < 5; $i++)
-<<<<<<< HEAD
                         <span class="star-animate stat-star text-xl transition-colors duration-300"
                               style="animation-delay:{{ $i * 0.08 }}s;">★</span>
-=======
-                        <span class="star-animate text-xl group-hover:text-white transition-colors duration-300"
-                              style="color:#f59e0b; animation-delay:{{ $i * 0.08 }}s;">★</span>
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                     @endfor
                 </div>
 
@@ -1153,31 +1094,18 @@
         </div>
 
         {{-- ── Card 3: Happy Customers ── --}}
-<<<<<<< HEAD
         <div class="stat-card reveal delay-3 rounded-2xl bg-white border border-slate-100 shadow-md px-5 py-5 text-center cursor-default group">
-=======
-        <div class="p-4 stat-card reveal delay-3 rounded-2xl bg-white border border-slate-100 shadow-md p-7 text-center cursor-default group">
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
             <div class="absolute -bottom-8 -right-8 h-32 w-32 rounded-full bg-green-500 opacity-0 group-hover:opacity-10 blur-2xl transition-opacity duration-500"></div>
             <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-green-700 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
             <div class="relative z-10 flex flex-col items-center">
-<<<<<<< HEAD
                 <div class="stat-icon-wrap inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 group-hover:bg-white/20 transition-colors duration-300 mb-3 text-green-600 group-hover:text-white">
-=======
-                <div class="stat-icon-wrap inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50 group-hover:bg-white/20 transition-colors duration-300 mb-4 text-green-600 group-hover:text-white">
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                     <i class="fa-solid fa-users fa-lg"></i>
                 </div>
 
                 <div class="flex items-start justify-center leading-none mb-1">
-<<<<<<< HEAD
                     <span class="stat-num stat-num-glow stat-num-green text-4xl font-black transition-colors duration-300" data-target="300">0</span>
                     <span class="stat-plus-green text-xl font-black mt-1 ml-0.5 transition-colors duration-300">+</span>
-=======
-                    <span class="stat-num stat-num-glow text-5xl font-black group-hover:text-white" data-target="300" style="color:#15803d;">0</span>
-                    <span class="text-2xl font-black mt-1 ml-0.5 group-hover:text-white transition-colors duration-300" style="color:#86efac;">+</span>
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                 </div>
 
                 <p class="text-sm font-bold text-slate-800 group-hover:text-white transition-colors duration-300">Happy Customers</p>

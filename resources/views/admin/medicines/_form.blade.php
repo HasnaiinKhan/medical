@@ -9,6 +9,95 @@
     $initialImages = json_encode($existingImages ?: ['']);
 @endphp
 
+{{-- ═══════════════════════════════════════════════════════
+     PHARMEASY AUTO-FILL PANEL  (pure vanilla JS, no Alpine)
+═══════════════════════════════════════════════════════ --}}
+<style>
+.pe-panel        { display:none; margin-top:12px; border-radius:18px; border:1.5px solid #bfdbfe; background:linear-gradient(135deg,#eff6ff,#f5f3ff); padding:20px; box-shadow:0 4px 20px rgba(37,99,235,.10); }
+.pe-panel.open   { display:block; }
+.pe-search-row   { display:flex; gap:8px; margin-bottom:12px; }
+.pe-input        { flex:1; border:1.5px solid #bfdbfe; border-radius:12px; padding:10px 14px 10px 38px; font-size:13px; outline:none; background:#fff; }
+.pe-input:focus  { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.15); }
+.pe-btn          { background:#2563eb; color:#fff; border:none; border-radius:12px; padding:10px 20px; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:6px; }
+.pe-btn:hover    { background:#1d4ed8; }
+.pe-btn:disabled { opacity:.5; cursor:not-allowed; }
+.pe-error        { background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:10px 14px; font-size:13px; color:#dc2626; margin-bottom:10px; display:none; }
+.pe-meta         { font-size:11px; color:#94a3b8; margin-bottom:8px; display:none; }
+.pe-grid         { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; max-height:400px; overflow-y:auto; padding-right:4px; }
+@media(max-width:900px){ .pe-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:600px){ .pe-grid{ grid-template-columns:1fr; } }
+.pe-card         { background:#fff; border:2px solid #e2e8f0; border-radius:14px; padding:12px; cursor:pointer; transition:border-color .2s,box-shadow .2s; position:relative; }
+.pe-card:hover   { border-color:#3b82f6; box-shadow:0 4px 16px rgba(37,99,235,.12); }
+.pe-card.active  { border-color:#2563eb; background:#eff6ff; }
+.pe-card-img     { width:52px; height:52px; object-fit:contain; border-radius:8px; border:1px solid #e2e8f0; padding:4px; background:#fff; flex-shrink:0; }
+.pe-card-initial { width:52px; height:52px; border-radius:8px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:900; color:#94a3b8; flex-shrink:0; }
+.pe-card-top     { display:flex; gap:10px; align-items:flex-start; margin-bottom:8px; }
+.pe-card-name    { font-size:12px; font-weight:700; color:#0f172a; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.pe-card-mfg     { font-size:10px; color:#64748b; margin-top:2px; }
+.pe-card-bottom  { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.pe-price        { font-size:13px; font-weight:800; color:#0f172a; }
+.pe-mrp          { font-size:10px; color:#94a3b8; text-decoration:line-through; }
+.pe-badge        { border-radius:99px; padding:2px 7px; font-size:9px; font-weight:700; }
+.pe-badge-rx     { background:#fef3c7; color:#92400e; }
+.pe-badge-cat    { background:#f1f5f9; color:#475569; }
+.pe-tick         { font-size:10px; color:#2563eb; font-weight:700; display:none; margin-top:6px; }
+.pe-card.active .pe-tick { display:flex; align-items:center; gap:3px; }
+.pe-overlay      { display:none; position:absolute; inset:0; border-radius:13px; background:rgba(255,255,255,.8); align-items:center; justify-content:center; z-index:5; }
+.pe-card.loading .pe-overlay { display:flex; }
+.pe-spinner      { width:22px; height:22px; border:3px solid #bfdbfe; border-top-color:#2563eb; border-radius:50%; animation:pe-spin .7s linear infinite; }
+@keyframes pe-spin{ to{ transform:rotate(360deg); } }
+.pe-toggle-btn   { display:inline-flex; align-items:center; gap:8px; border-radius:14px; padding:10px 20px; font-size:13px; font-weight:700; cursor:pointer; border:none; background:linear-gradient(135deg,#2563eb,#7c3aed); color:#fff; box-shadow:0 2px 10px rgba(37,99,235,.25); transition:opacity .2s; }
+.pe-toggle-btn:hover { opacity:.9; }
+.pe-toast        { position:fixed; bottom:24px; right:24px; z-index:9999; background:#2563eb; color:#fff; border-radius:14px; padding:12px 20px; font-size:13px; font-weight:700; box-shadow:0 8px 24px rgba(37,99,235,.3); display:flex; align-items:center; gap:8px; pointer-events:none; }
+</style>
+
+<div style="margin-bottom:24px;">
+
+    {{-- Toggle button --}}
+    <button type="button" class="pe-toggle-btn" id="pe-toggle">
+        <span id="pe-toggle-icon">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </span>
+        <span id="pe-toggle-label"> Auto-Fill Agent</span>
+    </button>
+
+    {{-- Panel --}}
+    <div class="pe-panel" id="pe-panel">
+
+        {{-- Header --}}
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="width:60px;height:60px;border-radius:12px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:50px;flex-shrink:0;"><img src="{{ asset('images/chatbot.gif') }}" alt="Loading" class="h-16 w-max"></div>
+            <div>
+                <p style="font-size:13px;font-weight:700;color:#0f172a;margin:0;">Medikart Auto-Fill</p>
+                <p style="font-size:11px;color:#64748b;margin:2px 0 0;">Search any medicine, face wash, diaper, supplement — click a result to fill all form fields.</p>
+            </div>
+        </div>
+
+        {{-- Search --}}
+        <div class="pe-search-row">
+            <div style="position:relative;flex:1;">
+                <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:#94a3b8;pointer-events:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="pe-query" class="pe-input"
+                       placeholder="e.g. Dolo 650, Himalaya face wash, Pampers diaper…">
+            </div>
+            <button type="button" class="pe-btn" id="pe-search-btn">
+                <span id="pe-btn-text">Search</span>
+            </button>
+        </div>
+
+        {{-- Error --}}
+        <div class="pe-error" id="pe-error"></div>
+
+        {{-- Meta --}}
+        <div class="pe-meta" id="pe-meta"></div>
+
+        {{-- Results --}}
+        <div class="pe-grid" id="pe-grid"></div>
+
+    </div>
+</div>
+
+
 <div class="grid gap-6 lg:grid-cols-3">
 
     {{-- ===== LEFT: main fields ===== --}}
@@ -45,14 +134,9 @@
                     </div>
                     <div x-show="!creating">
                         <select name="category_id"
-<<<<<<< HEAD
                                 :required="!creating"
                                 class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20">
                             <option value="">— Select a category —</option>
-=======
-                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20">
-                            <option value="">Select category…</option>
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                             @foreach($categories as $cat)
                                 <option value="{{ $cat->id }}"
                                     {{ old('category_id', $medicine->category_id ?? '') == $cat->id ? 'selected' : '' }}>
@@ -60,15 +144,12 @@
                                 </option>
                             @endforeach
                         </select>
-<<<<<<< HEAD
                         @error('category_id')
                             <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
                                 <svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 {{ $message }}
                             </p>
                         @enderror
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                     </div>
                     <div x-show="creating" x-cloak>
                         <input name="new_category_name"
@@ -76,10 +157,6 @@
                                class="w-full rounded-xl border border-blue-300 bg-blue-50 px-4 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20">
                         <p class="mt-1 text-xs text-blue-700">Category will be created automatically on save.</p>
                     </div>
-<<<<<<< HEAD
-=======
-                    @error('category_id')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                 </div>
 
                 <div class="sm:col-span-2">
@@ -275,3 +352,226 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+(function () {
+    var CSRF = document.querySelector('meta[name="csrf-token"]').content;
+    var CATEGORY_MAP = {
+        @foreach($categories as $cat)
+        "{{ $cat->slug }}": "{{ $cat->id }}",
+        @endforeach
+    };
+
+    var SEARCH_URL = '{{ route('admin.ai.medicine.generate') }}';
+    var DETAIL_URL = '{{ route('admin.ai.medicine.detail') }}';
+
+    var toggleBtn  = document.getElementById('pe-toggle');
+    var toggleLbl  = document.getElementById('pe-toggle-label');
+    var toggleIcon = document.getElementById('pe-toggle-icon');
+    var panel      = document.getElementById('pe-panel');
+    var queryInput = document.getElementById('pe-query');
+    var searchBtn  = document.getElementById('pe-search-btn');
+    var btnText    = document.getElementById('pe-btn-text');
+    var errorBox   = document.getElementById('pe-error');
+    var metaBox    = document.getElementById('pe-meta');
+    var grid       = document.getElementById('pe-grid');
+
+    var currentSource  = null;
+    var currentResults = [];
+    var selectedIdx    = null;
+
+    var CROSS_ICON  = '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
+    var SEARCH_ICON = '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>';
+
+    // Toggle panel open/close
+    toggleBtn.addEventListener('click', function () {
+        var isOpen = panel.classList.toggle('open');
+        toggleLbl.textContent = isOpen ? ' Close' : ' Auto-Fill Agent';
+        toggleIcon.innerHTML  = isOpen ? CROSS_ICON : SEARCH_ICON;
+        if (isOpen) queryInput.focus();
+    });
+
+    // Enter key on input
+    queryInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); doSearch(); }
+    });
+
+    searchBtn.addEventListener('click', doSearch);
+
+    // ── Search ──────────────────────────────────────────────────────────────
+    function doSearch() {
+        var q = queryInput.value.trim();
+        if (!q) return;
+
+        setLoading(true);
+        showError('');
+        metaBox.style.display = 'none';
+        grid.innerHTML = '';
+        currentResults = [];
+        selectedIdx    = null;
+
+        fetch(SEARCH_URL, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
+            body:    JSON.stringify({ name: q })
+        })
+        .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, j: j }; }); })
+        .then(function (r) {
+            if (!r.ok || r.j.error) {
+                showError(r.j.error || 'No results found. Try a different name.');
+            } else {
+                currentResults = r.j.results || [];
+                currentSource  = r.j.source  || null;
+                renderResults();
+            }
+        })
+        .catch(function () { showError('Network error. Please check your connection.'); })
+        .finally(function () { setLoading(false); });
+    }
+
+    // ── Render cards ─────────────────────────────────────────────────────────
+    function renderResults() {
+        grid.innerHTML = '';
+
+        if (!currentResults.length) {
+            showError('No results found. Try a more specific name.');
+            return;
+        }
+
+        var srcLabel = currentSource === 'pharmeasy' ? '🛒 PharmEasy' : '🤖 AI Generated';
+        metaBox.textContent = srcLabel + ' · ' + currentResults.length + ' result(s) found';
+        metaBox.style.display = 'block';
+
+        currentResults.forEach(function (item, idx) {
+            var card = document.createElement('div');
+            card.className = 'pe-card';
+            card.dataset.idx = idx;
+
+            var imgHtml = item.image_url
+                ? '<img src="' + esc(item.image_url) + '" class="pe-card-img" onerror="this.style.display=\'none\'">'
+                : '<div class="pe-card-initial">' + esc((item.name || '?')[0].toUpperCase()) + '</div>';
+
+            var rxBadge  = item.prescription_required ? '<span class="pe-badge pe-badge-rx">Rx</span>' : '';
+            var catBadge = item.category ? '<span class="pe-badge pe-badge-cat">' + esc(item.category) + '</span>' : '';
+            var price    = item.price_suggestion ? '<span class="pe-price">₹' + parseFloat(item.price_suggestion).toFixed(2) + '</span>' : '';
+            var mrp      = (item.mrp_suggestion && item.price_suggestion && parseFloat(item.mrp_suggestion) > parseFloat(item.price_suggestion))
+                         ? '<span class="pe-mrp">₹' + parseFloat(item.mrp_suggestion).toFixed(2) + '</span>' : '';
+
+            card.innerHTML =
+                '<div class="pe-overlay"><div class="pe-spinner"></div></div>' +
+                '<div class="pe-card-top">' + imgHtml +
+                    '<div style="flex:1;min-width:0;">' +
+                        '<div class="pe-card-name">' + esc(item.name || '') + '</div>' +
+                        '<div class="pe-card-mfg">' + esc(item.manufacturer || '') + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="pe-card-bottom">' + price + mrp + rxBadge + catBadge + '</div>' +
+                '<div class="pe-tick">✔ Applied to form</div>';
+
+            card.addEventListener('click', function () { selectCard(idx); });
+            grid.appendChild(card);
+        });
+    }
+
+    // ── Select card ───────────────────────────────────────────────────────────
+    function selectCard(idx) {
+        var cards = grid.querySelectorAll('.pe-card');
+        cards.forEach(function (c) { c.classList.remove('active'); });
+        var card = grid.querySelector('[data-idx="' + idx + '"]');
+        if (!card) return;
+        card.classList.add('active', 'loading');
+        selectedIdx = idx;
+
+        var data = currentResults[idx];
+
+        if (currentSource === 'pharmeasy' && data.slug) {
+            fetch(DETAIL_URL, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
+                body:    JSON.stringify({ slug: data.slug })
+            })
+            .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, j: j }; }); })
+            .then(function (r) {
+                if (r.ok && r.j.data) data = r.j.data;
+                card.classList.remove('loading');
+                applyToForm(data);
+            })
+            .catch(function () {
+                card.classList.remove('loading');
+                applyToForm(data);
+            });
+        } else {
+            card.classList.remove('loading');
+            applyToForm(data);
+        }
+    }
+
+    // ── Apply to form ─────────────────────────────────────────────────────────
+    function applyToForm(d) {
+        if (!d) return;
+
+        function setVal(name, val) {
+            var el = document.querySelector('[name="' + name + '"]');
+            if (el && val != null && val !== '') el.value = val;
+        }
+
+        setVal('name',         d.name);
+        setVal('manufacturer', d.manufacturer);
+
+        // Description + composition + uses
+        var parts = [];
+        if (d.description)              parts.push(d.description);
+        if (d.composition)              parts.push('Composition: ' + d.composition + '.');
+        if (d.uses && d.uses.length)    parts.push('Uses: ' + d.uses.join('; ') + '.');
+        setVal('description', parts.join('\n\n'));
+
+        // Category select
+        if (d.category && CATEGORY_MAP[d.category]) {
+            var sel = document.querySelector('select[name="category_id"]');
+            if (sel) sel.value = CATEGORY_MAP[d.category];
+        }
+
+        // Pricing
+        if (d.mrp_suggestion)   setVal('mrp',   parseFloat(d.mrp_suggestion).toFixed(2));
+        if (d.price_suggestion) setVal('price', parseFloat(d.price_suggestion).toFixed(2));
+
+        // Prescription checkbox
+        var rx = document.querySelector('input[name="prescription_required"]');
+        if (rx) rx.checked = !!d.prescription_required;
+
+        // Image URL — fill first image input + fire input event for Alpine preview
+        if (d.image_url) {
+            var imgInput = document.querySelector('input[name="image_url"]');
+            if (imgInput) {
+                imgInput.value = d.image_url;
+                imgInput.dispatchEvent(new Event('input'));
+            }
+        }
+
+        // Toast
+        var toast = document.createElement('div');
+        toast.className = 'pe-toast';
+        toast.innerHTML = '✔ Form filled successfully!';
+        document.body.appendChild(toast);
+        setTimeout(function () { toast.remove(); }, 3000);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function setLoading(on) {
+        searchBtn.disabled = on;
+        btnText.textContent = on ? 'Searching…' : 'Search';
+    }
+
+    function showError(msg) {
+        errorBox.textContent = msg;
+        errorBox.style.display = msg ? 'block' : 'none';
+    }
+
+    function esc(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+})();
+</script>
+@endpush

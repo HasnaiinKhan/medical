@@ -40,4 +40,18 @@ return [
         'enabled' => env('WHATSAPP_ENABLED', true),
     ],
 
+    'openrouter' => [
+        'key' => env('OPENROUTER_API_KEY', ''),
+    ],
+
+    'gemini' => [
+        'key'   => env('GEMINI_API_KEY', ''),
+        'model' => 'models/gemini-2.5-flash',
+    ],
+
+    'groq' => [
+        'key'   => env('GROQ_API_KEY', ''),
+        'model' => 'llama-3.1-8b-instant',
+    ],
+
 ];

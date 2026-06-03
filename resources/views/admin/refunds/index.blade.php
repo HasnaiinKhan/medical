@@ -6,11 +6,7 @@
 @section('content')
 
 {{-- Stats --}}
-<<<<<<< HEAD
 <div class="grid grid-cols-2 gap-4 lg:grid-cols-5 mb-6">
-=======
-<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 mb-6">
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     @foreach([
         ['label'=>'Total',      'value'=>$stats['total'],      'color'=>'bg-slate-50 text-slate-700'],
         ['label'=>'Requested',  'value'=>$stats['requested'],  'color'=>'bg-amber-50 text-amber-800'],
@@ -56,11 +52,7 @@
 {{-- Table --}}
 <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden mb-4">
     <div class="overflow-x-auto">
-<<<<<<< HEAD
         <table class="w-full admin-table">
-=======
-        <table class="w-full min-w-[700px] admin-table">
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
             <thead>
                 <tr>
                     <th class="text-left">Refund #</th>
@@ -91,11 +83,7 @@
                         <td class="text-right font-bold text-slate-900">₹{{ number_format($refund->amountRupees(), 2) }}</td>
                         <td>
                             <span class="badge {{ $refund->type === 'gateway' ? 'bg-indigo-100 text-indigo-800' : 'bg-amber-100 text-amber-800' }}">
-<<<<<<< HEAD
                                 {{ $refund->type === 'gateway' ? ' Gateway' : ' Bank Transfer' }}
-=======
-                                {{ $refund->type === 'gateway' ? '💳 Gateway' : '🏦 Bank Transfer' }}
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                             </span>
                         </td>
                         <td><span class="badge {{ $badgeClass }}">{{ $badgeLabel }}</span></td>

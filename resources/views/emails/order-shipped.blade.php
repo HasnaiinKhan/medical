@@ -66,29 +66,6 @@
       <p>Expected delivery within 1–3 business days to {{ $order->delivery_area }}, {{ $order->delivery_pin }}</p>
     </div>
 
-<<<<<<< HEAD
-=======
-    {{-- Progress steps --}}
-    <div class="steps">
-      <div class="step">
-        <div class="step-dot done">✓</div>
-        <div class="step-label">Placed</div>
-      </div>
-      <div class="step">
-        <div class="step-dot done">✓</div>
-        <div class="step-label">Confirmed</div>
-      </div>
-      <div class="step">
-        <div class="step-dot active">🚚</div>
-        <div class="step-label active">Shipped</div>
-      </div>
-      <div class="step">
-        <div class="step-dot pending">🎉</div>
-        <div class="step-label">Delivered</div>
-      </div>
-    </div>
-
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     {{-- Order details --}}
     <div class="order-box">
       <h3>Order Details</h3>

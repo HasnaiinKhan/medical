@@ -2,19 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-<<<<<<< HEAD
 use App\Http\Controllers\Admin\AdminOrderController;
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Medicine;
 use App\Models\Order;
 use App\Models\User;
-<<<<<<< HEAD
 use Illuminate\Support\Facades\DB;
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
 
 class AdminController extends Controller
 {
@@ -25,11 +19,7 @@ class AdminController extends Controller
             'categories' => Category::count(),
             'orders'     => Order::count(),
             'users'      => User::where('is_admin', false)->count(),
-<<<<<<< HEAD
             'revenue'    => AdminOrderController::revenueQuery()->sum('total_paise') / 100,
-=======
-            'revenue'    => Order::where('payment_status', 'paid')->sum('total_paise') / 100,
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
             'pending'    => Order::where('status', 'placed')->count(),
         ];
 
@@ -38,7 +28,6 @@ class AdminController extends Controller
             ->take(8)
             ->get();
 
-<<<<<<< HEAD
         // ── Chart data ──────────────────────────────────────────────────
         // Revenue uses the same source-of-truth as revenueQuery():
         //   payment_status = 'paid'  AND  status != 'cancelled'
@@ -109,8 +98,5 @@ class AdminController extends Controller
             ->pluck('count', 'status');
 
         return view('admin.dashboard', compact('stats', 'recentOrders', 'months', 'statusBreakdown'));
-=======
-        return view('admin.dashboard', compact('stats', 'recentOrders'));
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     }
 }

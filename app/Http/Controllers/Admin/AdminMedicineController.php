@@ -173,15 +173,12 @@ class AdminMedicineController extends Controller
 
     private function validated(Request $request, ?int $ignoreId = null): array
     {
-<<<<<<< HEAD
         // Category is required unless the admin is creating a new one inline
         $newCategoryName = trim((string) $request->input('new_category_name', ''));
         $categoryIdRule  = $newCategoryName !== ''
             ? ['nullable', 'integer']
             : ['required', 'integer', 'exists:categories,id'];
 
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
         return $request->validate([
             'name'                  => ['required', 'string', 'max:200'],
             'manufacturer'          => ['required', 'string', 'max:200'],
@@ -190,22 +187,16 @@ class AdminMedicineController extends Controller
             'price'                 => ['required', 'numeric', 'min:0.01'],
             'prescription_required' => ['nullable', 'boolean'],
             'stock'                 => ['required', 'integer', 'min:0'],
-<<<<<<< HEAD
             'category_id'           => $categoryIdRule,
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
             // Primary image: either a URL or a file (both optional)
             'image_url'             => ['nullable', 'url', 'max:500'],
             'image_file'            => ['nullable', 'image', 'max:4096'],
             // Extra images
             'extra_image_url.*'     => ['nullable', 'url', 'max:500'],
             'extra_image_file.*'    => ['nullable', 'image', 'max:4096'],
-<<<<<<< HEAD
         ], [
             'category_id.required' => 'Please select a category, or create a new one.',
             'category_id.exists'   => 'The selected category is invalid.',
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
         ]);
     }
 }

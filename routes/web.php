@@ -23,13 +23,10 @@ Route::post('/webhooks/razorpay', [WebhookController::class, 'razorpay'])
     ->name('webhooks.razorpay')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
-<<<<<<< HEAD
 // ── Chatbot ───────────────────────────────────────────────────────────────────
 Route::post('/chatbot', [\App\Http\Controllers\ChatbotController::class, 'chat'])->name('chatbot.chat');
 Route::post('/chatbot/order-detail', [\App\Http\Controllers\ChatbotController::class, 'orderDetail'])->name('chatbot.orderDetail')->middleware('auth');
 
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
 // ── Public ────────────────────────────────────────────────────────────────────
 Route::get('/', HomeController::class)->name('home');
 
@@ -107,4 +104,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('settings/notifications',          [AdminSettingsController::class, 'notifications'])->name('settings.notifications');
     Route::post('settings/notifications',         [AdminSettingsController::class, 'saveNotifications'])->name('settings.notifications.save');
     Route::get('settings/notifications/test/{channel}', [AdminSettingsController::class, 'testNotification'])->name('settings.notifications.test');
+
+    // AI Medicine Generator
+    Route::post('ai/medicine-generate', [\App\Http\Controllers\Admin\AIMedicineController::class, 'generate'])->name('ai.medicine.generate');
+    Route::post('ai/medicine-detail',   [\App\Http\Controllers\Admin\AIMedicineController::class, 'detail'])->name('ai.medicine.detail');
 });

@@ -17,11 +17,7 @@ class RefundProcessed extends Mailable
 
     public function envelope(): Envelope
     {
-<<<<<<< HEAD
         return new Envelope(subject: 'Refund Processed — ' . $this->refund->refund_number . ' | Medikart');
-=======
-        return new Envelope(subject: '💚 Refund Processed — ' . $this->refund->refund_number . ' | Medikart');
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     }
 
     public function content(): Content

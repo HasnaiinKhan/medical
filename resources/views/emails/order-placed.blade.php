@@ -36,13 +36,9 @@
 
   {{-- Header --}}
   <div class="header">
-<<<<<<< HEAD
     <div class=lock style="width:40px;">
                             <h1>✅ Order Confirmed!</h1>
 </div>
-=======
-    <h1>✅ Order Confirmed!</h1>
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     <p>Thank you for shopping with Medikart</p>
     <span class="badge">{{ $order->order_number }}</span>
   </div>

@@ -159,11 +159,7 @@
     </div>
 
     <p class="mt-6 text-center text-xs text-slate-400">
-<<<<<<< HEAD
         Always consult a doctor before taking medication.
-=======
-        This is a demo order. No real medicines will be delivered. Always consult a doctor before taking medication.
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     </p>
 </div>
 

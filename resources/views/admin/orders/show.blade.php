@@ -15,7 +15,6 @@
         Back to Orders
     </a>
 
-<<<<<<< HEAD
     {{-- Status change form (non-cancel statuses only) --}}
     @if($order->status !== 'cancelled')
     <form method="POST" action="{{ route('admin.orders.updateStatus', $order) }}"
@@ -41,25 +40,6 @@
         </button>
     </form>
     @endif
-=======
-    {{-- Status change form --}}
-    <form method="POST" action="{{ route('admin.orders.updateStatus', $order) }}"
-          class="flex items-center gap-2 flex-wrap">
-        @csrf @method('PATCH')
-        <select name="status"
-                class="flex-1 sm:flex-none rounded-xl border border-slate-200 py-2 px-3 text-sm font-semibold focus:outline-none focus:border-blue-500 bg-white shadow-sm">
-            @foreach($statusFlow as $s)
-                <option value="{{ $s }}" {{ $order->status === $s ? 'selected' : '' }}>
-                    {{ ucfirst($s) }}
-                </option>
-            @endforeach
-        </select>
-        <button type="submit"
-                class="rounded-xl bg-blue-600 px-5 py-2 text-sm font-bold text-white hover:bg-blue-700 shadow-sm transition-colors whitespace-nowrap">
-            Update Status
-        </button>
-    </form>
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
 </div>
 
 {{-- ── STATUS TIMELINE ── --}}
@@ -68,7 +48,6 @@
     $currentIdx  = array_search($order->status, $allStatuses);
     $isCancelled = $order->status === 'cancelled';
 @endphp
-<<<<<<< HEAD
 <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Order Progress</h3>
     @if($isCancelled)
@@ -108,43 +87,6 @@
                     @endif
                 @endforeach
             </div>
-=======
-<div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Order Progress</h3>
-    @if($isCancelled)
-        <div class="flex items-center gap-3 rounded-xl bg-red-50 border border-red-200 px-4 py-3">
-            <span class="text-xl">❌</span>
-            <div>
-                <p class="text-sm font-bold text-red-800">Order Cancelled</p>
-                <p class="text-xs text-red-600">This order has been cancelled.</p>
-            </div>
-        </div>
-    @else
-        <div class="flex flex-wrap sm:flex-nowrap items-center gap-0 overflow-x-auto pb-1">
-            @foreach($allStatuses as $i => $step)
-                @php
-                    $done    = $currentIdx !== false && $i <= $currentIdx;
-                    $current = $currentIdx !== false && $i === $currentIdx;
-                    $icons   = ['placed'=>'📋','confirmed'=>'✅','shipped'=>'🚚','delivered'=>'🎉'];
-                @endphp
-                <div class="flex flex-1 flex-col items-center">
-                    <div class="flex h-9 w-9 items-center justify-center rounded-full text-base
-                                {{ $current ? 'bg-blue-600 ring-4 ring-blue-100' : ($done ? 'bg-blue-500' : 'bg-slate-200') }}">
-                        @if($done)
-                            <span>{{ $icons[$step] }}</span>
-                        @else
-                            <span class="h-2.5 w-2.5 rounded-full bg-slate-400"></span>
-                        @endif
-                    </div>
-                    <p class="mt-1.5 text-[11px] font-semibold {{ $done ? 'text-blue-700' : 'text-slate-400' }}">
-                        {{ ucfirst($step) }}
-                    </p>
-                </div>
-                @if(!$loop->last)
-                    <div class="flex-1 h-0.5 mb-5 {{ $currentIdx !== false && $i < $currentIdx ? 'bg-blue-500' : 'bg-slate-200' }}"></div>
-                @endif
-            @endforeach
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
         </div>
     @endif
 </div>
@@ -271,7 +213,6 @@
                 <div class="flex justify-between items-center">
                     <span class="text-slate-500">Status</span>
                     @php
-<<<<<<< HEAD
                         $statusCfgShow = [
                             'placed'                 => ['bg-amber-100 text-amber-800',  asset('images/hourglass.gif')],
                             'confirmed'              => ['bg-blue-100 text-blue-800',    asset('images/check.png')],
@@ -288,18 +229,6 @@
                     <span class="badge {{ $showSc }} inline-flex items-center gap-1.5">
                         <img src="{{ $showImg }}" alt="{{ $order->status }}" class="h-4 w-4 object-contain flex-shrink-0">
                         {{ ucfirst(str_replace('_', ' ', $order->status)) }}
-=======
-                        $statusCfg = [
-                            'placed'    => 'bg-amber-100 text-amber-800',
-                            'confirmed' => 'bg-blue-100 text-blue-800',
-                            'shipped'   => 'bg-purple-100 text-purple-800',
-                            'delivered' => 'bg-green-100 text-green-800',
-                            'cancelled' => 'bg-red-100 text-red-800',
-                        ];
-                    @endphp
-                    <span class="badge {{ $statusCfg[$order->status] ?? 'bg-slate-100 text-slate-700' }}">
-                        {{ ucfirst($order->status) }}
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                     </span>
                 </div>
             </div>
@@ -355,24 +284,15 @@
         </div>
 
         {{-- Quick status change (sidebar) --}}
-<<<<<<< HEAD
         @if($order->status !== 'cancelled')
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
         <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5">
             <h3 class="text-sm font-bold text-blue-900 mb-3">Quick Status Update</h3>
             <form method="POST" action="{{ route('admin.orders.updateStatus', $order) }}" class="space-y-3">
                 @csrf @method('PATCH')
                 <div class="grid grid-cols-1 gap-2">
-<<<<<<< HEAD
                     @foreach(['placed','confirmed','shipped','delivered'] as $s)
                         @php
                             $icons  = ['placed'=>'📋','confirmed'=>'✅','shipped'=>'🚚','delivered'=>'🎉'];
-=======
-                    @foreach(['placed','confirmed','shipped','delivered','cancelled'] as $s)
-                        @php
-                            $icons = ['placed'=>'📋','confirmed'=>'✅','shipped'=>'🚚','delivered'=>'🎉','cancelled'=>'❌'];
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                             $active = $order->status === $s;
                         @endphp
                         <button type="submit" name="status" value="{{ $s }}"
@@ -389,7 +309,6 @@
                     @endforeach
                 </div>
             </form>
-<<<<<<< HEAD
 
             {{-- Cancel — separate, opens modal --}}
             <div class="mt-3 pt-3 border-t border-blue-200">
@@ -428,14 +347,10 @@
             </div>
         </div>
         @endif
-=======
-        </div>
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     </div>
 </div>
 
 @endsection
-<<<<<<< HEAD
 
 {{-- ── CANCEL ORDER MODAL ── --}}
 @if($order->status !== 'cancelled')
@@ -500,5 +415,3 @@ document.getElementById('cancel-modal').addEventListener('click', function(e) {
 @enderror
 </script>
 @endif
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb

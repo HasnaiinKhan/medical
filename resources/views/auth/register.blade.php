@@ -118,13 +118,8 @@
 
     {{-- Centre --}}
     <div style="position:relative;z-index:1;">
-<<<<<<< HEAD
         <div style="width:90px;height:90px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:44px;margin-bottom:24px;">
             <img src="{{ asset('images/medical-team.png') }}" alt="Medical Team">
-=======
-        <div style="width:90px;height:90px;background:rgba(255,255,255,.12);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:44px;margin-bottom:24px;border:1px solid rgba(255,255,255,.18);">
-            🏥
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
         </div>
         <h2 style="color:#fff;font-size:28px;font-weight:900;line-height:1.25;margin-bottom:12px;">
             Join Medikart<br>Today

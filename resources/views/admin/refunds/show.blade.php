@@ -24,11 +24,7 @@
         {{-- Refund details --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <h3 class="text-sm font-bold text-slate-900 mb-4">Refund Details</h3>
-<<<<<<< HEAD
             <div class="grid grid-cols-2 gap-4 text-sm">
-=======
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                 <div><p class="text-xs text-slate-500">Refund #</p><p class="font-mono font-bold text-slate-800">{{ $refund->refund_number }}</p></div>
                 <div><p class="text-xs text-slate-500">Amount</p><p class="font-bold text-slate-900 text-lg">₹{{ number_format($refund->amountRupees(), 2) }}</p></div>
                 <div><p class="text-xs text-slate-500">Type</p>

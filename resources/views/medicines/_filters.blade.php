@@ -10,7 +10,6 @@
     }
 @endphp
 
-<<<<<<< HEAD
 <style>
     /* Custom scrollbar styling with blue gradient */
     #cat-list::-webkit-scrollbar,
@@ -39,13 +38,11 @@
     /* Firefox scrollbar */
     #cat-list,
     #brand-filter-list {
-        scrollbar-color: linear-gradient(180deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%) #f1f5f9;
+        scrollbar-color: #2563eb #f1f5f9;
         scrollbar-width: thin;
     }
 </style>
 
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
 {{-- Filters Header --}}
 <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100"
      style="background: linear-gradient(135deg,#1e3a8a,#2563eb);">
@@ -75,11 +72,7 @@
         </button>
 
         <div id="cat-section" class="px-3 pb-3">
-<<<<<<< HEAD
             <ul class="space-y-0.5 max-h-64 overflow-y-auto pr-2" id="cat-list">
-=======
-            <ul class="space-y-0.5" id="cat-list">
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                 <li>
                     <a href="{{ route('medicines.index', array_filter(['q' => $q, 'brand' => request('brand')])) }}"
                        class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors {{ !request('category') ? 'bg-blue-700 font-semibold text-white' : 'text-slate-700 hover:bg-slate-50' }}">
@@ -143,11 +136,7 @@
                     <input type="hidden" name="category" value="{{ request('category') }}">
                 @endif
 
-<<<<<<< HEAD
                 <div id="brand-filter-list" class="space-y-1.5 max-h-64 overflow-y-auto pr-2">
-=======
-                <div id="brand-filter-list" class="space-y-1.5">
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
                     @forelse ($brands as $i => $brandItem)
                         <label class="brand-filter-item {{ $i >= 5 && !in_array($brandItem->name, $selectedBrands) ? 'hidden' : '' }} flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
                                data-brand-name="{{ strtolower($brandItem->name) }}"

@@ -6,10 +6,7 @@ use App\Mail\OrderPlaced;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PinCode;
-<<<<<<< HEAD
 use App\Models\UserAddress;
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
 use App\Services\CartService;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
@@ -46,16 +43,10 @@ class RazorpayController extends Controller
         $deliveryFeePaise = $subtotalPaise >= self::FREE_DELIVERY_ABOVE_PAISE ? 0 : self::DELIVERY_FEE_PAISE;
         $totalPaise       = $subtotalPaise + $deliveryFeePaise;
         $razorpayKeyId    = config('razorpay.key_id');
-<<<<<<< HEAD
         $savedAddresses   = Auth::user()->addresses()->get();
 
         return view('checkout.index', compact(
             'lines', 'subtotalPaise', 'deliveryFeePaise', 'totalPaise', 'razorpayKeyId', 'savedAddresses'
-=======
-
-        return view('checkout.index', compact(
-            'lines', 'subtotalPaise', 'deliveryFeePaise', 'totalPaise', 'razorpayKeyId'
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
         ));
     }
 
@@ -76,12 +67,9 @@ class RazorpayController extends Controller
             'address_line2'  => ['nullable', 'string', 'max:255'],
             'delivery_pin'   => ['required', 'regex:/^[0-9]{6}$/'],
             'payment_method' => ['required', 'in:cod,online'],
-<<<<<<< HEAD
             'save_address'   => ['nullable', 'boolean'],
             'address_label'  => ['nullable', 'string', 'max:30'],
             'address_id'     => ['nullable', 'integer'],   // if user picked a saved address
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
         ]);
 
         $pin = PinCode::query()->where('code', $data['delivery_pin'])->first();
@@ -93,14 +81,11 @@ class RazorpayController extends Controller
         $deliveryFeePaise = $subtotalPaise >= self::FREE_DELIVERY_ABOVE_PAISE ? 0 : self::DELIVERY_FEE_PAISE;
         $totalPaise       = $subtotalPaise + $deliveryFeePaise;
 
-<<<<<<< HEAD
         // ── Save address if requested ─────────────────────────────────────────
         if (!empty($data['save_address'])) {
             $this->saveAddress($data, $pin);
         }
 
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
         // ── COD path ─────────────────────────────────────────────────────────
         if ($data['payment_method'] === 'cod') {
             $order = $this->persistOrder($data, $pin, $totalPaise, $subtotalPaise, $deliveryFeePaise, 'cod', 'pending');
@@ -241,7 +226,6 @@ class RazorpayController extends Controller
     // Private helper — write order + items to DB
     // ─────────────────────────────────────────────────────────────────────────
 
-<<<<<<< HEAD
     // ── Save or update a user address ────────────────────────────────────────
     private function saveAddress(array $data, PinCode $pin): void
     {
@@ -277,8 +261,6 @@ class RazorpayController extends Controller
         ]);
     }
 
-=======
->>>>>>> 790fbb57cd8a67fb90eb8f1a6093c048cf5a90eb
     private function persistOrder(
         array   $data,
         PinCode $pin,
