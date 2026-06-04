@@ -104,30 +104,43 @@ class AdminMedicineController extends Controller
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /**
-     * Resolve the primary image: uploaded file takes priority over URL input.
-     * Falls back to existing URL if neither provided (on update).
+     * Resolve the primary image: uploaded file takes ABSOLUTE priority over URL input.
+     * File uploads are always preferred, even if URL is present.
      */
     private function resolvePrimaryImage(Request $request, ?string $existing = null): ?string
     {
-        // File upload takes priority
-        if ($request->hasFile('image_file') && $request->file('image_file')->isValid()) {
-            $path = $request->file('image_file')->store('medicines', 'public');
-            return asset('storage/' . $path);
+        // File upload takes ABSOLUTE priority - if file exists, ignore any URL
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            if ($file && $file->isValid()) {
+                $path = $file->store('medicines', 'public');
+                $url = asset('storage/' . $path);
+                \Log::info("Resolved primary image from file upload: {$url}");
+                return $url;
+            }
         }
 
-        // URL input
+        // Only use URL if NO file was uploaded
         $url = trim((string) $request->input('image_url', ''));
-        if ($url !== '') {
-            return $url;
+        if ($url !== '' && !str_starts_with($url, 'blob:')) {
+            // Validate that it's actually a real URL before using it
+            if (filter_var($url, FILTER_VALIDATE_URL)) {
+                \Log::info("Resolved primary image from URL: {$url}");
+                return $url;
+            }
         }
 
-        // Keep existing on update
+        // Keep existing on update if neither file nor valid URL provided
+        if ($existing) {
+            \Log::info("Keeping existing primary image: {$existing}");
+        }
         return $existing;
     }
 
     /**
      * Parse extra images: each slot can be a file upload OR a URL.
      * extra_image_file[] and extra_image_url[] are parallel arrays by index.
+     * FILE UPLOADS TAKE ABSOLUTE PRIORITY over URLs.
      */
     private function parseExtraImages(Request $request): array
     {
@@ -142,11 +155,20 @@ class AdminMedicineController extends Controller
             $file = $files[$i] ?? null;
             $url  = trim((string) ($urls[$i] ?? ''));
 
+            // File upload takes ABSOLUTE priority - if file exists, ignore URL completely
             if ($file && $file->isValid()) {
                 $path = $file->store('medicines', 'public');
-                $result[] = asset('storage/' . $path);
-            } elseif ($url !== '') {
-                $result[] = $url;
+                $imageUrl = asset('storage/' . $path);
+                $result[] = $imageUrl;
+                \Log::info("Resolved extra image {$i} from file upload: {$imageUrl}");
+            } 
+            // Only use URL if NO file was uploaded
+            elseif ($url !== '' && !str_starts_with($url, 'blob:')) {
+                // Validate that it's actually a real URL
+                if (filter_var($url, FILTER_VALIDATE_URL)) {
+                    $result[] = $url;
+                    \Log::info("Resolved extra image {$i} from URL: {$url}");
+                }
             }
         }
 
@@ -189,10 +211,10 @@ class AdminMedicineController extends Controller
             'stock'                 => ['required', 'integer', 'min:0'],
             'category_id'           => $categoryIdRule,
             // Primary image: either a URL or a file (both optional)
-            'image_url'             => ['nullable', 'url', 'max:500'],
+            'image_url'             => ['nullable', 'string', 'max:500'],
             'image_file'            => ['nullable', 'image', 'max:4096'],
             // Extra images
-            'extra_image_url.*'     => ['nullable', 'url', 'max:500'],
+            'extra_image_url.*'     => ['nullable', 'string', 'max:500'],
             'extra_image_file.*'    => ['nullable', 'image', 'max:4096'],
         ], [
             'category_id.required' => 'Please select a category, or create a new one.',

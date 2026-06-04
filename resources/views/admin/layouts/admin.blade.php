@@ -1,5 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+{{-- If this is an AJAX navigation request, return only the page fragment --}}
+@if(request()->ajax() || request()->header('X-Admin-Ajax'))
+    <script>
+    window.__adminPageTitle    = @json(\Illuminate\Support\Facades\View::yieldContent('title', 'Admin') . ' — MediCart Admin');
+    window.__adminPageHeading  = @json(\Illuminate\Support\Facades\View::yieldContent('page-title', 'Dashboard'));
+    window.__adminPageSubtitle = @json(\Illuminate\Support\Facades\View::yieldContent('page-subtitle', ''));
+    </script>
+    @yield('content')
+    {{-- Include page-specific scripts --}}
+    @stack('scripts')
+@else
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -230,9 +241,63 @@
             width: 20px;
             height: 20px;
         }
+        /* ── Page Loader Overlay ── */
+        #admin-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s ease;
+        }
+        #admin-loader.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .admin-loader-box {
+            background: #fff;
+            border-radius: 20px;
+            padding: 28px 36px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.25);
+            min-width: 160px;
+        }
+        .admin-loader-ring {
+            width: 44px;
+            height: 44px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: adminSpin .75s linear infinite;
+        }
+        .admin-loader-text {
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+            letter-spacing: .01em;
+        }
+        @keyframes adminSpin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="min-h-screen">
+
+{{-- ── Global page loader ── --}}
+<div id="admin-loader">
+    <div class="admin-loader-box">
+        <div class="admin-loader-ring"></div>
+        <span class="admin-loader-text" id="admin-loader-text">Loading…</span>
+    </div>
+</div>
+
 <div class="flex min-h-screen w-full">
 
     {{-- ===== SIDEBAR (fixed overlay on mobile, sticky on desktop) ===== --}}
@@ -327,11 +392,11 @@
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 Notifications
             </a>
-            <a href="{{ route('home') }}" target="_blank" class="sidebar-link mt-1">
+            <a href="{{ route('home') }}" target="_blank" class="sidebar-link mt-1" data-no-loader>
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                 View Shop
             </a>
-            <form method="post" action="{{ route('logout') }}" class="mt-1">
+            <form method="post" action="{{ route('logout') }}" class="mt-1" data-no-loader>
                 @csrf
                 <button type="submit" class="sidebar-link w-full text-left text-red-300 hover:text-red-200">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
@@ -399,8 +464,43 @@
         @endif
 
         {{-- Content --}}
-        <main class="flex-1 p-3 sm:p-6 overflow-x-hidden">
-            <div class="container px-0 sm:px-0">
+        <main id="admin-main-content" class="flex-1 p-3 sm:p-6 overflow-x-hidden" style="position:relative;">
+
+            {{-- Content-area loader (shown during AJAX navigation) --}}
+            <div id="admin-content-loader" style="
+                display:none;
+                position:absolute;
+                inset:0;
+                z-index:200;
+                background:rgba(246,248,251,.75);
+                backdrop-filter:blur(2px);
+                -webkit-backdrop-filter:blur(2px);
+                align-items:center;
+                justify-content:center;
+                border-radius:12px;
+            ">
+                <div style="
+                    background:#fff;
+                    border-radius:16px;
+                    padding:24px 32px;
+                    display:flex;
+                    flex-direction:column;
+                    align-items:center;
+                    gap:12px;
+                    box-shadow:0 8px 32px rgba(0,0,0,.12);
+                ">
+                    <div style="
+                        width:36px;height:36px;
+                        border:3px solid #e2e8f0;
+                        border-top-color:#2563eb;
+                        border-radius:50%;
+                        animation:adminSpin .7s linear infinite;
+                    "></div>
+                    <span style="font-size:13px;font-weight:700;color:#334155;" id="admin-content-loader-text">Loading…</span>
+                </div>
+            </div>
+
+            <div id="admin-page-content" class="container px-0 sm:px-0">
                 @yield('content')
             </div>
         </main>
@@ -409,6 +509,67 @@
 
 @stack('scripts')
 <script>
+/* ── Global Admin Loader ─────────────────────────────────────────── */
+(function () {
+    var loader     = document.getElementById('admin-loader');
+    var loaderText = document.getElementById('admin-loader-text');
+
+    function show(msg) {
+        loaderText.textContent = msg || 'Loading…';
+        loader.classList.add('active');
+    }
+    function hide() {
+        loader.classList.remove('active');
+    }
+
+    // Expose globally so any page script can call window.adminLoader.show/hide
+    window.adminLoader = { show: show, hide: hide };
+
+    // ── 1. Form submits ────────────────────────────────────────────────────
+    document.addEventListener('submit', function (e) {
+        var form = e.target;
+        // Skip AJAX forms (they handle their own loading)
+        if (form.dataset.noLoader) return;
+        // Skip forms that open in new tab
+        if (form.target === '_blank') return;
+
+        var msg = 'Saving…';
+        var btn = form.querySelector('[type="submit"]');
+        if (btn) {
+            var txt = btn.textContent.trim();
+            if (txt) msg = txt + '…';
+        }
+        show(msg);
+    });
+
+    // ── 2. Navigation links (not AJAX, not new-tab, not anchor-only) ──────
+    document.addEventListener('click', function (e) {
+        var link = e.target.closest('a[href]');
+        if (!link) return;
+        if (link.dataset.noLoader) return;
+        if (link.target === '_blank') return;
+        var href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('javascript')) return;
+        if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+        // Only internal links
+        try {
+            var url = new URL(href, window.location.origin);
+            if (url.origin !== window.location.origin) return;
+        } catch (err) { return; }
+
+        show('Loading…');
+    });
+
+    // ── 3. Hide on page show (back/forward navigation) ────────────────────
+    window.addEventListener('pageshow', hide);
+
+    // ── 4. Hide if already loaded (safety net) ───────────────────────────
+    if (document.readyState === 'complete') {
+        hide();
+    } else {
+        window.addEventListener('load', hide);
+    }
+})();
 document.querySelectorAll('.admin-flash-message').forEach(function (message) {
     window.setTimeout(function () {
         message.classList.add('is-hiding');
@@ -473,3 +634,4 @@ document.querySelectorAll('.admin-flash-message').forEach(function (message) {
 
 </body>
 </html>
+@endif

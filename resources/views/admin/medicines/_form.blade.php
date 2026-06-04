@@ -205,19 +205,14 @@
         </div>
 
         {{-- ===== PRODUCT IMAGES ===== --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-             x-data="{
-                images: {{ $initialImages }},
-                addSlot() { if (this.images.length < 8) this.images.push(''); },
-                removeSlot(idx) { if (this.images.length > 1) this.images.splice(idx, 1); }
-             }">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
             <div class="flex items-center justify-between mb-5">
                 <div>
                     <h3 class="text-sm font-bold text-slate-900">Product Images</h3>
                     <p class="text-xs text-slate-500 mt-0.5">First image is the primary. Add up to 8 images.</p>
                 </div>
-                <button type="button" @click="addSlot()"
+                <button type="button" onclick="addImageSlot()"
                         class="inline-flex items-center gap-1.5 rounded-xl bg-blue-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-800 transition-colors">
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -226,92 +221,86 @@
                 </button>
             </div>
 
-            <div class="space-y-4">
-                <template x-for="(img, idx) in images" :key="idx">
-                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div id="image-slots" class="space-y-4">
+                @php
+                    $slots = isset($medicine)
+                        ? array_values(array_filter(array_merge(
+                            [$medicine->image_url ?? ''],
+                            $medicine->extra_images ?? []
+                          )))
+                        : [''];
+                    if (empty($slots)) $slots = [''];
+                @endphp
 
-                        {{-- Slot label --}}
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-[10px] font-bold uppercase tracking-wider"
-                                  :class="idx === 0 ? 'text-blue-700' : 'text-slate-400'"
-                                  x-text="idx === 0 ? '★ Primary Image' : 'Extra Image ' + idx"></span>
-                            <button type="button" @click="removeSlot(idx)"
-                                    x-show="images.length > 1"
-                                    class="rounded-lg p-1 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
-                                    title="Remove slot">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </div>
+                @foreach($slots as $slotIdx => $slotUrl)
+                <div class="image-slot rounded-xl border border-slate-200 bg-slate-50 p-4" data-slot="{{ $slotIdx }}">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-[10px] font-bold uppercase tracking-wider {{ $slotIdx === 0 ? 'text-blue-700' : 'text-slate-400' }}">
+                            {{ $slotIdx === 0 ? '★ Primary Image' : 'Extra Image ' . $slotIdx }}
+                        </span>
+                        @if($slotIdx > 0)
+                        <button type="button" onclick="removeImageSlot(this)"
+                                class="rounded-lg p-1 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                        @endif
+                    </div>
 
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            {{-- Live preview --}}
-                            <div class="h-20 w-20 flex-shrink-0 rounded-xl overflow-hidden bg-white border border-slate-200 flex items-center justify-center">
-                                <img :src="img" :alt="'Image ' + (idx + 1)"
-                                     class="h-full w-full object-contain p-1"
-                                     x-show="img !== ''"
-                                     onerror="this.style.opacity='.15'">
-                                <svg x-show="img === ''" class="h-7 w-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        {{-- Preview --}}
+                        <div class="img-preview h-20 w-20 flex-shrink-0 rounded-xl overflow-hidden bg-white border border-slate-200 flex items-center justify-center">
+                            @if($slotUrl)
+                                <img src="{{ $slotUrl }}" class="h-full w-full object-contain p-1" onerror="this.style.opacity='.15'">
+                            @else
+                                <svg class="h-7 w-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
+                            @endif
+                        </div>
+
+                        <div class="flex-1 space-y-2">
+                            {{-- URL input --}}
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">🔗 Image URL</label>
+                                <input type="text"
+                                       name="{{ $slotIdx === 0 ? 'image_url' : 'extra_image_url[]' }}"
+                                       value="{{ $slotUrl }}"
+                                       placeholder="https://example.com/image.jpg"
+                                       class="img-url-input w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                                       oninput="updatePreview(this)">
                             </div>
 
-                            {{-- Inputs --}}
-                            <div class="flex-1 space-y-2">
+                            <div class="flex items-center gap-2">
+                                <div class="flex-1 h-px bg-slate-200"></div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase">or</span>
+                                <div class="flex-1 h-px bg-slate-200"></div>
+                            </div>
 
-                                {{-- URL input --}}
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">
-                                        🔗 Image URL
-                                    </label>
-                                    <input type="url"
-                                           :name="idx === 0 ? 'image_url' : 'extra_image_url[]'"
-                                           x-model="images[idx]"
-                                           placeholder="https://example.com/image.jpg"
-                                           class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20">
-                                </div>
-
-                                {{-- Divider --}}
-                                <div class="flex items-center gap-2">
-                                    <div class="flex-1 h-px bg-slate-200"></div>
-                                    <span class="text-[10px] font-bold text-slate-400 uppercase">or</span>
-                                    <div class="flex-1 h-px bg-slate-200"></div>
-                                </div>
-
-                                {{-- File upload --}}
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">
-                                        📁 Upload from Device
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer rounded-lg border-2 border-dashed border-slate-300 bg-white px-3 py-2 hover:border-blue-400 hover:bg-blue-50 transition-colors">
-                                        <svg class="h-4 w-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                                        </svg>
-                                        <span class="text-xs text-slate-500 file-label" x-ref="fileLabel">
-                                            Click to choose image (JPG, PNG, WEBP — max 4MB)
-                                        </span>
-                                        <input type="file"
-                                               :name="idx === 0 ? 'image_file' : 'extra_image_file[]'"
-                                               accept="image/*"
-                                               class="sr-only"
-                                               @change="
-                                                   const f = $event.target.files[0];
-                                                   if (f) {
-                                                       images[idx] = URL.createObjectURL(f);
-                                                       $event.target.closest('label').querySelector('.file-label').textContent = f.name;
-                                                   }
-                                               ">
-                                    </label>
-                                    <p class="mt-1 text-[10px] text-slate-400">Uploaded file takes priority over URL if both are provided.</p>
-                                </div>
+                            {{-- File upload --}}
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">📁 Upload from Device</label>
+                                <label class="flex items-center gap-2 cursor-pointer rounded-lg border-2 border-dashed border-slate-300 bg-white px-3 py-2 hover:border-blue-400 hover:bg-blue-50 transition-colors">
+                                    <svg class="h-4 w-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                    </svg>
+                                    <span class="text-xs text-slate-500 file-label">Click to choose image (JPG, PNG, WEBP — max 4MB)</span>
+                                    <input type="file"
+                                           name="{{ $slotIdx === 0 ? 'image_file' : 'extra_image_file[]' }}"
+                                           accept="image/jpeg,image/png,image/webp,image/gif"
+                                           class="sr-only"
+                                           onchange="handleFileSelect(this)">
+                                </label>
+                                <p class="mt-1 text-[10px] text-slate-400">File takes priority over URL if both provided.</p>
                             </div>
                         </div>
                     </div>
-                </template>
+                </div>
+                @endforeach
             </div>
 
-            <button type="button" @click="addSlot()"
+            <button type="button" onclick="addImageSlot()"
                     class="mt-4 w-full rounded-xl border-2 border-dashed border-slate-300 py-2.5 text-xs font-semibold text-slate-500 hover:border-blue-400 hover:text-blue-600 transition-colors">
                 + Add another image slot
             </button>
@@ -345,7 +334,7 @@
                     class="p-4 ml-1 w-full sm:flex-1 rounded-xl bg-blue-700 py-2.5 text-sm font-bold text-white hover:bg-blue-800 transition-colors shadow-md">
                 {{ isset($medicine) ? 'Update Medicine' : 'Create Medicine' }}
             </button>
-            <a href="{{ route('admin.medicines.index') }}"
+            <a href="{{ route('admin.medicines.create') }}"
                class="p-4 sm:w-auto rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
                 Cancel
             </a>
@@ -354,6 +343,156 @@
 </div>
 
 @push('scripts')
+<script>
+// ── Image slot helpers ────────────────────────────────────────────────────────
+var _slotCount = document.querySelectorAll('.image-slot').length;
+
+function addImageSlot() {
+    var container = document.getElementById('image-slots');
+    if (!container) return;
+    var total = container.querySelectorAll('.image-slot').length;
+    if (total >= 8) { alert('Maximum 8 images allowed.'); return; }
+
+    var idx = _slotCount++;          // unique index for name attrs
+    var isExtra = (idx > 0);         // slot 0 is always primary; new dynamic slots are extra
+
+    var slot = document.createElement('div');
+    slot.className = 'image-slot rounded-xl border border-slate-200 bg-slate-50 p-4';
+    slot.dataset.slot = idx;
+    slot.innerHTML =
+        '<div class="flex items-center justify-between mb-3">' +
+            '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Extra Image ' + total + '</span>' +
+            '<button type="button" onclick="removeImageSlot(this)" ' +
+                    'class="rounded-lg p-1 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">' +
+                '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>' +
+                '</svg>' +
+            '</button>' +
+        '</div>' +
+        '<div class="flex flex-col sm:flex-row gap-3">' +
+            '<div class="img-preview h-20 w-20 flex-shrink-0 rounded-xl overflow-hidden bg-white border border-slate-200 flex items-center justify-center">' +
+                '<svg class="h-7 w-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>' +
+                '</svg>' +
+            '</div>' +
+            '<div class="flex-1 space-y-2">' +
+                '<div>' +
+                    '<label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">🔗 Image URL</label>' +
+                    '<input type="text" name="extra_image_url[]" value="" placeholder="https://example.com/image.jpg" ' +
+                           'class="img-url-input w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20" ' +
+                           'oninput="updatePreview(this)">' +
+                '</div>' +
+                '<div class="flex items-center gap-2">' +
+                    '<div class="flex-1 h-px bg-slate-200"></div>' +
+                    '<span class="text-[10px] font-bold text-slate-400 uppercase">or</span>' +
+                    '<div class="flex-1 h-px bg-slate-200"></div>' +
+                '</div>' +
+                '<div>' +
+                    '<label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">📁 Upload from Device</label>' +
+                    '<label class="flex items-center gap-2 cursor-pointer rounded-lg border-2 border-dashed border-slate-300 bg-white px-3 py-2 hover:border-blue-400 hover:bg-blue-50 transition-colors">' +
+                        '<svg class="h-4 w-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>' +
+                        '</svg>' +
+                        '<span class="text-xs text-slate-500 file-label">Click to choose image (JPG, PNG, WEBP — max 4MB)</span>' +
+                        '<input type="file" name="extra_image_file[]" accept="image/jpeg,image/png,image/webp,image/gif" class="sr-only" onchange="handleFileSelect(this)">' +
+                    '</label>' +
+                    '<p class="mt-1 text-[10px] text-slate-400">File takes priority over URL if both provided.</p>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+    container.appendChild(slot);
+}
+
+function removeImageSlot(btn) {
+    var slot = btn.closest('.image-slot');
+    if (slot) slot.remove();
+}
+
+function updatePreview(input) {
+    var slot    = input.closest('.image-slot');
+    if (!slot) return;
+    var preview = slot.querySelector('.img-preview');
+    var url     = input.value.trim();
+
+    if (url) {
+        preview.innerHTML = '<img src="' + url + '" class="h-full w-full object-contain p-1" onerror="this.style.opacity=\'.15\'">';
+    } else {
+        preview.innerHTML =
+            '<svg class="h-7 w-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>' +
+            '</svg>';
+    }
+}
+
+function handleFileSelect(input) {
+    var slot    = input.closest('.image-slot');
+    if (!slot) return;
+    var preview = slot.querySelector('.img-preview');
+    var label   = slot.querySelector('.file-label');
+    var file    = input.files && input.files[0];
+
+    if (!file) return;
+
+    // Validate size (4 MB)
+    if (file.size > 4 * 1024 * 1024) {
+        alert('Image must be under 4 MB. Please choose a smaller file.');
+        input.value = '';
+        return;
+    }
+
+    // Update label text
+    if (label) label.textContent = file.name;
+
+    // Mark that a file was selected
+    input.setAttribute('data-file-selected', 'true');
+
+    // Show local preview via FileReader
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        preview.innerHTML = '<img src="' + e.target.result + '" class="h-full w-full object-contain p-1">';
+        // Clear any URL input in this slot so the file takes priority
+        var urlInput = slot.querySelector('.img-url-input');
+        if (urlInput) {
+            urlInput.value = '';
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+// Before form submit, clear URL fields if file was selected
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submit handler: clearing URL fields where files are selected');
+            
+            // For each image slot, if there's a file selected, clear the URL field
+            document.querySelectorAll('.image-slot').forEach(function(slot, idx) {
+                var fileInput = slot.querySelector('input[type="file"]');
+                var urlInput = slot.querySelector('.img-url-input');
+                
+                if (fileInput && urlInput) {
+                    var hasFile = fileInput.files && fileInput.files.length > 0;
+                    var urlValue = urlInput.value.trim();
+                    
+                    console.log('Slot ' + idx + ': hasFile=' + hasFile + ', urlValue=' + (urlValue ? 'present' : 'empty'));
+                    
+                    // If a file is selected in this slot, ALWAYS clear the URL field
+                    // to ensure file upload takes priority
+                    if (hasFile) {
+                        console.log('  → Clearing URL field because file is selected');
+                        urlInput.value = '';
+                        urlInput.setAttribute('data-cleared-for-upload', 'true');
+                    }
+                }
+            });
+        }, false); // Use capture phase to ensure this runs before any other handlers
+    }
+});
+
+</script>
+
 <script>
 (function () {
     var CSRF = document.querySelector('meta[name="csrf-token"]').content;
@@ -365,6 +504,7 @@
 
     var SEARCH_URL = '{{ route('admin.ai.medicine.generate') }}';
     var DETAIL_URL = '{{ route('admin.ai.medicine.detail') }}';
+    var DESC_URL   = '{{ route('admin.ai.medicine.description') }}';
 
     var toggleBtn  = document.getElementById('pe-toggle');
     var toggleLbl  = document.getElementById('pe-toggle-label');
@@ -485,7 +625,8 @@
 
         var data = currentResults[idx];
 
-        if (currentSource === 'pharmeasy' && data.slug) {
+        // Always fetch full PharmEasy detail when slug is available (fixes combined source)
+        if (data.slug && (data.source_platform === 'PharmEasy' || currentSource === 'pharmeasy')) {
             fetch(DETAIL_URL, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
@@ -507,7 +648,7 @@
         }
     }
 
-    // ── Apply to form ─────────────────────────────────────────────────────────
+    // ── Apply data to form ────────────────────────────────────────────────────
     function applyToForm(d) {
         if (!d) return;
 
@@ -518,13 +659,6 @@
 
         setVal('name',         d.name);
         setVal('manufacturer', d.manufacturer);
-
-        // Description + composition + uses
-        var parts = [];
-        if (d.description)              parts.push(d.description);
-        if (d.composition)              parts.push('Composition: ' + d.composition + '.');
-        if (d.uses && d.uses.length)    parts.push('Uses: ' + d.uses.join('; ') + '.');
-        setVal('description', parts.join('\n\n'));
 
         // Category select
         if (d.category && CATEGORY_MAP[d.category]) {
@@ -540,21 +674,108 @@
         var rx = document.querySelector('input[name="prescription_required"]');
         if (rx) rx.checked = !!d.prescription_required;
 
-        // Image URL — fill first image input + fire input event for Alpine preview
+        // ── Description: fill from data, then check if AI generation needed ──
+        var descEl = document.querySelector('[name="description"]');
+
+        // Build a base description from whatever we have right now
+        var parts = [];
+        if (d.description)           parts.push(d.description);
+        if (d.composition)           parts.push('Composition: ' + d.composition + '.');
+        if (d.uses && d.uses.length) parts.push('Uses: ' + d.uses.join('; ') + '.');
+        var baseDesc = parts.join('\n\n');
+
+        // Count words (rough: split on whitespace)
+        function wordCount(str) {
+            return str ? str.trim().replace(/\s+/g, ' ').split(' ').length : 0;
+        }
+
+        var needsAI = !baseDesc || wordCount(baseDesc) < 100;
+
+        if (descEl) {
+            if (needsAI) {
+                // Show placeholder while AI generates
+                descEl.value = '';
+                descEl.placeholder = '✨ Generating AI description…';
+                descEl.disabled = true;
+
+                fetch(DESC_URL, {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
+                    body:    JSON.stringify({
+                        name:         d.name         || '',
+                        manufacturer: d.manufacturer || '',
+                        composition:  d.composition  || '',
+                        uses:         d.uses         || [],
+                        dosage_form:  d.dosage_form  || '',
+                        category:     d.category     || '',
+                        existing:     baseDesc        || '',
+                    })
+                })
+                .then(function (res) { return res.json(); })
+                .then(function (j) {
+                    descEl.disabled    = false;
+                    descEl.placeholder = '';
+                    if (j.description) {
+                        descEl.value = j.description;
+                        showDescBadge('✨ AI description generated');
+                    } else {
+                        // AI failed — fall back to the short base description
+                        descEl.value = baseDesc;
+                    }
+                })
+                .catch(function () {
+                    descEl.disabled    = false;
+                    descEl.placeholder = '';
+                    descEl.value       = baseDesc;
+                });
+            } else {
+                descEl.value = baseDesc;
+            }
+        }
+
+        // ── Image — download to server first, then fill local path ────────────
         if (d.image_url) {
             var imgInput = document.querySelector('input[name="image_url"]');
             if (imgInput) {
-                imgInput.value = d.image_url;
-                imgInput.dispatchEvent(new Event('input'));
+                imgInput.value = '';
+                imgInput.placeholder = '⏳ Downloading image…';
+
+                fetch('{{ route('admin.ai.medicine.image') }}', {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
+                    body:    JSON.stringify({ url: d.image_url, platform: d.source_platform || '' })
+                })
+                .then(function (res) { return res.json(); })
+                .then(function (j) {
+                    imgInput.placeholder = '';
+                    imgInput.value = j.url || d.image_url;
+                    imgInput.dispatchEvent(new Event('input'));
+                })
+                .catch(function () {
+                    imgInput.placeholder = '';
+                    imgInput.value = d.image_url;
+                    imgInput.dispatchEvent(new Event('input'));
+                });
             }
         }
 
         // Toast
         var toast = document.createElement('div');
         toast.className = 'pe-toast';
-        toast.innerHTML = '✔ Form filled successfully!';
+        toast.innerHTML = '✔ Form filled — ' + (needsAI ? '✨ generating description…' : 'description ready!');
         document.body.appendChild(toast);
-        setTimeout(function () { toast.remove(); }, 3000);
+        setTimeout(function () { toast.remove(); }, 4000);
+    }
+
+    // Small badge that briefly appears next to the description field
+    function showDescBadge(msg) {
+        var descEl = document.querySelector('[name="description"]');
+        if (!descEl) return;
+        var badge = document.createElement('p');
+        badge.style.cssText = 'font-size:11px;color:#2563eb;font-weight:600;margin-top:4px;';
+        badge.textContent = msg;
+        descEl.parentNode.appendChild(badge);
+        setTimeout(function () { badge.remove(); }, 4000);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

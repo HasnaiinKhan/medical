@@ -106,6 +106,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('settings/notifications/test/{channel}', [AdminSettingsController::class, 'testNotification'])->name('settings.notifications.test');
 
     // AI Medicine Generator
-    Route::post('ai/medicine-generate', [\App\Http\Controllers\Admin\AIMedicineController::class, 'generate'])->name('ai.medicine.generate');
-    Route::post('ai/medicine-detail',   [\App\Http\Controllers\Admin\AIMedicineController::class, 'detail'])->name('ai.medicine.detail');
+    Route::post('ai/medicine-generate',     [\App\Http\Controllers\Admin\AIMedicineController::class, 'generate'])->name('ai.medicine.generate');
+    Route::post('ai/medicine-detail',       [\App\Http\Controllers\Admin\AIMedicineController::class, 'detail'])->name('ai.medicine.detail');
+    Route::post('ai/medicine-image',        [\App\Http\Controllers\Admin\AIMedicineController::class, 'downloadImage'])->name('ai.medicine.image');
+    Route::post('ai/medicine-description',  [\App\Http\Controllers\Admin\AIMedicineController::class, 'generateDescription'])->name('ai.medicine.description');
 });

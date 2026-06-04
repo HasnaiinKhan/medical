@@ -225,7 +225,7 @@
     <div class="pointer-events-none absolute bottom-0 right-6 hidden sm:block">
         <img src="{{ asset('Images/handwithphonemedicine.png') }}"
              alt="Order medicines on your phone"
-             class="h-128 w-auto object-contain object-bottom"
+             class="h-64 w-auto object-contain object-bottom"
              style="margin-bottom:100px;"
              draggable="false">
     </div>
