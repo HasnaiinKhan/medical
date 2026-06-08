@@ -110,4 +110,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('ai/medicine-detail',       [\App\Http\Controllers\Admin\AIMedicineController::class, 'detail'])->name('ai.medicine.detail');
     Route::post('ai/medicine-image',        [\App\Http\Controllers\Admin\AIMedicineController::class, 'downloadImage'])->name('ai.medicine.image');
     Route::post('ai/medicine-description',  [\App\Http\Controllers\Admin\AIMedicineController::class, 'generateDescription'])->name('ai.medicine.description');
+    Route::post('ai/medicine-bulk-search',  [\App\Http\Controllers\Admin\AIMedicineController::class, 'bulkSearch'])->name('ai.medicine.bulk-search');
+
+    // Bulk Import Builder (page)
+    Route::get('medicines-bulk-builder',    [\App\Http\Controllers\Admin\AIMedicineController::class, 'bulkBuilderPage'])->name('medicines.bulk-builder');
 });

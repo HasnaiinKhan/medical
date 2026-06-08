@@ -622,7 +622,7 @@
    <div class="info-section reveal grid grid-cols-1 sm:grid-cols-2 bg-white border border-slate-200 shadow-sm">
 
         {{-- Left: image fills exactly half --}}
-       <div class="info-image bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center order-2 sm:order-1">
+       <div class="info-image bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center order-2 sm:order-1">
             <img src="{{ asset('Images/Naturalmedicine.png') }}"
                  alt="Natural Medicine"
                  class="w-full h-full object-contain max-h-80 drop-shadow-xl"
@@ -638,7 +638,7 @@
                 Nature-Backed Medicines &amp; Herbal Remedies
             </h2>
             <p class="mt-3 text-sm text-slate-500 leading-relaxed">
-                Harness the power of nature with our curated range of herbal and Ayurvedic medicines. Trusted ingredients, modern formulations — gentle on your body, effective on symptoms.
+                Harness the power of nature with our curated range of herbal and Ayurvedic medicines. Trusted ingredients, modern formulations - gentle on your body, effective on symptoms.
             </p>
             <ul class="mt-4 space-y-2">
                 @foreach(['Ayurvedic Supplements', 'Herbal Immunity Boosters', 'Natural Pain Relief', 'Vitamin & Mineral Blends'] as $point)

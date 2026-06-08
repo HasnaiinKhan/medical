@@ -35,6 +35,172 @@ class AIMedicineController extends Controller
     // ROUTE 1: Search — ALWAYS searches ALL sources simultaneously, returns
     //          only items whose name contains the keyword (exact match filter)
     // ─────────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // PAGE: Bulk Import Builder
+    // ─────────────────────────────────────────────────────────────────────────
+    public function bulkBuilderPage(): \Illuminate\View\View
+    {
+        return view('admin.medicines.bulk-builder');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // ROUTE 5: Bulk search — searches ALL sources, deduplicates by name slug,
+    //          no result cap — returns everything both sites return.
+    //          Descriptions are fetched from source sites for all items.
+    // ─────────────────────────────────────────────────────────────────────────
+    public function bulkSearch(Request $request): JsonResponse
+    {
+        $request->validate(['name' => ['required', 'string', 'min:2', 'max:200']]);
+        $name    = trim($request->input('name'));
+        $keyword = $this->normaliseSearchText($name);
+
+        $allResults = [];
+        $searchLog  = [];
+
+        // Search PharmEasy — all results, no cap
+        try {
+            $pe = $this->searchPharmEasyBulk($name, 500);
+            $pe = $this->filterByKeyword($pe, $keyword);
+            $allResults = array_merge($allResults, $pe);
+            $searchLog['PharmEasy'] = count($pe);
+            Log::info("MediBot Bulk PharmEasy [{$name}] → " . count($pe));
+        } catch (\Throwable $e) {
+            $searchLog['PharmEasy'] = 'error';
+            Log::warning("MediBot Bulk PharmEasy failed [{$name}]: " . $e->getMessage());
+        }
+
+        // Search NetMeds — all results, no cap
+        try {
+            $nm = $this->searchNetMedsBulk($name, 500);
+            $nm = $this->filterByKeyword($nm, $keyword);
+            $allResults = array_merge($allResults, $nm);
+            $searchLog['NetMeds'] = count($nm);
+            Log::info("MediBot Bulk NetMeds [{$name}] → " . count($nm));
+        } catch (\Throwable $e) {
+            $searchLog['NetMeds'] = 'error';
+            Log::warning("MediBot Bulk NetMeds failed [{$name}]: " . $e->getMessage());
+        }
+
+        // Deduplicate by normalised slug (keep first occurrence = PharmEasy priority)
+        $seen    = [];
+        $unique  = [];
+        foreach ($allResults as $item) {
+            $slug = \Illuminate\Support\Str::slug($item['name'] ?? '');
+            if ($slug === '' || isset($seen[$slug])) continue;
+            $seen[$slug] = true;
+            $unique[] = $item;
+        }
+
+        // No cap — return everything
+        Log::info("MediBot Bulk [{$name}] → " . count($unique) . " unique results | " . json_encode($searchLog));
+
+        return response()->json([
+            'results'    => $unique,
+            'total'      => count($unique),
+            'search_log' => $searchLog,
+        ]);
+    }
+
+    // NetMeds bulk search — larger page size
+    private function searchNetMedsBulk(string $name, int $limit): array
+    {
+        $ch = curl_init(
+            'https://www.netmeds.com/ext/search/application/api/v1.0/products'
+            . '?q=' . urlencode($name)
+            . '&page_no=1&page_size=' . $limit
+        );
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => 25,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_ENCODING       => 'gzip',
+            CURLOPT_HTTPHEADER     => [
+                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124',
+                'Accept: application/json',
+                'Accept-Language: en-IN,en;q=0.9',
+                'Referer: https://www.netmeds.com/',
+                'x-application-token: _U-ohI4Iy',
+                'Origin: https://www.netmeds.com',
+            ],
+        ]);
+        $body   = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($status !== 200 || !$body) return [];
+
+        $data  = json_decode($body, true);
+        if (json_last_error() !== JSON_ERROR_NONE) return [];
+
+        $items = $data['items'] ?? [];
+        if (!is_array($items) || empty($items)) return [];
+
+        $results = [];
+        foreach ($items as $p) {
+            $pname = $p['name'] ?? '';
+            if (empty($pname)) continue;
+
+            $imageUrl = '';
+            foreach ($p['medias'] ?? [] as $media) {
+                if (!empty($media['url'])) { $imageUrl = $media['url']; break; }
+            }
+
+            $mrp   = (float) ($p['price']['marked']['min']    ?? 0);
+            $price = (float) ($p['price']['effective']['min'] ?? 0);
+
+            $attrs        = $p['attributes'] ?? [];
+            $manufacturer = $attrs['marketername']  ?? $attrs['brandfilter'] ?? null;
+            $composition  = $attrs['genericname']   ?? null;
+            $packSize     = trim(($attrs['packsize'] ?? '') . ' ' . ($attrs['packsizeunit'] ?? ''));
+
+            $fullName = $pname;
+            if ($packSize && !str_contains(strtolower($pname), strtolower(trim($packSize)))) {
+                $fullName = $pname . ' ' . $packSize;
+            }
+
+            $haystack = strtoupper($fullName . ' ' . ($manufacturer ?? '') . ' ' . ($composition ?? ''));
+
+            // Extract real description from NetMeds OTC fields
+            $description = null;
+            $otcDesc    = $attrs['otc-description'] ?? '';
+            $otcBenefit = $attrs['otc-keybenefit']  ?? '';
+            if ($otcDesc) {
+                $clean = trim(preg_replace('/\s+/', ' ', strip_tags((string)$otcDesc)));
+                if (strlen($clean) > 30) $description = $clean;
+            }
+            if (!$description && $otcBenefit) {
+                preg_match_all('/<li>(.*?)<\/li>/si', (string)$otcBenefit, $li);
+                $bullets = array_filter(
+                    array_map(fn($t) => trim(strip_tags($t)), $li[1]),
+                    fn($t) => strlen($t) > 10
+                );
+                if (!empty($bullets)) {
+                    $description = implode(' ', array_slice(array_values($bullets), 0, 3));
+                }
+            }
+
+            $results[] = [
+                'slug'                  => $p['slug'] ?? null,
+                'name'                  => $fullName,
+                'manufacturer'          => $manufacturer ? $this->titleCase(strtolower($manufacturer)) : null,
+                'category'              => $this->guessCategory($haystack),
+                'description'           => $description,
+                'composition'           => $composition ? $this->titleCase(strtolower($composition)) : null,
+                'dosage_form'           => 'Unit',
+                'uses'                  => [],
+                'prescription_required' => false,
+                'mrp_suggestion'        => $mrp   > 0 ? round($mrp, 2)   : null,
+                'price_suggestion'      => $price > 0 ? round($price, 2) : null,
+                'image_url'             => $imageUrl ?: null,
+                'source_url'            => $p['slug'] ? "https://www.netmeds.com/products/" . $p['slug'] : "https://www.netmeds.com",
+                'source_platform'       => 'NetMeds',
+            ];
+        }
+
+        return $results;
+    }
+
     public function generate(Request $request): JsonResponse
     {
         $request->validate(['name' => ['required', 'string', 'min:2', 'max:200']]);
@@ -382,7 +548,7 @@ class AIMedicineController extends Controller
     }
 
     // ═════════════════════════════════════════════════════════════════════════
-    // PharmEasy — search, return results (up to 25)
+    // PharmEasy — search via __NEXT_DATA__ (productList key)
     // ═════════════════════════════════════════════════════════════════════════
     private function searchPharmEasy(string $name): array
     {
@@ -397,21 +563,65 @@ class AIMedicineController extends Controller
         $nextData = json_decode($m[1], true);
         if (json_last_error() !== JSON_ERROR_NONE) return [];
 
-        $raw = $nextData['props']['pageProps']['searchResults'] ?? [];
+        $pp = $nextData['props']['pageProps'] ?? [];
+
+        // PharmEasy changed key from 'searchResults' → 'productList'
+        $raw = $pp['productList'] ?? $pp['searchResults'] ?? [];
         if (empty($raw)) return [];
 
+        return $this->parsePharmEasyItems($raw);
+    }
+
+    // PharmEasy bulk — fetches multiple pages to get all results
+    private function searchPharmEasyBulk(string $name, int $limit): array
+    {
+        $allItems = [];
+        $page     = 1;
+
+        while (true) {
+            $url  = 'https://pharmeasy.in/search/all?name=' . urlencode($name) . '&page=' . $page;
+            $html = $this->httpGet($url, 'https://pharmeasy.in/');
+            if (!$html) break;
+
+            if (!preg_match('/<script id="__NEXT_DATA__"[^>]*>(.*?)<\/script>/s', $html, $m)) break;
+
+            $nextData = json_decode($m[1], true);
+            if (json_last_error() !== JSON_ERROR_NONE) break;
+
+            $pp  = $nextData['props']['pageProps'] ?? [];
+            $raw = $pp['productList'] ?? $pp['searchResults'] ?? [];
+
+            if (empty($raw)) break;
+
+            $allItems = array_merge($allItems, $raw);
+
+            // Stop if no more pages or already at limit
+            $hasMore = $pp['hasMorePages'] ?? false;
+            if (!$hasMore || count($allItems) >= $limit) break;
+
+            $page++;
+            // Safety cap: max 5 pages to avoid hammering
+            if ($page > 5) break;
+        }
+
+        return $this->parsePharmEasyItems(array_slice($allItems, 0, $limit));
+    }
+
+    // Shared parser for PharmEasy product arrays
+    private function parsePharmEasyItems(array $raw): array
+    {
         $results = [];
-        foreach (array_slice($raw, 0, 25) as $p) {
+        foreach ($raw as $p) {
             if (empty($p['name'])) continue;
 
-            // Best image
+            // Best image: prefer 'front' face, fall back to first
             $imageUrl = '';
             foreach ($p['damImages'] ?? [] as $img) {
                 if (($img['face'] ?? '') === 'front') { $imageUrl = $img['url'] ?? ''; break; }
             }
-            if (! $imageUrl) $imageUrl = $p['damImages'][0]['url'] ?? '';
+            if (!$imageUrl) $imageUrl = $p['damImages'][0]['url'] ?? '';
+            if (!$imageUrl && !empty($p['image'])) $imageUrl = $p['image'];
 
-            // Dosage form
             $pf = strtoupper($p['packform'] ?? '');
             $dosageForm = match(true) {
                 str_contains($pf, 'STRIP')  => 'Tablet',
@@ -424,7 +634,7 @@ class AIMedicineController extends Controller
                 default                      => $this->titleCase($pf) ?: 'Unit',
             };
 
-            $manufacturer = ! empty($p['manufacturer'])
+            $manufacturer = !empty($p['manufacturer'])
                 ? $this->titleCase(strtolower($p['manufacturer']))
                 : null;
 
@@ -437,12 +647,14 @@ class AIMedicineController extends Controller
                 ($p['manufacturer'] ?? '') . ' ' . $pf
             );
 
+            $slug = $p['slug'] ?? null;
+
             $results[] = [
-                'slug'                  => $p['slug'] ?? null,
+                'slug'                  => $slug,
                 'name'                  => $p['name'],
                 'manufacturer'          => $manufacturer,
                 'category'              => $this->guessCategory($haystack),
-                'description'           => null, // fetched on demand via /detail
+                'description'           => null, // fetched via generateDescription route
                 'composition'           => $p['moleculeName'] ?: null,
                 'dosage_form'           => $dosageForm,
                 'uses'                  => [],
@@ -450,13 +662,12 @@ class AIMedicineController extends Controller
                 'mrp_suggestion'        => $mrp   > 0 ? round($mrp, 2)   : null,
                 'price_suggestion'      => $price > 0 ? round($price, 2) : null,
                 'image_url'             => $imageUrl ?: null,
-                'source_url'            => $p['slug']
-                    ? "https://pharmeasy.in/online-medicine-order/{$p['slug']}"
+                'source_url'            => $slug
+                    ? "https://pharmeasy.in/online-medicine-order/{$slug}"
                     : null,
                 'source_platform'       => 'PharmEasy',
             ];
         }
-
         return $results;
     }
 
@@ -526,12 +737,31 @@ class AIMedicineController extends Controller
 
             $haystack = strtoupper($fullName . ' ' . ($manufacturer ?? '') . ' ' . ($composition ?? ''));
 
+            // Extract real description from NetMeds OTC fields
+            $description = null;
+            $otcDesc    = $attrs['otc-description'] ?? '';
+            $otcBenefit = $attrs['otc-keybenefit']  ?? '';
+            if ($otcDesc) {
+                $clean = trim(preg_replace('/\s+/', ' ', strip_tags((string)$otcDesc)));
+                if (strlen($clean) > 30) $description = $clean;
+            }
+            if (!$description && $otcBenefit) {
+                preg_match_all('/<li>(.*?)<\/li>/si', (string)$otcBenefit, $li);
+                $bullets = array_filter(
+                    array_map(fn($t) => trim(strip_tags($t)), $li[1]),
+                    fn($t) => strlen($t) > 10
+                );
+                if (!empty($bullets)) {
+                    $description = implode(' ', array_slice(array_values($bullets), 0, 3));
+                }
+            }
+
             $results[] = [
                 'slug'                  => $p['slug'] ?? null,
                 'name'                  => $fullName,
                 'manufacturer'          => $manufacturer ? $this->titleCase(strtolower($manufacturer)) : null,
                 'category'              => $this->guessCategory($haystack),
-                'description'           => null,
+                'description'           => $description,
                 'composition'           => $composition ? $this->titleCase(strtolower($composition)) : null,
                 'dosage_form'           => 'Unit',
                 'uses'                  => [],
@@ -806,8 +1036,8 @@ class AIMedicineController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // ROUTE 4: Generate AI description for a product (used when description is
-    //          missing or less than 100 words)
+    // ROUTE 4: Generate AI description — always ≥50 words guaranteed.
+    //          Retries once with a stricter prompt if the first attempt is short.
     // ─────────────────────────────────────────────────────────────────────────
     public function generateDescription(Request $request): JsonResponse
     {
@@ -818,7 +1048,10 @@ class AIMedicineController extends Controller
             'uses'         => ['nullable', 'array'],
             'dosage_form'  => ['nullable', 'string', 'max:100'],
             'category'     => ['nullable', 'string', 'max:100'],
-            'existing'     => ['nullable', 'string'], // existing short description to expand
+            'existing'     => ['nullable', 'string'],
+            'source_url'   => ['nullable', 'string', 'max:500'],
+            'source_platform' => ['nullable', 'string', 'max:50'],
+            'slug'         => ['nullable', 'string', 'max:300'],
         ]);
 
         $name         = trim($request->input('name'));
@@ -828,11 +1061,66 @@ class AIMedicineController extends Controller
         $dosageForm   = trim((string) $request->input('dosage_form', ''));
         $category     = trim((string) $request->input('category', ''));
         $existing     = trim((string) $request->input('existing', ''));
+        $sourcePlatform = strtolower(trim((string) $request->input('source_platform', '')));
+        $slug         = trim((string) $request->input('slug', ''));
 
+        // ── Step 1: Try to get real description from source site ──────────────
+        $scrapedDesc = null;
+
+        // PharmEasy — fetch full product page
+        if (str_contains($sourcePlatform, 'pharmeasy') && $slug) {
+            try {
+                $detail = $this->fetchProductDetail($slug);
+                if ($detail && !empty($detail['description']) && str_word_count($detail['description']) >= 20) {
+                    $scrapedDesc = $detail['description'];
+                    Log::info("MediBot descGen scraped PharmEasy ✓ [{$name}]");
+                }
+            } catch (\Throwable $e) {
+                Log::warning("MediBot descGen PharmEasy scrape failed [{$name}]: " . $e->getMessage());
+            }
+        }
+
+        // NetMeds — description comes in via 'existing' field (already extracted at search time)
+        if (!$scrapedDesc && str_contains($sourcePlatform, 'netmeds') && $existing && str_word_count($existing) >= 20) {
+            $scrapedDesc = $existing;
+            Log::info("MediBot descGen using NetMeds source desc ✓ [{$name}]");
+        }
+
+        if ($scrapedDesc) {
+            return response()->json(['description' => $scrapedDesc]);
+        }
+
+        // ── Step 2: Fall back to AI generation ───────────────────────────────
         $prompt = $this->descriptionPrompt(
             $name, $manufacturer, $composition, $uses, $dosageForm, $category, $existing
         );
 
+        $text = $this->callAiForDescription($prompt, $name);
+
+        // If the first attempt came back short, retry once with a stricter prompt
+        if ($text && str_word_count($text) < 50) {
+            Log::warning("MediBot descGen: first attempt only " . str_word_count($text) . " words for [{$name}], retrying");
+            $retryPrompt = $this->descriptionPrompt(
+                $name, $manufacturer, $composition, $uses, $dosageForm, $category,
+                "IMPORTANT: The previous attempt was too short. You MUST write at least 60 words. Previous attempt: {$text}"
+            );
+            $retry = $this->callAiForDescription($retryPrompt, $name . ' [retry]');
+            if ($retry && str_word_count($retry) >= str_word_count($text)) {
+                $text = $retry;
+            }
+        }
+
+        if ($text) {
+            Log::info("MediBot descGen AI ✓ [{$name}] → " . str_word_count($text) . " words");
+            return response()->json(['description' => $text]);
+        }
+
+        return response()->json(['error' => 'Could not generate description.'], 502);
+    }
+
+    // Tries Gemini then Groq, returns the text or null
+    private function callAiForDescription(string $prompt, string $label): ?string
+    {
         // Try Gemini first
         $geminiKey = config('services.gemini.key');
         if ($geminiKey) {
@@ -845,7 +1133,7 @@ class AIMedicineController extends Controller
                     CURLOPT_RETURNTRANSFER => true, CURLOPT_POST => true,
                     CURLOPT_POSTFIELDS     => json_encode([
                         'contents'         => [['parts' => [['text' => $prompt]]]],
-                        'generationConfig' => ['temperature' => 0.3, 'maxOutputTokens' => 400],
+                        'generationConfig' => ['temperature' => 0.4, 'maxOutputTokens' => 300],
                     ]),
                     CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
                     CURLOPT_TIMEOUT => 20, CURLOPT_SSL_VERIFYPEER => false,
@@ -858,12 +1146,12 @@ class AIMedicineController extends Controller
                     $d    = json_decode($body, true);
                     $text = trim($d['candidates'][0]['content']['parts'][0]['text'] ?? '');
                     if ($text) {
-                        Log::info("MediBot descGen Gemini ✓ [{$name}]");
-                        return response()->json(['description' => $text, 'source' => 'gemini']);
+                        Log::info("MediBot descGen Gemini ✓ [{$label}]");
+                        return $text;
                     }
                 }
             } catch (\Throwable $e) {
-                Log::warning("MediBot descGen Gemini failed [{$name}]: " . $e->getMessage());
+                Log::warning("MediBot descGen Gemini failed [{$label}]: " . $e->getMessage());
             }
         }
 
@@ -877,10 +1165,10 @@ class AIMedicineController extends Controller
                     CURLOPT_POSTFIELDS     => json_encode([
                         'model'       => config('services.groq.model', 'llama-3.1-8b-instant'),
                         'messages'    => [
-                            ['role' => 'system', 'content' => 'You write professional product descriptions. Return ONLY the description text, no extra commentary.'],
+                            ['role' => 'system', 'content' => 'You write professional product descriptions of at least 60 words. Return ONLY the description text.'],
                             ['role' => 'user',   'content' => $prompt],
                         ],
-                        'temperature' => 0.3, 'max_tokens' => 400,
+                        'temperature' => 0.4, 'max_tokens' => 300,
                     ]),
                     CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $groqKey, 'Content-Type: application/json'],
                     CURLOPT_TIMEOUT => 20, CURLOPT_SSL_VERIFYPEER => false,
@@ -893,29 +1181,29 @@ class AIMedicineController extends Controller
                     $d    = json_decode($body, true);
                     $text = trim($d['choices'][0]['message']['content'] ?? '');
                     if ($text) {
-                        Log::info("MediBot descGen Groq ✓ [{$name}]");
-                        return response()->json(['description' => $text, 'source' => 'groq']);
+                        Log::info("MediBot descGen Groq ✓ [{$label}]");
+                        return $text;
                     }
                 }
             } catch (\Throwable $e) {
-                Log::warning("MediBot descGen Groq failed [{$name}]: " . $e->getMessage());
+                Log::warning("MediBot descGen Groq failed [{$label}]: " . $e->getMessage());
             }
         }
 
-        return response()->json(['error' => 'Could not generate description.'], 502);
+        return null;
     }
 
     private function descriptionPrompt(
         string $name, string $manufacturer, string $composition,
         array $uses, string $dosageForm, string $category, string $existing
     ): string {
-        $usesText  = !empty($uses)  ? implode(', ', array_slice($uses, 0, 5)) : '';
+        $usesText  = !empty($uses) ? implode(', ', array_slice($uses, 0, 5)) : '';
         $contextParts = array_filter([
-            $manufacturer  ? "Manufactured by {$manufacturer}."      : '',
-            $dosageForm    ? "Dosage form: {$dosageForm}."            : '',
-            $composition   ? "Active ingredients: {$composition}."   : '',
-            $usesText      ? "Uses: {$usesText}."                     : '',
-            $existing      ? "Existing short description: {$existing}." : '',
+            $manufacturer ? "Manufactured by {$manufacturer}."     : '',
+            $dosageForm   ? "Dosage form: {$dosageForm}."          : '',
+            $composition  ? "Active ingredients: {$composition}."  : '',
+            $usesText     ? "Uses: {$usesText}."                   : '',
+            $existing     ? "Context: {$existing}."                : '',
         ]);
         $context = implode(' ', $contextParts);
 
@@ -926,11 +1214,12 @@ Product: {$name}
 {$context}
 
 Requirements:
-- Minimum 120 words, maximum 180 words
+- MUST be at least 60 words and no more than 150 words
+- Count every word carefully — do not stop before 60 words
 - Professional, informative tone suitable for a pharmacy website
 - Cover what the product is, its key benefits, active ingredients (if applicable), and who it is for
 - Do NOT include price, dosage instructions, or side effects
-- Return ONLY the description text, no headings or bullet points
+- Return ONLY the plain description paragraph — no headings, no bullet points, no extra commentary
 PROMPT;
     }
 

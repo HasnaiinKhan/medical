@@ -674,22 +674,24 @@ document.addEventListener('DOMContentLoaded', function() {
         var rx = document.querySelector('input[name="prescription_required"]');
         if (rx) rx.checked = !!d.prescription_required;
 
-        // ── Description: fill from data, then check if AI generation needed ──
+        // ── Description: ALWAYS generate via AI. Use any existing data as context. ──
         var descEl = document.querySelector('[name="description"]');
 
-        // Build a base description from whatever we have right now
-        var parts = [];
-        if (d.description)           parts.push(d.description);
-        if (d.composition)           parts.push('Composition: ' + d.composition + '.');
-        if (d.uses && d.uses.length) parts.push('Uses: ' + d.uses.join('; ') + '.');
-        var baseDesc = parts.join('\n\n');
+        // Build whatever context we have from the product data
+        var ctxParts = [];
+        if (d.description)           ctxParts.push(d.description);
+        if (d.composition)           ctxParts.push('Composition: ' + d.composition + '.');
+        if (d.uses && d.uses.length) ctxParts.push('Uses: ' + d.uses.join('; ') + '.');
+        var baseDesc = ctxParts.join('\n\n');
 
-        // Count words (rough: split on whitespace)
+        // Count words helper
         function wordCount(str) {
             return str ? str.trim().replace(/\s+/g, ' ').split(' ').length : 0;
         }
 
-        var needsAI = !baseDesc || wordCount(baseDesc) < 100;
+        // Always call AI — unless we already have a proper description of ≥50 words
+        // (e.g. PharmEasy detail fetch already returned a full paragraph)
+        var needsAI = wordCount(d.description || '') < 50;
 
         if (descEl) {
             if (needsAI) {
@@ -715,11 +717,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(function (j) {
                     descEl.disabled    = false;
                     descEl.placeholder = '';
-                    if (j.description) {
+                    if (j.description && wordCount(j.description) >= 50) {
                         descEl.value = j.description;
                         showDescBadge('✨ AI description generated');
+                    } else if (j.description) {
+                        // AI returned something but it's short — append to base context
+                        descEl.value = (baseDesc ? baseDesc + '\n\n' : '') + j.description;
+                        showDescBadge('✨ AI description generated');
                     } else {
-                        // AI failed — fall back to the short base description
+                        // AI failed — use base context as fallback
                         descEl.value = baseDesc;
                     }
                 })
@@ -729,7 +735,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     descEl.value       = baseDesc;
                 });
             } else {
+                // Already have ≥50 word description from pharmacy data — use it directly
                 descEl.value = baseDesc;
+                showDescBadge('📋 Description from ' + (d.source_platform || 'pharmacy'));
             }
         }
 

@@ -344,6 +344,13 @@
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 Add Medicine
             </a>
+            <a href="{{ route('admin.medicines.bulk-builder') }}"
+               data-no-loader
+               class="sidebar-link {{ request()->routeIs('admin.medicines.bulk-builder') ? 'active' : '' }}">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h6"/></svg>
+                Bulk Import Builder
+                <span class="ml-auto rounded-full bg-emerald-500 px-1.5 py-0.5 text-[9px] font-black text-white">NEW</span>
+            </a>
             <a href="{{ route('admin.medicines.import.form') }}"
                class="sidebar-link {{ request()->routeIs('admin.medicines.import*') ? 'active' : '' }}">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
@@ -385,7 +392,7 @@
         </nav>
 
         {{-- Bottom --}}
-        <div class="px-3 py-4 border-t border-white/10 flex-shrink-0">
+        <div class="px-3 border-t border-white/10 flex-shrink-0">
             <p class="px-3 text-[10px] font-bold uppercase tracking-widest text-blue-400/70 mb-2">System</p>
             <a href="{{ route('admin.settings.notifications') }}"
                class="sidebar-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
@@ -549,8 +556,11 @@
         if (link.dataset.noLoader) return;
         if (link.target === '_blank') return;
         var href = link.getAttribute('href');
-        if (!href || href.startsWith('#') || href.startsWith('javascript')) return;
+        if (!href || href.startsWith('#') || href.startsWith('javascript') || href.startsWith('blob:')) return;
         if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+        // Skip if the original click was on a <button> element (not navigation)
+        var clickedBtn = e.target.closest('button');
+        if (clickedBtn && !link.contains(clickedBtn)) return;
         // Only internal links
         try {
             var url = new URL(href, window.location.origin);

@@ -73,6 +73,8 @@
         .site-header {
             background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 40%, #2563eb 70%, #3b82f6 100%);
             box-shadow: 0 2px 20px rgba(30,58,138,.35);
+            position: relative;
+            z-index: 60;   /* above the drawer (z-index: 45) */
         }
         .pin-bar {
             background: rgba(30,58,138,.25);
@@ -370,6 +372,381 @@
             transform: translateX(3px);
         }
 
+        /* ── Hide Alpine cloak until JS ready ── */
+        [x-cloak] { display: none !important; }
+
+        /* ══════════════════════════════════════
+           HEADER NAV — plain CSS
+           ══════════════════════════════════════ */
+
+        /* Nav wrapper — flex row, right-aligned */
+        .hdr-nav {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: auto;   /* push everything to the right */
+        }
+
+        /* Desktop-only items hidden on mobile */
+        .hdr-desktop-only { display: none; }
+        @media (min-width: 640px) {
+            .hdr-desktop-only { display: inline-flex; }
+        }
+
+        /* Shared nav link style */
+        .hdr-nav-link {
+            align-items: center;
+            gap: 6px;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,.85);
+            text-decoration: none;
+            background: transparent;
+            transition: background .15s, color .15s;
+        }
+        .hdr-nav-link:hover { background: rgba(255,255,255,.10); color: #fff; }
+        .hdr-nav-link--amber { color: #fde68a; }
+        .hdr-nav-link--amber:hover { color: #fff; }
+
+        /* Cart button */
+        .hdr-cart-btn {
+            position: relative;
+            align-items: center;
+            gap: 6px;
+            border-radius: 12px;
+            background: rgba(255,255,255,.15);
+            border: 1px solid rgba(255,255,255,.20);
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+            transition: background .15s;
+        }
+        .hdr-cart-btn:hover { background: rgba(255,255,255,.25); }
+
+        /* User menu wrapper */
+        .hdr-user-menu { position: relative; }
+        .hdr-user-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 12px;
+            background: rgba(255,255,255,.15);
+            border: 1px solid rgba(255,255,255,.20);
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .hdr-user-btn:hover { background: rgba(255,255,255,.25); }
+        .hdr-user-avatar {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: rgba(96,165,250,.4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 900; color: #fff;
+            flex-shrink: 0;
+        }
+        .hdr-user-name {
+            max-width: 80px;
+            overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+            font-size: 13px;
+        }
+
+        /* Dropdown panel */
+        .hdr-dropdown {
+            position: absolute;
+            right: 0; top: calc(100% + 8px);
+            width: 210px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.14);
+            z-index: 50;
+            overflow: hidden;
+        }
+        .hdr-dropdown-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .hdr-dropdown-name  { font-size: 12px; font-weight: 700; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .hdr-dropdown-email { font-size: 11px; color: #94a3b8; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .hdr-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            text-decoration: none;
+            transition: background .12s, color .12s;
+        }
+        .hdr-dropdown-item:hover { background: #f8fafc; color: #2563eb; }
+        .hdr-dropdown-item--amber { color: #b45309; }
+        .hdr-dropdown-item--amber:hover { background: #fffbeb; color: #92400e; }
+        .hdr-dropdown-item--red { color: #dc2626; }
+        .hdr-dropdown-item--red:hover { background: #fef2f2; }
+        .hdr-dropdown-item--btn {
+            width: 100%; border: none; background: transparent; cursor: pointer; text-align: left;
+        }
+
+        /* Sign In / Register (desktop guest) */
+        .hdr-signin-btn {
+            display: inline-flex; align-items: center;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,.25);
+            padding: 8px 14px;
+            font-size: 13px; font-weight: 600;
+            color: #fff; text-decoration: none;
+            transition: background .15s;
+        }
+        .hdr-signin-btn:hover { background: rgba(255,255,255,.10); }
+        .hdr-register-btn {
+            display: inline-flex; align-items: center;
+            border-radius: 12px;
+            background: #fff;
+            padding: 8px 14px;
+            font-size: 13px; font-weight: 700;
+            color: #1d4ed8; text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,.10);
+            transition: background .15s;
+        }
+        .hdr-register-btn:hover { background: #eff6ff; }
+
+        /* ── Hamburger button — mobile only ── */
+        .hdr-hamburger {
+            display: none;              /* hidden on desktop */
+            align-items: center;
+            justify-content: center;
+            width: 38px; height: 38px;
+            border-radius: 999px;                        /* capsule / pill shape */
+            background: #2563eb;                         /* solid blue */
+            border: 2px solid rgba(255,255,255,.30);
+            color: #fff;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background .15s, box-shadow .15s;
+            margin-left: auto;
+            box-shadow: 0 2px 10px rgba(37,99,235,.45);
+        }
+        .hdr-hamburger:hover {
+            background: #1d4ed8;
+            box-shadow: 0 4px 16px rgba(37,99,235,.6);
+        }
+        @media (max-width: 639px) {
+            .hdr-hamburger { display: inline-flex; }
+        }
+
+        /* ══════════════════════════════════════
+           MOBILE MENU PANEL
+           ══════════════════════════════════════ */
+
+        /* Backdrop */
+        .mob-menu-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 40;   /* below header and drawer */
+            background: rgba(15,23,42,.40);
+        }
+
+        /* Slide-in drawer — full height from the right */
+        .mob-menu-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 280px;
+            max-width: 85vw;
+            z-index: 45;   /* below header (z-index: 60) so hamburger stays visible */
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+            box-shadow: -8px 0 40px rgba(30,58,138,.50);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .mob-menu-inner {
+            padding: 20px 14px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 100%;
+        }
+
+        /* Close button row at the top of the drawer */
+        .mob-menu-close-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .mob-menu-brand {
+            font-size: 16px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: -.01em;
+        }
+        .mob-menu-close-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px; height: 34px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.15);
+            border: 1px solid rgba(255,255,255,.20);
+            color: #fff;
+            cursor: pointer;
+            transition: background .15s;
+            flex-shrink: 0;
+        }
+        .mob-menu-close-btn:hover { background: rgba(255,255,255,.25); }
+
+        /* Search bar */
+        .mob-search-form { position: relative; }
+        .mob-search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,.95);
+            border-radius: 999px;           /* pill shape */
+            padding: 10px 8px 10px 14px;
+            box-shadow: 0 4px 16px rgba(30,58,138,.25);
+        }
+        .mob-search-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            color: #0f172a;
+            outline: none;
+            min-width: 0;
+        }
+        .mob-search-input::placeholder { color: #94a3b8; }
+        .mob-search-btn {
+            border: none;
+            border-radius: 999px;           /* pill shape */
+            background: #2563eb;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background .15s;
+            flex-shrink: 0;
+        }
+        .mob-search-btn:hover { background: #1d4ed8; }
+
+        /* Divider label */
+        .mob-menu-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.45);
+            padding: 0 6px;
+        }
+
+        /* Nav links list */
+        .mob-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .mob-menu-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 999px;           /* pill / capsule shape */
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,.92);
+            text-decoration: none;
+            background: rgba(255,255,255,.10);
+            border: 1px solid rgba(255,255,255,.12);
+            transition: background .15s, border-color .15s, color .15s;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+        .mob-menu-link:hover {
+            background: rgba(255,255,255,.20);
+            border-color: rgba(255,255,255,.25);
+            color: #fff;
+        }
+        .mob-menu-link svg { flex-shrink: 0; opacity: .85; }
+
+        /* Variants */
+        .mob-menu-link--amber {
+            background: rgba(251,191,36,.12);
+            border-color: rgba(251,191,36,.25);
+            color: #fde68a;
+        }
+        .mob-menu-link--amber:hover {
+            background: rgba(251,191,36,.22);
+            border-color: rgba(251,191,36,.4);
+            color: #fef3c7;
+        }
+        .mob-menu-link--red {
+            background: rgba(239,68,68,.12);
+            border-color: rgba(239,68,68,.25);
+            color: #fca5a5;
+        }
+        .mob-menu-link--red:hover {
+            background: rgba(239,68,68,.22);
+            border-color: rgba(239,68,68,.4);
+            color: #fecaca;
+        }
+        .mob-menu-link--register {
+            background: rgba(255,255,255,.18);
+            border-color: rgba(255,255,255,.30);
+            color: #fff;
+            font-weight: 700;
+        }
+        .mob-menu-link--btn { border: none; cursor: pointer; }
+
+        /* Cart count pill */
+        .mob-cart-pill {
+            margin-left: auto;
+            min-width: 22px;
+            height: 22px;
+            background: #fff;
+            border-radius: 999px;
+            padding: 0 7px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #1d4ed8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* User info card */
+        .mob-user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 14px;
+            padding: 11px 14px;
+            background: rgba(255,255,255,.10);
+            border: 1px solid rgba(255,255,255,.15);
+        }
+        .mob-user-avatar {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 900; color: #1d4ed8;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(30,58,138,.25);
+        }
+        .mob-user-name  { font-size: 12px; font-weight: 700; color: #fff; }
+        .mob-user-email { font-size: 10px; color: rgba(255,255,255,.55); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+
         /* ═══════════════════════════════════
            BOTTOM MOBILE NAV BAR
            ─────────────────────────────────── */
@@ -523,173 +900,191 @@
                 </form>
 
                 {{-- Nav links (desktop) --}}
-                <nav class="flex items-center gap-1 sm:gap-1.5">
-                    <a href="{{ route('medicines.index') }}"
-                       class="nav-link hidden sm:inline-flex items-center gap-1.5 rounded-lg px-4 py-3 text-sm font-semibold text-white/85 hover:text-white hover:bg-white/10 transition-all">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                <nav class="hdr-nav">
+
+                    {{-- ── Hamburger button — mobile only ── --}}
+                    <button @click="mobileMenuOpen = !mobileMenuOpen"
+                            class="hdr-hamburger"
+                            :aria-expanded="mobileMenuOpen"
+                            aria-label="Toggle menu">
+                        <svg x-show="!mobileMenuOpen" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        <svg x-show="mobileMenuOpen" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+
+                    <a href="{{ route('medicines.index') }}" class="nav-link hdr-nav-link hdr-desktop-only">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                         Medicines
                     </a>
 
                     @auth
-                        <a href="{{ route('orders.index') }}"
-                           class="nav-link hidden sm:inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-white/85 hover:text-white hover:bg-white/10 transition-all">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        <a href="{{ route('orders.index') }}" class="nav-link hdr-nav-link hdr-desktop-only">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                             My Orders
                         </a>
                         @if(auth()->user()->is_admin)
-                            <a href="{{ route('admin.dashboard') }}"
-                               class="nav-link hidden sm:inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-amber-200 hover:text-white hover:bg-white/10 transition-all">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <a href="{{ route('admin.dashboard') }}" class="nav-link hdr-nav-link hdr-nav-link--amber hdr-desktop-only">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                 Admin
                             </a>
                         @endif
                     @endauth
 
-                    {{-- Cart (visible on desktop; mobile uses bottom nav) --}}
-                    <a id="cart-nav-link" href="{{ route('cart.index') }}"
-                       class="relative hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-3 py-2 text-sm font-bold text-white hover:bg-white/25 transition-all ring-1 ring-white/20">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    {{-- Cart (desktop only — mobile uses bottom nav) --}}
+                    <a id="cart-nav-link" href="{{ route('cart.index') }}" class="hdr-cart-btn hdr-desktop-only">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         Cart
-                        <span
-                            id="cart-count-badge"
-                            class="cart-badge absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full text-white shadow-md {{ ($cartCount ?? 0) > 0 ? '' : 'hidden' }}"
-                        >{{ $cartCount ?? 0 }}</span>
+                        <span id="cart-count-badge" class="cart-badge {{ ($cartCount ?? 0) > 0 ? '' : 'hidden' }}">{{ $cartCount ?? 0 }}</span>
                     </a>
 
                     @auth
-                        <div class="hidden sm:relative sm:block" x-data="{ open: false }" @click.outside="open = false">
-                            <button @click="open = !open"
-                                    class="inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-3 py-2 text-sm font-bold text-white hover:bg-white/25 transition-all ring-1 ring-white/20">
-                                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-400/40 text-xs font-black text-white">
-                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                                </div>
-                                <span class="hidden sm:inline max-w-[72px] truncate text-sm">{{ auth()->user()->name }}</span>
-                                <svg class="h-3 w-3 opacity-60 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                        <div class="hdr-user-menu hdr-desktop-only" x-data="{ open: false }" @click.outside="open = false">
+                            <button @click="open = !open" class="hdr-user-btn">
+                                <span class="hdr-user-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                                <span class="hdr-user-name">{{ auth()->user()->name }}</span>
+                                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity:.6;transition:transform .2s;" :style="open ? 'transform:rotate(180deg)' : ''"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                             </button>
                             <div x-show="open"
                                  x-transition:enter="transition ease-out duration-150"
-                                 x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
-                                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
                                  x-transition:leave="transition ease-in duration-100"
                                  x-transition:leave-start="opacity-100 scale-100"
                                  x-transition:leave-end="opacity-0 scale-95"
-                                 class="absolute right-0 top-full mt-2 w-52 rounded-2xl border border-slate-200 bg-white py-1.5 shadow-2xl z-50 ring-1 ring-black/5">
-                                <div class="border-b border-slate-100 px-4 py-3">
-                                    <p class="text-xs font-bold text-slate-900 truncate">{{ auth()->user()->name }}</p>
-                                    <p class="text-xs text-slate-500 truncate mt-0.5">{{ auth()->user()->email }}</p>
+                                 class="hdr-dropdown">
+                                <div class="hdr-dropdown-header">
+                                    <p class="hdr-dropdown-name">{{ auth()->user()->name }}</p>
+                                    <p class="hdr-dropdown-email">{{ auth()->user()->email }}</p>
                                 </div>
-                                <a href="{{ route('orders.index') }}"
-                                   class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-700 transition-colors">
-                                    <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                <a href="{{ route('orders.index') }}" class="hdr-dropdown-item">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                                     My Orders
                                 </a>
                                 @if(auth()->user()->is_admin)
-                                <a href="{{ route('admin.dashboard') }}"
-                                   class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-amber-700 hover:bg-amber-50 transition-colors">
-                                    <svg class="h-4 w-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <a href="{{ route('admin.dashboard') }}" class="hdr-dropdown-item hdr-dropdown-item--amber">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     Admin Panel
                                 </a>
                                 @endif
                                 <form method="post" action="{{ route('logout') }}">
                                     @csrf
-                                    <button type="submit"
-                                            class="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                    <button type="submit" class="hdr-dropdown-item hdr-dropdown-item--red hdr-dropdown-item--btn">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                                         Sign Out
                                     </button>
                                 </form>
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}"
-                           class="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-white/25 px-3 py-2 text-sm font-semibold text-white hover:bg-white/10 transition-all">
-                            Sign In
-                        </a>
-                        <a href="{{ route('register') }}"
-                           class="hidden sm:inline-flex items-center rounded-xl bg-white px-3.5 py-2 text-sm font-bold text-blue-700 hover:bg-blue-50 transition-all shadow-md">
-                            Register
-                        </a>
+                        <a href="{{ route('login') }}" class="hdr-signin-btn hdr-desktop-only">Sign In</a>
+                        <a href="{{ route('register') }}" class="hdr-register-btn hdr-desktop-only">Register</a>
                     @endguest
                 </nav>
             </div>
 
-            {{-- ── Mobile slide-down menu (inside x-data scope) ── --}}
+            {{-- ── Mobile menu backdrop ── --}}
             <div x-show="mobileMenuOpen" x-cloak
-                 x-transition.opacity
-                 class="fixed inset-0 z-40 bg-black/40 sm:hidden"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="mob-menu-backdrop"
                  @click="mobileMenuOpen = false"
                  aria-hidden="true"></div>
 
+            {{-- ── Mobile right-side drawer ── --}}
             <div x-show="mobileMenuOpen" x-cloak
-                 x-transition:enter="transition ease-out duration-200"
-                 x-transition:enter-start="opacity-0 -translate-y-3"
-                 x-transition:enter-end="opacity-100 translate-y-0"
-                 x-transition:leave="transition ease-in duration-150"
-                 x-transition:leave-start="opacity-100 translate-y-0"
-                 x-transition:leave-end="opacity-0 -translate-y-3"
-                 class="absolute inset-x-0 top-full z-50 sm:hidden bg-slate-950/97 backdrop-blur-lg border-b border-slate-800 shadow-2xl">
-                <div class="mx-auto max-w-7xl px-4 pb-5 pt-4">
-                    <div class="space-y-3">
+                 x-transition:enter="transition ease-out duration-250"
+                 x-transition:enter-start="opacity-0 translate-x-full"
+                 x-transition:enter-end="opacity-100 translate-x-0"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-x-0"
+                 x-transition:leave-end="opacity-0 translate-x-full"
+                 class="mob-menu-panel">
+                <div class="mob-menu-inner">
 
-                        {{-- Mobile search --}}
-                        <form action="{{ route('medicines.index') }}" method="get" class="relative" data-medicine-suggest-form>
-                            <div class="flex items-center rounded-2xl bg-white px-3 py-2 shadow-sm ring-1 ring-slate-200">
-                                <svg class="h-4 w-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                <input type="search" name="q" value="{{ request('q') }}" data-medicine-suggest-input
-                                       autocomplete="off"
-                                       placeholder="Search medicines, brands, categories…"
-                                       class="flex-1 ml-2 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none">
-                                <button type="submit" class="ml-3 rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Search</button>
-                            </div>
-                            <div data-medicine-suggestions
-                                 class="absolute left-0 right-0 top-full z-[130] mt-2 hidden w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-                            </div>
-                        </form>
-
-                        {{-- Mobile nav links --}}
-                        <nav class="space-y-1">
-                            <a href="{{ route('medicines.index') }}" @click="mobileMenuOpen = false"
-                               class="block rounded-2xl px-5 py-4 text-sm font-semibold text-white hover:bg-white/10 transition-colors">
-                                Medicines
-                            </a>
-                            @auth
-                                <a href="{{ route('orders.index') }}" @click="mobileMenuOpen = false"
-                                   class="block rounded-2xl px-5 py-4 text-sm font-semibold text-white hover:bg-white/10 transition-colors">
-                                    My Orders
-                                </a>
-                                @if(auth()->user()->is_admin)
-                                    <a href="{{ route('admin.dashboard') }}" @click="mobileMenuOpen = false"
-                                       class="block rounded-2xl px-5 py-4 text-sm font-semibold text-amber-200 hover:bg-white/10 transition-colors">
-                                        Admin Dashboard
-                                    </a>
-                                @endif
-                            @endauth
-                            <a href="{{ route('cart.index') }}" @click="mobileMenuOpen = false"
-                               class="flex items-center justify-between rounded-2xl px-5 py-4 text-sm font-semibold text-white hover:bg-white/10 transition-colors">
-                                <span>Cart</span>
-                                <span class="inline-flex h-7 min-w-[26px] items-center justify-center rounded-full bg-blue-500 px-3 text-[12px] font-bold text-white">{{ $cartCount ?? 0 }}</span>
-                            </a>
-                            @guest
-                                <a href="{{ route('login') }}" @click="mobileMenuOpen = false"
-                                   class="block rounded-2xl px-5 py-4 text-sm font-semibold text-white hover:bg-white/10 transition-colors">Sign In</a>
-                                <a href="{{ route('register') }}" @click="mobileMenuOpen = false"
-                                   class="block rounded-2xl px-5 py-4 text-sm font-semibold text-blue-200 hover:bg-white/10 transition-colors">Register</a>
-                            @else
-                                <div class="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
-                                    <p class="text-sm font-semibold text-white">{{ auth()->user()->name }}</p>
-                                    <p class="text-xs text-slate-300 mt-0.5">{{ auth()->user()->email }}</p>
-                                </div>
-                                <form method="post" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit"
-                                            class="flex w-full items-center gap-2.5 rounded-2xl px-5 py-4 text-sm font-semibold text-red-400 hover:bg-white/10 transition-colors">
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                                        Sign Out
-                                    </button>
-                                </form>
-                            @endguest
-                        </nav>
+                    {{-- Close row --}}
+                    <div class="mob-menu-close-row">
+                        <span class="mob-menu-brand">✚ Medikart</span>
+                        <button @click="mobileMenuOpen = false" class="mob-menu-close-btn" aria-label="Close menu">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
                     </div>
+
+                    {{-- Mobile search --}}
+                    <form action="{{ route('medicines.index') }}" method="get" class="mob-search-form" data-medicine-suggest-form>
+                        <div class="mob-search-box">
+                            <svg width="16" height="16" fill="none" stroke="#94a3b8" viewBox="0 0 24 24" style="flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            <input type="search" name="q" value="{{ request('q') }}" data-medicine-suggest-input
+                                   autocomplete="off"
+                                   placeholder="Search medicines, brands…"
+                                   class="mob-search-input">
+                            <button type="submit" class="mob-search-btn">Search</button>
+                        </div>
+                        <div data-medicine-suggestions
+                             class="absolute left-0 right-0 top-full z-[130] mt-2 hidden w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                        </div>
+                    </form>
+
+                    {{-- Mobile nav links --}}
+                    <nav class="mob-nav-links">
+                        <a href="{{ route('medicines.index') }}" @click="mobileMenuOpen = false" class="mob-menu-link">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                            Medicines
+                        </a>
+
+                        <a href="{{ route('cart.index') }}" @click="mobileMenuOpen = false" class="mob-menu-link mob-menu-link--cart">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            Cart
+                            <span class="mob-cart-pill">{{ $cartCount ?? 0 }}</span>
+                        </a>
+
+                        @auth
+                            <a href="{{ route('orders.index') }}" @click="mobileMenuOpen = false" class="mob-menu-link">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                My Orders
+                            </a>
+                            @if(auth()->user()->is_admin)
+                                <a href="{{ route('admin.dashboard') }}" @click="mobileMenuOpen = false" class="mob-menu-link mob-menu-link--amber">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    Admin Dashboard
+                                </a>
+                            @endif
+
+                            {{-- User info row --}}
+                            <div class="mob-user-info">
+                                <div class="mob-user-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                                <div>
+                                    <p class="mob-user-name">{{ auth()->user()->name }}</p>
+                                    <p class="mob-user-email">{{ auth()->user()->email }}</p>
+                                </div>
+                            </div>
+
+                            <form method="post" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="mob-menu-link mob-menu-link--red mob-menu-link--btn">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                    Sign Out
+                                </button>
+                            </form>
+                        @else
+                            <a href="{{ route('login') }}" @click="mobileMenuOpen = false" class="mob-menu-link">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                                Sign In
+                            </a>
+                            <a href="{{ route('register') }}" @click="mobileMenuOpen = false" class="mob-menu-link mob-menu-link--register">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                                Register
+                            </a>
+                        @endguest
+                    </nav>
                 </div>
             </div>
 

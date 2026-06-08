@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Illuminate\Validation\Rule;
 
 class AdminMedicineController extends Controller
 {
@@ -40,28 +41,41 @@ class AdminMedicineController extends Controller
         return view('admin.medicines.create', compact('categories'));
     }
 
-    public function store(Request $request): RedirectResponse
-    {
-        $data = $this->validated($request);
-        $categoryId = $this->resolveCategory($request);
+   public function store(Request $request): RedirectResponse
+{
+    // Prevent duplicate medicine names (case-insensitive)
+    $exists = Medicine::whereRaw('LOWER(name) = ?', [
+        strtolower(trim($request->name))
+    ])->exists();
 
-        Medicine::create([
-            'category_id'           => $categoryId,
-            'name'                  => $data['name'],
-            'slug'                  => Str::slug($data['name']),
-            'manufacturer'          => $data['manufacturer'],
-            'description'           => $data['description'] ?? '',
-            'mrp_paise'             => (int) round($data['mrp'] * 100),
-            'price_paise'           => (int) round($data['price'] * 100),
-            'prescription_required' => (bool) ($data['prescription_required'] ?? false),
-            'stock'                 => (int) $data['stock'],
-            'image_url'             => $this->resolvePrimaryImage($request),
-            'extra_images'          => $this->parseExtraImages($request),
-        ]);
-
-        return redirect()->route('admin.medicines.index')
-            ->with('status', "Medicine '{$data['name']}' created.");
+    if ($exists) {
+        return back()
+            ->withErrors([
+                'name' => 'This medicine already exists.'
+            ])
+            ->withInput();
     }
+
+    $data = $this->validated($request);
+    $categoryId = $this->resolveCategory($request);
+
+    Medicine::create([
+        'category_id'           => $categoryId,
+        'name'                  => $data['name'],
+        'slug'                  => Str::slug($data['name']),
+        'manufacturer'          => $data['manufacturer'],
+        'description'           => $data['description'] ?? '',
+        'mrp_paise'             => (int) round($data['mrp'] * 100),
+        'price_paise'           => (int) round($data['price'] * 100),
+        'prescription_required' => (bool) ($data['prescription_required'] ?? false),
+        'stock'                 => (int) $data['stock'],
+        'image_url'             => $this->resolvePrimaryImage($request),
+        'extra_images'          => $this->parseExtraImages($request),
+    ]);
+
+    return redirect()->route('admin.medicines.index')
+        ->with('status', "Medicine '{$data['name']}' created.");
+}
 
     public function edit(Medicine $medicine): View
     {
@@ -71,6 +85,20 @@ class AdminMedicineController extends Controller
 
     public function update(Request $request, Medicine $medicine): RedirectResponse
     {
+
+        $exists = Medicine::whereRaw('LOWER(name) = ?', [
+    strtolower(trim($request->name))
+])
+->where('id', '!=', $medicine->id)
+->exists();
+
+if ($exists) {
+    return back()
+        ->withErrors([
+            'name' => 'This medicine already exists.'
+        ])
+        ->withInput();
+}
         $data = $this->validated($request, $medicine->id);
         $categoryId = $this->resolveCategory($request);
 
