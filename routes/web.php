@@ -57,6 +57,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [RazorpayController::class, 'create'])->name('checkout.create');
     Route::post('/checkout/order', [RazorpayController::class, 'createOrder'])->name('checkout.order');
+    Route::post('/address/update', [RazorpayController::class, 'updateAddress'])
+    ->name('address.update');
     Route::post('/checkout/verify', [RazorpayController::class, 'verifyPayment'])->name('checkout.verify');
     Route::get('/orders/{order}/thank-you', [RazorpayController::class, 'thankyou'])->name('checkout.thankyou');
 
@@ -104,6 +106,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('settings/notifications',          [AdminSettingsController::class, 'notifications'])->name('settings.notifications');
     Route::post('settings/notifications',         [AdminSettingsController::class, 'saveNotifications'])->name('settings.notifications.save');
     Route::get('settings/notifications/test/{channel}', [AdminSettingsController::class, 'testNotification'])->name('settings.notifications.test');
+    Route::get('settings/orders',                 [AdminSettingsController::class, 'orders'])->name('settings.orders');
+    Route::post('settings/orders',                [AdminSettingsController::class, 'saveOrders'])->name('settings.orders.save');
 
     // AI Medicine Generator
     Route::post('ai/medicine-generate',     [\App\Http\Controllers\Admin\AIMedicineController::class, 'generate'])->name('ai.medicine.generate');

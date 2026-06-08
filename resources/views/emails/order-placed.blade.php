@@ -29,6 +29,9 @@
   .cta a { display:inline-block; background:linear-gradient(135deg,#1e40af,#2563eb); color:#fff; text-decoration:none; padding:13px 32px; border-radius:12px; font-size:14px; font-weight:700; }
   .footer { background:#f8fafc; border-top:1px solid #e2e8f0; padding:20px 40px; text-align:center; font-size:12px; color:#94a3b8; }
   .status-pill { display:inline-block; background:#dbeafe; color:#1e40af; border-radius:99px; padding:3px 12px; font-size:12px; font-weight:700; }
+  h3 {
+    color:white;
+  }
 </style>
 </head>
 <body>
@@ -36,9 +39,7 @@
 
   {{-- Header --}}
   <div class="header">
-    <div class=lock style="width:40px;">
-                            <h1>✅ Order Confirmed!</h1>
-</div>
+    <h3>✅ Order Confirmed!</h3>
     <p>Thank you for shopping with Medikart</p>
     <span class="badge">{{ $order->order_number }}</span>
   </div>

@@ -149,6 +149,73 @@
                 </div>
             @endif
 
+            {{-- Online: Bank or UPI for refund credit --}}
+            @if(!$order->isCOD())
+                <div x-data="{ method: 'bank' }" class="rounded-xl border border-indigo-200 bg-indigo-50 p-4 space-y-4">
+                    <p class="text-xs font-bold text-indigo-800 uppercase tracking-wide">Refund Credit Method</p>
+                    <p class="text-xs text-indigo-700">Please provide where you'd like the refund credited. Our team will process it within 5–7 business days.</p>
+
+                    {{-- Toggle --}}
+                    <div class="flex gap-3">
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="refund_method_choice" value="bank" x-model="method" class="sr-only">
+                            <div :class="method === 'bank' ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-200 bg-white text-slate-700'"
+                                 class="rounded-xl border-2 px-4 py-2.5 text-sm font-bold text-center transition-colors">
+                                🏦 Bank Transfer
+                            </div>
+                        </label>
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="refund_method_choice" value="upi" x-model="method" class="sr-only">
+                            <div :class="method === 'upi' ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-200 bg-white text-slate-700'"
+                                 class="rounded-xl border-2 px-4 py-2.5 text-sm font-bold text-center transition-colors">
+                                📱 UPI
+                            </div>
+                        </label>
+                    </div>
+
+                    {{-- Bank fields --}}
+                    <div x-show="method === 'bank'" class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Account Holder Name *</label>
+                            <input name="bank_account_name" value="{{ old('bank_account_name') }}"
+                                   :required="method === 'bank'"
+                                   placeholder="As per bank records"
+                                   class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20">
+                            @error('bank_account_name')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Account Number *</label>
+                                <input name="bank_account_number" value="{{ old('bank_account_number') }}"
+                                       :required="method === 'bank'"
+                                       placeholder="9–18 digit number"
+                                       class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20">
+                                @error('bank_account_number')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">IFSC Code *</label>
+                                <input name="bank_ifsc" value="{{ old('bank_ifsc') }}"
+                                       :required="method === 'bank'"
+                                       placeholder="e.g. SBIN0001234" maxlength="11"
+                                       class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm uppercase focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20">
+                                @error('bank_ifsc')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- UPI field --}}
+                    <div x-show="method === 'upi'">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">UPI ID *</label>
+                        <input name="upi_id" value="{{ old('upi_id') }}"
+                               :required="method === 'upi'"
+                               placeholder="e.g. yourname@upi or 7600264090@paytm"
+                               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/20">
+                        @error('upi_id')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        <p class="mt-1 text-xs text-slate-500">Format: name@bank or phone@upi</p>
+                    </div>
+                </div>
+            @endif
+
             {{-- Timeline info --}}
             <div class="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
                 <p class="text-xs font-bold text-slate-600 mb-2">What happens next?</p>

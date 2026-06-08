@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Order Cancelled — Admin Alert</title>
+<title>Order Cancelled - Admin Alert</title>
 <style>
   body { margin:0; padding:0; background:#f0f4f8; font-family:'Segoe UI',Arial,sans-serif; color:#1e293b; }
   .wrap { max-width:600px; margin:32px auto; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(30,58,138,.10); }
@@ -35,7 +35,7 @@
 
   <div class="header">
     <h1>⚠️ Order Cancelled</h1>
-    <p>Admin Alert — Medikart</p>
+    <p>Admin Alert - Medikart</p>
     <span class="badge">{{ $order->order_number }}</span>
   </div>
 

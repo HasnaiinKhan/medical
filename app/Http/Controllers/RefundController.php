@@ -46,16 +46,36 @@ class RefundController extends Controller
         $data = $request->validate([
             'reason'              => ['required', 'string', 'max:1000'],
             'proof_image'         => ['nullable', 'image', 'max:4096'],
-            // Bank details — required for COD
-            'bank_account_number' => ['required_if:payment_method,cod', 'nullable', 'string', 'max:20', 'regex:/^[0-9]{9,18}$/'],
-            'bank_ifsc'           => ['required_if:payment_method,cod', 'nullable', 'string', 'regex:/^[A-Z]{4}0[A-Z0-9]{6}$/'],
-            'bank_account_name'   => ['required_if:payment_method,cod', 'nullable', 'string', 'max:100'],
-            // UPI — optional alternative for COD
+            // Bank details — required when bank transfer is chosen
+            'bank_account_number' => ['nullable', 'string', 'max:20', 'regex:/^[0-9]{9,18}$/'],
+            'bank_ifsc'           => ['nullable', 'string', 'regex:/^[A-Z]{4}0[A-Z0-9]{6}$/'],
+            'bank_account_name'   => ['nullable', 'string', 'max:100'],
+            // UPI — alternative to bank
             'upi_id'              => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$/'],
+            'refund_method_choice'=> ['required', 'in:bank,upi'],
         ]);
 
+        // Validate bank/UPI fields based on chosen method
+        if ($data['refund_method_choice'] === 'bank') {
+            $request->validate([
+                'bank_account_number' => ['required', 'string', 'max:20', 'regex:/^[0-9]{9,18}$/'],
+                'bank_ifsc'           => ['required', 'string', 'regex:/^[A-Z]{4}0[A-Z0-9]{6}$/'],
+                'bank_account_name'   => ['required', 'string', 'max:100'],
+            ]);
+        } else {
+            $request->validate([
+                'upi_id' => ['required', 'string', 'max:50', 'regex:/^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$/'],
+            ]);
+        }
+
         DB::transaction(function () use ($order, $data, $request) {
-            $refundType = $order->isCOD() ? 'cod_bank_transfer' : 'gateway';
+            // Determine refund type based on payment method and chosen refund method
+            $chosenMethod = $data['refund_method_choice'];
+            if ($order->isCOD()) {
+                $refundType = $chosenMethod === 'upi' ? 'cod_upi' : 'cod_bank_transfer';
+            } else {
+                $refundType = $chosenMethod === 'upi' ? 'online_upi' : 'online_bank_transfer';
+            }
 
             // Handle proof image upload
             $proofPath = null;
@@ -107,11 +127,6 @@ class RefundController extends Controller
                 Mail::to($adminEmail)->send(new RefundRequested($refund));
             } catch (\Throwable $e) {
                 Log::error('Admin RefundRequested mail failed: ' . $e->getMessage());
-            }
-
-            // Auto-process online refunds if order not yet dispatched
-            if (! $order->is_dispatched && ! $order->isCOD()) {
-                $this->processGatewayRefund($order, $refund);
             }
         });
 

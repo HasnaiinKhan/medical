@@ -46,7 +46,7 @@
 
         *, *::before, *::after { box-sizing: border-box; }
          html {
-            overflow-x: hidden;
+            overflow-x: clip;
             max-width: 100%;
         }
         body {
@@ -73,8 +73,9 @@
         .site-header {
             background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 40%, #2563eb 70%, #3b82f6 100%);
             box-shadow: 0 2px 20px rgba(30,58,138,.35);
-            position: relative;
-            z-index: 60;   /* above the drawer (z-index: 45) */
+            position: sticky;
+            top: 0;
+            z-index: 60;
         }
         .pin-bar {
             background: rgba(30,58,138,.25);
@@ -201,10 +202,25 @@
 
         /* ── Cart badge ── */
         .cart-badge {
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            font-size: 10px;
-            font-weight: 800;
-        }
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 20px;
+    height: 20px;
+
+    background: #ff0000;
+    color: #fff;
+
+    border-radius: 50%;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    position: relative;
+    top: -8px;
+    margin-right:2px;
+}
 
         /* ── Nav link underline ── */
         .nav-link { position: relative; }
@@ -418,7 +434,7 @@
             border-radius: 12px;
             background: rgba(255,255,255,.15);
             border: 1px solid rgba(255,255,255,.20);
-            padding: 8px 14px;
+            padding: 8px 0px 8px 8px;
             font-size: 13px;
             font-weight: 700;
             color: #fff;
@@ -856,7 +872,7 @@
 <body class="min-h-screen bg-slate-100 text-slate-900 antialiased">
 
     {{-- ===== TOP HEADER ===== --}}
-    <header id="site-header" class="sticky top-0 z-50 site-header">
+    <header id="site-header" class="site-header">
 
         {{-- x-data wraps EVERYTHING in the header so mobile menu state is accessible --}}
         <div x-data="{ mobileMenuOpen: false }">

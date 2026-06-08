@@ -40,7 +40,10 @@
 
 <form id="checkout-form" class="space-y-5">
 @csrf
+
+
 <input type="hidden" id="selected_address_id" name="address_id" value="">
+<input type="hidden" id="edit_address_id" name="edit_address_id">
 
 {{-- ── Saved addresses picker ── --}}
 @if($savedAddresses->isNotEmpty())
@@ -48,6 +51,7 @@
     <label class="block text-sm font-semibold text-slate-700 mb-2">📍 Saved Addresses</label>
     <div class="space-y-2" id="saved-address-list">
         @foreach($savedAddresses as $addr)
+        
         <div class="saved-addr-card flex items-start gap-3 rounded-xl border-2 border-slate-200 bg-white p-3 cursor-pointer transition-all hover:border-blue-400 {{ $loop->first ? 'border-blue-500 bg-blue-50' : '' }}"
              data-id="{{ $addr->id }}"
              data-name="{{ $addr->customer_name }}"
@@ -68,7 +72,18 @@
                 </div>
                 <p class="text-sm font-semibold text-slate-800 mt-1">{{ $addr->customer_name }} · {{ $addr->customer_phone }}</p>
                 <p class="text-xs text-slate-500 mt-0.5 line-clamp-2">{{ $addr->summary() }}</p>
+                <button type="button"
+        class="edit-address-btn text-xs text-blue-600 font-semibold hover:underline"
+        data-id="{{ $addr->id }}"
+        data-name="{{ $addr->customer_name }}"
+        data-phone="{{ $addr->customer_phone }}"
+        data-pin="{{ $addr->delivery_pin }}"
+        data-line1="{{ $addr->address_line1 }}"
+        data-line2="{{ $addr->address_line2 }}">
+    Edit Address
+</button>
             </div>
+            
         </div>
         @endforeach
     </div>
@@ -100,7 +115,7 @@
             <span class="flex items-center bg-slate-50 px-3 text-sm font-medium text-slate-600 border-r border-slate-200">+91</span>
             <input name="customer_phone" id="customer_phone"
                    value="{{ old('customer_phone') }}" required maxlength="10" inputmode="numeric"
-                   placeholder="7600264090"
+                   placeholder="1234567890"
                    class="flex-1 px-4 py-3 text-sm focus:outline-none">
         </div>
         <p class="field-error hidden mt-1.5 text-xs text-red-600" id="err-customer_phone"></p>
@@ -211,17 +226,53 @@
 <div id="form-error" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></div>
 
 {{-- Submit --}}
+<div id="edit-address-actions" style="display:none; margin-top:15px;">
+
+    <button type="button"
+            id="update-address-btn"
+            style="
+                width:100%;
+                padding:14px;
+                background:#16a34a;
+                color:white;
+                border:none;
+                border-radius:10px;
+                font-size:15px;
+                font-weight:600;
+                cursor:pointer;">
+        Update Address
+    </button>
+
+</div>
 <div class="pt-2">
-    <button type="submit" id="place-order-btn"
+    <button type="submit"
+            id="place-order-btn"
             class="btn-primary w-full rounded-xl py-3.5 text-sm font-bold text-white shadow-md flex items-center justify-center gap-2">
-        <span id="btn-text">Pay & Place Order</span>
-        <svg id="btn-spinner" class="hidden h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+        <svg id="btn-spinner" class="hidden animate-spin h-4 w-4 shrink-0 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-        </svg>
+        </svg><span id="btn-text">Pay & Place Order</span>
     </button>
-</div>
 
+</div>
+<div id="toast-message"
+     style="
+        display:none;
+        position:fixed;
+        top:20px;
+        right:20px;
+        z-index:9999;
+        background:linear-gradient(135deg,#2563eb,#1d4ed8,#1e40af);
+        color:#fff;
+        padding:14px 22px;
+        border-radius:12px;
+        font-size:14px;
+        font-weight:600;
+        box-shadow:0 10px 25px rgba(37,99,235,.35);
+        min-width:250px;
+        animation:slideIn .3s ease;
+     ">
+</div>
 </form>
 </div>{{-- end card --}}
 </div>{{-- end lg:col-span-3 --}}
@@ -317,6 +368,37 @@ function selectSavedAddress(card) {
     newAddressForm.classList.add('hidden');
 }
 
+//Edit adress Button logic
+
+document.querySelectorAll('.edit-address-btn').forEach(btn => {
+
+    btn.addEventListener('click', function(e) {
+
+        e.stopPropagation();
+
+        newAddressForm.classList.remove('hidden');
+
+        document.getElementById('edit_address_id').value = this.dataset.id;
+
+        document.getElementById('customer_name').value = this.dataset.name;
+        document.getElementById('customer_phone').value = this.dataset.phone;
+        document.getElementById('delivery_pin').value = this.dataset.pin;
+        document.getElementById('address_line1').value = this.dataset.line1;
+        document.getElementById('address_line2').value = this.dataset.line2;
+
+        document.getElementById('edit-address-actions').style.display = 'block';
+
+document.getElementById('place-order-btn').style.display = 'none';
+
+        window.scrollTo({
+            top: newAddressForm.offsetTop - 100,
+            behavior: 'smooth'
+        });
+    });
+
+});
+
+
 // Auto-select first saved address on load
 const firstCard = document.querySelector('.saved-addr-card');
 if (firstCard) selectSavedAddress(firstCard);
@@ -327,25 +409,21 @@ document.querySelectorAll('.saved-addr-card').forEach(card => {
 
 if (useNewAddrBtn) {
     useNewAddrBtn.addEventListener('click', () => {
-        // Deselect all saved cards
-        document.querySelectorAll('.saved-addr-card').forEach(c => {
-            c.classList.remove('border-blue-500', 'bg-blue-50');
-            c.classList.add('border-slate-200', 'bg-white');
-            const dot = c.querySelector('.addr-radio-dot');
-            dot.classList.remove('border-blue-600', 'bg-blue-600');
-            dot.classList.add('border-slate-300');
-            dot.innerHTML = '';
-        });
+
         selectedAddrId.value = '';
-        // Clear fields
+        document.getElementById('edit_address_id').value = '';
+document.getElementById('edit-address-actions').style.display = 'none';
+document.getElementById('place-order-btn').style.display = 'block';
         document.getElementById('customer_name').value  = @json(auth()->user()->name);
         document.getElementById('customer_phone').value = '';
         document.getElementById('delivery_pin').value   = '';
         document.getElementById('address_line1').value  = '';
         document.getElementById('address_line2').value  = '';
-        document.getElementById('checkout-pin-status').innerHTML = '';
+
+        // Restore checkout button text
+        document.getElementById('btn-text').textContent = 'Pay & Place Order';
+
         newAddressForm.classList.remove('hidden');
-        newAddressForm.querySelector('input, textarea')?.focus();
     });
 }
 
@@ -426,7 +504,8 @@ if (document.getElementById('delivery_pin').value.length === 6) checkoutPinLooku
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function setLoading(on) {
     document.getElementById('place-order-btn').disabled = on;
-    document.getElementById('btn-spinner').classList.toggle('hidden', !on);
+    const spinner = document.getElementById('btn-spinner');
+    spinner.style.display = on ? 'inline-block' : 'none';
 }
 function clearErrors() {
     document.querySelectorAll('.field-error').forEach(el => { el.textContent = ''; el.classList.add('hidden'); });
@@ -443,6 +522,120 @@ function showGeneralError(msg) {
     el.textContent = msg;
     el.classList.remove('hidden');
 }
+
+function showToast(message, type = 'success')
+{
+    const toast = document.getElementById('toast-message');
+
+    toast.innerText = message;
+
+    if(type === 'success'){
+    toast.style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8, #1e40af)';
+}else{
+    toast.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+}
+
+    toast.style.display = 'block';
+
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
+
+document.getElementById('update-address-btn').addEventListener('click', async function () {
+
+    const btn = this;
+    const addressId = document.getElementById('edit_address_id').value;
+
+    btn.disabled = true;
+    btn.innerText = 'Updating...';
+
+    const newName  = document.getElementById('customer_name').value;
+    const newPhone = document.getElementById('customer_phone').value;
+    const newPin   = document.getElementById('delivery_pin').value;
+    const newLine1 = document.getElementById('address_line1').value;
+    const newLine2 = document.getElementById('address_line2').value;
+
+    try {
+
+        const response = await fetch("{{ route('address.update') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": CSRF,
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                address_id:     addressId,
+                customer_name:  newName,
+                customer_phone: newPhone,
+                delivery_pin:   newPin,
+                address_line1:  newLine1,
+                address_line2:  newLine2
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            showToast(data.message || 'Failed to update address', 'error');
+            btn.disabled = false;
+            btn.innerText = 'Update Address';
+            return;
+        }
+
+        // ── Refresh the saved address card in the DOM ──────────────────────
+        const card = document.querySelector(`.saved-addr-card[data-id="${addressId}"]`);
+        if (card) {
+            // Update data attributes so selectSavedAddress() picks up new values
+            card.dataset.name  = newName;
+            card.dataset.phone = newPhone;
+            card.dataset.pin   = newPin;
+            card.dataset.line1 = newLine1;
+            card.dataset.line2 = newLine2;
+
+            // Also update the edit button's data attributes
+            const editBtn = card.querySelector('.edit-address-btn');
+            if (editBtn) {
+                editBtn.dataset.name  = newName;
+                editBtn.dataset.phone = newPhone;
+                editBtn.dataset.pin   = newPin;
+                editBtn.dataset.line1 = newLine1;
+                editBtn.dataset.line2 = newLine2;
+            }
+
+            // Refresh the visible card text
+            const namePhoneEl = card.querySelector('p.text-sm');
+            if (namePhoneEl) namePhoneEl.textContent = `${newName} · ${newPhone}`;
+
+            const summaryParts = [newLine1, newLine2, newPin].filter(Boolean);
+            const summaryEl = card.querySelector('p.text-xs.text-slate-500');
+            if (summaryEl) summaryEl.textContent = summaryParts.join(', ');
+
+            // Auto-select the updated card so form fields are correct
+            selectSavedAddress(card);
+            selectedAddrId.value = addressId;
+        }
+
+        showToast(data.message, 'success');
+
+        document.getElementById('edit-address-actions').style.display = 'none';
+        document.getElementById('place-order-btn').style.display = 'block';
+        document.getElementById('edit_address_id').value = '';
+        newAddressForm.classList.add('hidden');
+
+    } catch (error) {
+
+        showToast('Network error. Please try again.', 'error');
+
+    }
+
+    btn.disabled = false;
+    btn.innerText = 'Update Address';
+});
+
+
+
 
 // ── Form submit ───────────────────────────────────────────────────────────────
 document.getElementById('checkout-form').addEventListener('submit', async function (e) {
@@ -462,6 +655,7 @@ document.getElementById('checkout-form').addEventListener('submit', async functi
         save_address:   saveAddr && saveAddr.checked ? 1 : 0,
         address_label:  document.getElementById('address_label')?.value || 'Home',
         _token:         CSRF,
+        edit_address_id: document.getElementById('edit_address_id').value || null,
     };
 
     let res, data;

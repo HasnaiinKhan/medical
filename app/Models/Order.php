@@ -64,8 +64,8 @@ class Order extends Model
 
     public function canRequestRefund(): bool
     {
-        // Must be in a valid status
-        if (! in_array($this->status, ['placed', 'confirmed', 'shipped', 'delivered'])) {
+        // Only allow refund requests after the order has been delivered
+        if ($this->status !== 'delivered') {
             return false;
         }
 
@@ -79,8 +79,9 @@ class Order extends Model
             return false;
         }
 
-        // Time window: 30 days from order creation
-        if ($this->created_at->diffInDays(now()) > 30) {
+        // Time window: configurable days from order creation (default 30)
+        $windowDays = (int) \App\Models\Setting::get('refund_window_days', 30);
+        if ($this->created_at->diffInDays(now()) > $windowDays) {
             return false;
         }
 
@@ -89,7 +90,8 @@ class Order extends Model
 
     public function refundWindowDaysLeft(): int
     {
-        return max(0, 30 - (int) $this->created_at->diffInDays(now()));
+        $windowDays = (int) \App\Models\Setting::get('refund_window_days', 30);
+        return max(0, $windowDays - (int) $this->created_at->diffInDays(now()));
     }
 
     public function isCOD(): bool

@@ -48,9 +48,8 @@
 
         {{-- Delivery info --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <svg class="h-4 w-4 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
-                Delivery Details
+            <h2 class="text-sm font-bold text-slate-900 mb-4">
+                <svg class="h-4 w-4 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>Delivery Details
             </h2>
             <div class="space-y-3 text-sm">
                 <div>
@@ -74,7 +73,7 @@
 
         {{-- Payment info --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 class="text-sm font-bold text-slate-900 mb-4 ">
                 <svg class="h-4 w-4 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 Payment Summary
             </h2>
@@ -106,7 +105,7 @@
                         @endif
                     </div>
                 @else
-                    <span class="text-lg">💵</span>
+                    <span class="text-lg"><i class="fa-solid fa-indian-rupee-sign fa-l"></i></span>
                     <p class="text-xs font-medium text-amber-800">Pay ₹{{ number_format($order->totalRupees(), 2) }} in cash when your order arrives.</p>
                 @endif
             </div>

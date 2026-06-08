@@ -67,8 +67,13 @@ class AdminRefundController extends Controller
 
         $order = $refund->order;
 
-        if ($order->isCOD()) {
-            $refund->transitionTo('approved', 'Admin approved COD refund. Awaiting bank transfer.', 'admin');
+        // All non-gateway types require manual transfer
+        if (in_array($refund->type, ['cod_bank_transfer', 'cod_upi', 'online_bank_transfer', 'online_upi'])) {
+            $method = match($refund->type) {
+                'cod_upi', 'online_upi' => 'UPI transfer',
+                default                 => 'bank transfer',
+            };
+            $refund->transitionTo('approved', "Admin approved refund. Awaiting {$method}.", 'admin');
             $order->update(['status' => 'refund_initiated']);
 
             RefundAuditLog::create([
@@ -77,13 +82,13 @@ class AdminRefundController extends Controller
                 'action'     => 'approved',
                 'from_status'=> 'requested',
                 'to_status'  => 'approved',
-                'notes'      => 'Admin approved. Manual bank transfer required.',
+                'notes'      => "Admin approved. Manual {$method} required.",
                 'actor_type' => 'admin',
             ]);
 
             $refund->update(['approved_by' => Auth::id(), 'approved_at' => now()]);
 
-            return back()->with('status', "Refund #{$refund->refund_number} approved. Process bank transfer manually.");
+            return back()->with('status', "Refund #{$refund->refund_number} approved. Process {$method} manually.");
         }
 
         // Online: trigger gateway
@@ -109,7 +114,7 @@ class AdminRefundController extends Controller
             'admin_notes'  => $request->admin_notes,
             'processed_at' => now(),
         ]);
-        $refund->transitionTo('processed', 'Bank transfer completed. UTR: ' . $request->admin_notes, 'admin');
+        $refund->transitionTo('processed', 'Transfer completed. Ref: ' . $request->admin_notes, 'admin');
 
         $refund->order->update(['status' => 'refunded', 'payment_status' => 'refunded']);
 
@@ -119,7 +124,7 @@ class AdminRefundController extends Controller
             'action'     => 'processed',
             'from_status'=> 'approved',
             'to_status'  => 'processed',
-            'notes'      => 'Bank transfer done. UTR: ' . $request->admin_notes,
+            'notes'      => ($refund->type === 'cod_upi' ? 'UPI transfer done.' : 'Bank transfer done.') . ' Ref: ' . $request->admin_notes,
             'actor_type' => 'admin',
         ]);
 

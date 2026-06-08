@@ -13,9 +13,8 @@
             <img src="{{ asset('images/MedicalDelhiveryboy.png') }}"
                  alt="" class="h-32 w-auto object-contain object-bottom opacity-30" draggable="false">
         </div>
-        <div class="relative">
-            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-3xl">
-                🎉
+        <div class="relative" style="margin-bottom:10px;">
+                <i class="fa-regular fa-face-grin-wide fa-2xl"></i>
             </div>
             <p class="text-sm font-semibold uppercase tracking-widest text-blue-200 mb-1">Order Confirmed</p>
             <h1 class="text-3xl font-extrabold">Thank You!</h1>
@@ -41,23 +40,23 @@
     {{-- ===== DELIVERY INFO ===== --}}
     <div class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div class="rounded-xl border border-slate-200 bg-white p-3 text-center shadow-sm">
-            <p class="text-lg mb-1">👤</p>
+            <p class="text-lg mb-1"><i class="fa-regular fa-user fa-lg" style="color: rgb(4, 22, 122);"></i></p>
             <p class="text-xs text-slate-500 mb-0.5">Customer</p>
             <p class="text-xs font-semibold text-slate-800">{{ $order->customer_name }}</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-3 text-center shadow-sm">
-            <p class="text-lg mb-1">📱</p>
+            <p class="text-lg mb-1"><i class="fa-solid fa-mobile-button fa-lg" style="color: rgb(4, 22, 122);"></i></p>
             <p class="text-xs text-slate-500 mb-0.5">Mobile</p>
             <p class="text-xs font-semibold text-slate-800">+91 {{ $order->customer_phone }}</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-3 text-center shadow-sm">
-            <p class="text-lg mb-1">📍</p>
+            <p class="text-lg mb-1"><i class="fa-solid fa-location-dot fa-lg"></i></p>
             <p class="text-xs text-slate-500 mb-0.5">Pincode</p>
             <p class="text-xs font-semibold text-slate-800">{{ $order->delivery_pin }}</p>
             <p class="text-xs text-slate-500 truncate">{{ $order->delivery_area }}</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-white p-3 text-center shadow-sm">
-            <p class="text-lg mb-1">💵</p>
+            <p class="text-lg mb-1"><i class="fa-solid fa-indian-rupee-sign fa-lg"></i></p>
             <p class="text-xs text-slate-500 mb-0.5">Payment</p>
             <p class="text-xs font-semibold text-slate-800">Cash on Delivery</p>
         </div>

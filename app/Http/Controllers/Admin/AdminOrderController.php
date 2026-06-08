@@ -130,26 +130,46 @@ class AdminOrderController extends Controller
         }
 
         // ── Normal status update ─────────────────────────────────────────
-        $order->update(['status' => $newStatus]);
 
         // Shipped → notify customer
-        if ($newStatus === 'shipped' && $old !== 'shipped' && $order->user) {
-            try {
-                $order->load('items');
-                Mail::to($order->user->email)->send(new OrderShipped($order));
-            } catch (\Throwable $e) {
-                Log::error('OrderShipped mail failed: ' . $e->getMessage());
+        if ($newStatus === 'shipped' && $old !== 'shipped') {
+            $order->update(['status' => $newStatus]);
+
+            if ($order->user) {
+                try {
+                    $order->load('items');
+                    Mail::to($order->user->email)->send(new OrderShipped($order));
+                } catch (\Throwable $e) {
+                    Log::error('OrderShipped mail failed: ' . $e->getMessage());
+                }
             }
         }
 
-        // Delivered → notify customer
-        if ($newStatus === 'delivered' && $old !== 'delivered' && $order->user) {
-            try {
-                $order->load('items');
-                Mail::to($order->user->email)->send(new OrderDelivered($order));
-            } catch (\Throwable $e) {
-                Log::error('OrderDelivered mail failed: ' . $e->getMessage());
+        // Delivered → notify customer + mark COD as paid
+        elseif ($newStatus === 'delivered') {
+            $updates = ['status' => $newStatus];
+
+            // COD orders are paid on delivery — always sync payment_status
+            if ($order->payment_method === 'cod' && $order->payment_status !== 'paid') {
+                $updates['payment_status'] = 'paid';
             }
+
+            $order->update($updates);
+
+            // Send delivery email only if this is a fresh transition
+            if ($old !== 'delivered' && $order->user) {
+                try {
+                    $order->load('items');
+                    Mail::to($order->user->email)->send(new OrderDelivered($order));
+                } catch (\Throwable $e) {
+                    Log::error('OrderDelivered mail failed: ' . $e->getMessage());
+                }
+            }
+        }
+
+        // All other status changes (placed, confirmed, etc.)
+        else {
+            $order->update(['status' => $newStatus]);
         }
 
         return back()->with('status', "Order #{$order->order_number} status changed from {$old} → {$newStatus}.");
@@ -168,7 +188,22 @@ class AdminOrderController extends Controller
             return back()->with('status', 'Bulk cancellation is not allowed. Please cancel orders individually to provide a reason.');
         }
 
-        $count = Order::whereIn('id', $request->order_ids)->update(['status' => $request->status]);
+        // When marking as delivered, also set COD pending orders to paid
+        if ($request->status === 'delivered') {
+            Order::whereIn('id', $request->order_ids)
+                ->where('payment_method', 'cod')
+                ->where('payment_status', 'pending')
+                ->update(['status' => 'delivered', 'payment_status' => 'paid']);
+
+            Order::whereIn('id', $request->order_ids)
+                ->where(fn ($q) => $q->where('payment_method', '!=', 'cod')
+                                     ->orWhere('payment_status', '!=', 'pending'))
+                ->update(['status' => 'delivered']);
+
+            $count = count($request->order_ids);
+        } else {
+            $count = Order::whereIn('id', $request->order_ids)->update(['status' => $request->status]);
+        }
 
         return back()->with('status', "{$count} order(s) updated to '{$request->status}'.");
     }

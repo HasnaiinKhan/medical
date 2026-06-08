@@ -52,25 +52,150 @@
 </div>
 
 {{-- ── FILTERS ── --}}
-<form method="GET" action="{{ route('admin.orders.index') }}"
-      class="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
+<style>
+.order-filter-form {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    margin-bottom: 20px;
+}
+.order-filter-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    align-items: end;
+}
+.order-filter-search {
+    grid-column: span 2;
+    position: relative;
+}
+@media (max-width: 640px) {
+    .order-filter-search { grid-column: span 1; }
+}
+.order-filter-search svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px; height: 16px;
+    color: #94a3b8;
+    pointer-events: none;
+}
+.order-filter-input,
+.order-filter-select {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #1e293b;
+    background: #fff;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color .15s, box-shadow .15s;
+}
+.order-filter-input:focus,
+.order-filter-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+.order-filter-search .order-filter-input {
+    padding-left: 36px;
+}
+.order-filter-date-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.order-filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    grid-column: 1 / -1;
+    padding-top: 4px;
+}
+.order-filter-btn-apply {
+    width: 120px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+}
+.order-filter-btn-apply:hover { background: #1d4ed8; }
+.order-filter-btn-reset {
+    width: 120px;
+    background: #fff;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    display: inline-block;
+    transition: background .15s;
+}
+.order-filter-btn-reset:hover { background: #f8fafc; }
+
+/* Active filter chips */
+.order-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
+}
+.order-filter-chips-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+.order-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+}
+.order-filter-chip.chip-status   { background: #dbeafe; color: #1e40af; }
+.order-filter-chip.chip-payment  { background: #e0e7ff; color: #3730a3; }
+.order-filter-chip.chip-search   { background: #f1f5f9; color: #334155; }
+.order-filter-chip.chip-date     { background: #f3e8ff; color: #6b21a8; }
+</style>
+
+<form method="GET" action="{{ route('admin.orders.index') }}" class="order-filter-form">
+    <div class="order-filter-grid">
 
         {{-- Search --}}
-        <div class="lg:col-span-2 relative">
-            <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"
-                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="order-filter-search">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
             <input type="search" name="q" value="{{ request('q') }}"
                    placeholder="Order #, name, phone, pincode…"
-                   class="w-full rounded-xl border border-slate-200 py-2 pl-9 pr-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                   class="order-filter-input">
         </div>
 
         {{-- Status --}}
-        <select name="status" id="filter-status"
-                class="rounded-xl border border-slate-200 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none">
+        <select name="status" id="filter-status" class="order-filter-select">
             <option value="all" {{ request('status', 'all') === 'all' ? 'selected' : '' }}>All Statuses</option>
             @foreach(['placed','confirmed','shipped','delivered','cancelled'] as $s)
                 <option value="{{ $s }}" {{ request('status') === $s ? 'selected' : '' }}>
@@ -80,63 +205,49 @@
         </select>
 
         {{-- Payment method --}}
-        <select name="payment" id="filter-payment"
-                class="rounded-xl border border-slate-200 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none">
+        <select name="payment" id="filter-payment" class="order-filter-select">
             <option value="all" {{ request('payment', 'all') === 'all' ? 'selected' : '' }}>All Payments</option>
             <option value="online" {{ request('payment') === 'online' ? 'selected' : '' }}>Online</option>
             <option value="cod"    {{ request('payment') === 'cod'    ? 'selected' : '' }}>COD</option>
         </select>
 
-        {{-- Date range: From --}}
-        <div class="relative">
-            <label class="text-xs font-semibold text-slate-500 block mb-1">From</label>
-            <input type="date" name="from" value="{{ request('from') }}"
-                   class="w-full rounded-xl border border-slate-200 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none">
+        {{-- Date from --}}
+        <div class="order-filter-date-group">
+            <label for="filter-from">From</label>
+            <input type="date" id="filter-from" name="from" value="{{ request('from') }}"
+                   class="order-filter-input">
         </div>
 
-        {{-- Date range: To --}}
-        <div class="relative">
-            <label class="text-xs font-semibold text-slate-500 block mb-1">To</label>
-            <input type="date" name="to" value="{{ request('to') }}"
-                   class="w-full rounded-xl border border-slate-200 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none">
+        {{-- Date to --}}
+        <div class="order-filter-date-group">
+            <label for="filter-to">To</label>
+            <input type="date" id="filter-to" name="to" value="{{ request('to') }}"
+                   class="order-filter-input">
         </div>
 
         {{-- Buttons --}}
-            <div class="flex gap-2 justify-center col-span-full">
-            <button type="submit"
-                    class="w-32 rounded-xl bg-blue-600 py-2 px-4 text-sm font-bold text-white hover:bg-blue-700 transition-colors">
-                Filter
-            </button>
-            <a href="{{ route('admin.orders.index') }}"
-               class="w-32 rounded-xl border border-slate-200 py-2 px-4 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors text-center">
-               Reset
-            </a>
+        <div class="order-filter-actions">
+            <button type="submit" class="order-filter-btn-apply">Filter</button>
+            <a href="{{ route('admin.orders.index') }}" class="order-filter-btn-reset">Reset</a>
         </div>
+
     </div>
 
-    {{-- Active filter indicator --}}
+    {{-- Active filter chips --}}
     @if(request('status') && request('status') !== 'all' || request('payment') && request('payment') !== 'all' || request('q') || request('from') || request('to'))
-    <div class="mt-3 flex flex-wrap gap-2 pt-3 border-t border-slate-100">
-        <span class="text-xs text-slate-500 font-semibold self-center">Active filters:</span>
+    <div class="order-filter-chips">
+        <span class="order-filter-chips-label">Active filters:</span>
         @if(request('status') && request('status') !== 'all')
-            <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold text-blue-800">
-                Status: {{ ucfirst(request('status')) }}
-            </span>
+            <span class="order-filter-chip chip-status">Status: {{ ucfirst(request('status')) }}</span>
         @endif
         @if(request('payment') && request('payment') !== 'all')
-            <span class="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-800">
-                Payment: {{ ucfirst(request('payment')) }}
-            </span>
+            <span class="order-filter-chip chip-payment">Payment: {{ ucfirst(request('payment')) }}</span>
         @endif
         @if(request('q'))
-            <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">
-                Search: "{{ request('q') }}"
-            </span>
+            <span class="order-filter-chip chip-search">Search: "{{ request('q') }}"</span>
         @endif
         @if(request('from') || request('to'))
-            <span class="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2.5 py-1 text-xs font-bold text-purple-800">
-                📅 {{ request('from') ? request('from') : 'Start' }} → {{ request('to') ? request('to') : 'End' }}
-            </span>
+            <span class="order-filter-chip chip-date">📅 {{ request('from') ?: 'Start' }} → {{ request('to') ?: 'End' }}</span>
         @endif
     </div>
     @endif
@@ -163,7 +274,7 @@
                     class="rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none">
                 <option value="">Change status to</option>
                 @foreach(['placed','confirmed','shipped','delivered'] as $s)
-                    <option value="{{ $s }}">➜ {{ ucfirst($s) }}</option>
+                    <option value="{{ $s }}"> {{ ucfirst($s) }}</option>
                 @endforeach
             </select>
             <button type="submit" id="bulk-apply"
@@ -300,16 +411,26 @@
                                     style="width:110px"
                                     data-url="{{ route('admin.orders.updateStatus', $order) }}"
                                     data-order="{{ $order->order_number }}"
-                                    data-show-url="{{ route('admin.orders.show', $order) }}">
-                                    @foreach(['placed','confirmed','shipped','delivered'] as $s)
-                                        <option value="{{ $s }}" {{ $order->status === $s ? 'selected' : '' }}>
-                                            {{ ucfirst($s) }}
-                                        </option>
-                                    @endforeach
-                                    @if($order->status === 'cancelled')
-                                        <option value="cancelled" selected>Cancelled</option>
-                                    @else
-                                        <option value="cancelled" disabled style="color:#ef4444">❌ Cancel</option>
+                                    data-show-url="{{ route('admin.orders.show', $order) }}"
+                                    data-payment-method="{{ $order->payment_method }}"
+                                    data-payment-status="{{ $order->payment_status }}"
+                                    data-current="{{ $order->status }}">
+                                    @php
+                                        $flow        = ['placed','confirmed','shipped','delivered'];
+                                        $currentIdx  = array_search($order->status, $flow);
+                                    @endphp
+                                    {{-- Current status as disabled label --}}
+                                    <option value="{{ $order->status }}" selected disabled>
+                                        {{ ucfirst(str_replace('_',' ',$order->status)) }}
+                                    </option>
+                                    {{-- Only forward steps --}}
+                                    @if($currentIdx !== false)
+                                        @foreach(array_slice($flow, $currentIdx + 1) as $s)
+                                            <option value="{{ $s }}"> {{ ucfirst($s) }}</option>
+                                        @endforeach
+                                    @endif
+                                    @if(!in_array($order->status, ['cancelled','delivered']))
+                                        <option value="cancelled" style="color:#ef4444">❌ Cancel</option>
                                     @endif
                                 </select>
                             </div>
@@ -357,18 +478,25 @@ document.querySelectorAll('.quick-status').forEach(function (sel) {
     sel.addEventListener('change', async function () {
         const url     = this.dataset.url;
         const showUrl = this.dataset.showUrl;
-        const order   = this.dataset.order;
         const status  = this.value;
-        const orig    = this.querySelector('[selected]')?.value || this.value;
+        const current = this.dataset.current;
 
         // Cancel must be done on the order detail page (requires a reason)
         if (status === 'cancelled') {
-            this.value = orig;
+            this.value = current;
             window.location.href = showUrl;
             return;
         }
 
         this.disabled = true;
+
+        // Show confirmation modal, only proceed on confirm
+        const confirmed = await showIndexStatusConfirm(status);
+        if (!confirmed) {
+            this.value = current;
+            this.disabled = false;
+            return;
+        }
 
         try {
             const res = await fetch(url, {
@@ -406,25 +534,72 @@ document.querySelectorAll('.quick-status').forEach(function (sel) {
                     refund_initiated:        '{{ asset('images/dollars.png') }}',
                     cancellation_requested:  '{{ asset('images/hourglass.gif') }}',
                 };
+
+                // Update status badge
                 if (badge) {
                     badge.className = 'badge status-badge ' + (colors[status] || 'bg-slate-100 text-slate-700');
                     const imgSrc = images[status] || '{{ asset('images/box.png') }}';
                     badge.innerHTML = `<img src="${imgSrc}" alt="${status}" class="h-4 w-4 object-contain" style="margin-right:5px;">` + status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, ' ');
                 }
-                this.querySelectorAll('option').forEach(o => o.removeAttribute('selected'));
-                this.querySelector(`option[value="${status}"]`)?.setAttribute('selected', 'selected');
+
+                // If COD order marked delivered → flip payment badge to Paid
+                if (status === 'delivered' && this.dataset.paymentMethod === 'cod') {
+                    const paymentBadges = row.querySelectorAll('.badge');
+                    paymentBadges.forEach(b => {
+                        if (b.textContent.trim() === 'Pending') {
+                            b.className = 'badge bg-green-100 text-green-800 mt-1';
+                            b.textContent = 'Paid';
+                        }
+                    });
+                    this.dataset.paymentStatus = 'paid';
+                }
+
+                // Rebuild dropdown: only show forward steps from new status
+                const flow = ['placed','confirmed','shipped','delivered'];
+                const newIdx = flow.indexOf(status);
+                this.dataset.current = status;
+                this.innerHTML = `<option value="${status}" selected disabled>${status.charAt(0).toUpperCase() + status.slice(1)}</option>`;
+                flow.slice(newIdx + 1).forEach(s => {
+                    this.innerHTML += `<option value="${s}"> ${s.charAt(0).toUpperCase() + s.slice(1)}</option>`;
+                });
+                if (status !== 'delivered') {
+                    this.innerHTML += `<option value="cancelled" style="color:#ef4444">❌ Cancel</option>`;
+                }
+
             } else {
                 alert('Failed to update status. Please try again.');
-                this.value = orig;
             }
         } catch (e) {
             alert('Network error. Please try again.');
-            this.value = orig;
         }
 
         this.disabled = false;
     });
 });
+
+/* ── Index status confirm modal ── */
+function showIndexStatusConfirm(status) {
+    return new Promise(function (resolve) {
+        const icons   = { placed:'📋', confirmed:'✅', shipped:'🚚', delivered:'🎉' };
+        const colors  = { placed:'#d97706', confirmed:'#2563eb', shipped:'#7c3aed', delivered:'#16a34a' };
+        const labels  = { placed:'Placed', confirmed:'Confirmed', shipped:'Shipped', delivered:'Delivered' };
+        const extra   = status === 'delivered'
+            ? ' COD payment will be marked as Paid.'
+            : ' A notification email will be sent to the customer.';
+
+        document.getElementById('iscm-icon').textContent   = icons[status] || '📦';
+        document.getElementById('iscm-status').textContent = labels[status] || status;
+        document.getElementById('iscm-body').textContent   = `Are you sure you want to mark this order as "${labels[status] || status}"?${extra}`;
+        const btn = document.getElementById('iscm-confirm-btn');
+        btn.style.background = colors[status] || '#2563eb';
+
+        const modal = document.getElementById('index-status-modal');
+        modal.style.display = 'flex';
+
+        btn.onclick = function () { modal.style.display = 'none'; resolve(true); };
+        document.getElementById('iscm-cancel-btn').onclick = function () { modal.style.display = 'none'; resolve(false); };
+    });
+}
 
 /* ── Bulk action ── */
 (function () {
@@ -443,10 +618,7 @@ document.querySelectorAll('.quick-status').forEach(function (sel) {
         const count  = getCheckedCount();
         const ready  = count > 0 && bulkStatus.value !== '';
         countLabel.textContent = count > 0 ? count + ' selected' : '0 selected';
-
         bulkApply.disabled = !ready;
-
-        // Sync select-all checkbox state
         selectAll.indeterminate = count > 0 && count < checkboxes.length;
         selectAll.checked = count === checkboxes.length && checkboxes.length > 0;
     }
@@ -471,10 +643,60 @@ document.querySelectorAll('.quick-status').forEach(function (sel) {
             alert('Please choose a status to apply.');
             return;
         }
-        if (!confirm('Change ' + count + ' order(s) to "' + bulkStatus.value + '"?')) {
-            e.preventDefault();
-        }
+        // Use custom modal for bulk confirm too
+        e.preventDefault();
+        const s = bulkStatus.value;
+        showBulkConfirm(count, s).then(ok => { if (ok) bulkForm.submit(); });
     });
+
+    function showBulkConfirm(count, status) {
+        return new Promise(function (resolve) {
+            const labels = { placed:'Placed', confirmed:'Confirmed', shipped:'Shipped', delivered:'Delivered' };
+            document.getElementById('iscm-icon').textContent   = '📦';
+            document.getElementById('iscm-status').textContent = labels[status] || status;
+            document.getElementById('iscm-body').textContent   =
+                `Change ${count} order(s) to "${labels[status] || status}"? This cannot be undone.`;
+            const btn = document.getElementById('iscm-confirm-btn');
+            btn.style.background = '#2563eb';
+
+            const modal = document.getElementById('index-status-modal');
+            modal.style.display = 'flex';
+
+            btn.onclick = function () { modal.style.display = 'none'; resolve(true); };
+            document.getElementById('iscm-cancel-btn').onclick = function () { modal.style.display = 'none'; resolve(false); };
+        });
+    }
 })();
 </script>
+
+{{-- ── Index Status Confirm Modal ── --}}
+<div id="index-status-modal"
+     style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(15,23,42,.55); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#fff; border-radius:20px; box-shadow:0 25px 50px rgba(0,0,0,.25); padding:28px 24px; width:100%; max-width:380px;">
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+            <div id="iscm-icon"
+                 style="width:44px; height:44px; border-radius:50%; background:#eff6ff; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">
+                📦
+            </div>
+            <div>
+                <p style="font-size:15px; font-weight:700; color:#0f172a; margin:0;">Confirm Status Change</p>
+                <p style="font-size:12px; color:#64748b; margin:2px 0 0;">
+                    Move to: <strong id="iscm-status"></strong>
+                </p>
+            </div>
+        </div>
+        <p id="iscm-body" style="font-size:13px; color:#475569; margin:0 0 22px; line-height:1.6;"></p>
+        <div style="display:flex; gap:10px;">
+            <button id="iscm-cancel-btn"
+                    style="flex:1; border:1px solid #e2e8f0; background:#fff; border-radius:12px; padding:10px; font-size:13px; font-weight:600; color:#475569; cursor:pointer;">
+                Cancel
+            </button>
+            <button id="iscm-confirm-btn"
+                    style="flex:1; border:none; border-radius:12px; padding:10px; font-size:13px; font-weight:700; color:#fff; cursor:pointer; background:#2563eb;">
+                Yes, Update
+            </button>
+        </div>
+    </div>
+</div>
+
 @endpush

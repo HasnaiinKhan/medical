@@ -70,6 +70,7 @@ class RazorpayController extends Controller
             'save_address'   => ['nullable', 'boolean'],
             'address_label'  => ['nullable', 'string', 'max:30'],
             'address_id'     => ['nullable', 'integer'],   // if user picked a saved address
+            'edit_address_id' => ['nullable', 'integer'],
         ]);
 
         $pin = PinCode::query()->where('code', $data['delivery_pin'])->first();
@@ -311,4 +312,36 @@ class RazorpayController extends Controller
             return $order;
         });
     }
+
+    public function updateAddress(Request $request)
+{
+    $request->validate([
+        'address_id'      => 'required|integer',
+        'customer_name'   => 'required|string|max:120',
+        'customer_phone'  => 'required',
+        'delivery_pin'    => 'required',
+        'address_line1'   => 'required',
+        'address_line2'   => 'nullable',
+    ]);
+
+    $address = UserAddress::where('id', $request->address_id)
+        ->where('user_id', Auth::id())
+        ->firstOrFail();
+
+    $pin = PinCode::where('code', $request->delivery_pin)->first();
+
+    $address->update([
+        'customer_name'  => $request->customer_name,
+        'customer_phone' => $request->customer_phone,
+        'delivery_pin'   => $request->delivery_pin,
+        'delivery_area'  => $pin?->area,
+        'address_line1'  => $request->address_line1,
+        'address_line2'  => $request->address_line2,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Address updated successfully'
+    ]);
+}
 }

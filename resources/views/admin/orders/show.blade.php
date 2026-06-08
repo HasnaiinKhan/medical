@@ -17,20 +17,26 @@
 
     {{-- Status change form (non-cancel statuses only) --}}
     @if($order->status !== 'cancelled')
+    @php
+        $flow          = ['placed','confirmed','shipped','delivered'];
+        $currentStep   = array_search($order->status, $flow);
+        $forwardSteps  = $currentStep !== false
+            ? array_slice($flow, $currentStep + 1)
+            : $flow;
+    @endphp
     <form method="POST" action="{{ route('admin.orders.updateStatus', $order) }}"
+          id="status-top-form"
           class="flex flex-wrap items-center gap-2">
         @csrf @method('PATCH')
-        <select name="status"
+        <select name="status" id="status-top-select"
                 class="flex-1 min-w-0 rounded-xl border border-slate-200 py-2 px-3 text-sm font-semibold focus:outline-none focus:border-blue-500 bg-white shadow-sm">
-            @foreach($statusFlow as $s)
-                @if($s !== 'cancelled')
-                    <option value="{{ $s }}" {{ $order->status === $s ? 'selected' : '' }}>
-                        {{ ucfirst($s) }}
-                    </option>
-                @endif
+            <option value="" disabled selected>Move to…</option>
+            @foreach($forwardSteps as $s)
+                <option value="{{ $s }}">{{ ucfirst($s) }}</option>
             @endforeach
         </select>
-        <button type="submit"
+        <button type="button"
+                onclick="openStatusModal(document.getElementById('status-top-select').value, 'status-top-form')"
                 class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 shadow-sm transition-colors whitespace-nowrap">
             Update
         </button>
@@ -285,30 +291,39 @@
 
         {{-- Quick status change (sidebar) --}}
         @if($order->status !== 'cancelled')
+        @php
+            $flow         = ['placed','confirmed','shipped','delivered'];
+            $currentStep  = array_search($order->status, $flow);
+            $forwardSteps = $currentStep !== false
+                ? array_slice($flow, $currentStep + 1)
+                : $flow;
+        @endphp
         <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5">
-            <h3 class="text-sm font-bold text-blue-900 mb-3">Quick Status Update</h3>
-            <form method="POST" action="{{ route('admin.orders.updateStatus', $order) }}" class="space-y-3">
-                @csrf @method('PATCH')
-                <div class="grid grid-cols-1 gap-2">
-                    @foreach(['placed','confirmed','shipped','delivered'] as $s)
-                        @php
-                            $icons  = ['placed'=>'📋','confirmed'=>'✅','shipped'=>'🚚','delivered'=>'🎉'];
-                            $active = $order->status === $s;
-                        @endphp
-                        <button type="submit" name="status" value="{{ $s }}"
-                                class="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition-all
-                                       {{ $active
-                                           ? 'bg-blue-600 text-white shadow-md'
-                                           : 'bg-white border border-slate-200 text-slate-700 hover:border-blue-400 hover:text-blue-700' }}">
+            <h3 class="text-sm font-bold text-blue-900 mb-1">Quick Status Update</h3>
+            @php $icons = ['placed'=>'📋','confirmed'=>'✅','shipped'=>'🚚','delivered'=>'🎉']; @endphp
+
+            {{-- Current status indicator --}}
+            <p class="text-xs text-blue-700 mb-3">
+                Current: <span class="font-bold">{{ ucfirst($order->status) }}</span>
+            </p>
+
+            @if(count($forwardSteps))
+                <form method="POST" action="{{ route('admin.orders.updateStatus', $order) }}" id="status-sidebar-form" class="space-y-2">
+                    @csrf @method('PATCH')
+                    <input type="hidden" name="status" id="status-sidebar-input">
+                    @foreach($forwardSteps as $s)
+                        <button type="button"
+                                onclick="openStatusModal('{{ $s }}', 'status-sidebar-form')"
+                                class="flex items-center gap-2 w-full rounded-xl px-3 py-2 text-xs font-bold transition-all bg-white border border-slate-200 text-slate-700 hover:border-blue-400 hover:text-blue-700">
                             <span>{{ $icons[$s] }}</span>
                             {{ ucfirst($s) }}
-                            @if($active)
-                                <span class="ml-auto text-[10px] bg-white/20 rounded px-1.5 py-0.5">Current</span>
-                            @endif
+                            <svg class="ml-auto h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                         </button>
                     @endforeach
-                </div>
-            </form>
+                </form>
+            @else
+                <p class="text-xs text-slate-500 italic">Order has reached final status.</p>
+            @endif
 
             {{-- Cancel — separate, opens modal --}}
             <div class="mt-3 pt-3 border-t border-blue-200">
@@ -351,6 +366,77 @@
 </div>
 
 @endsection
+
+{{-- ── STATUS CONFIRM MODAL ── --}}
+@if($order->status !== 'cancelled')
+<div id="status-confirm-modal"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);">
+    <div class="w-full max-w-sm rounded-2xl bg-white shadow-2xl p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div id="scm-icon" class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-xl">📦</div>
+            <div>
+                <h3 class="text-base font-bold text-slate-900">Confirm Status Change</h3>
+                <p id="scm-subtitle" class="text-xs text-slate-500 mt-0.5"></p>
+            </div>
+        </div>
+        <p id="scm-body" class="text-sm text-slate-600 mb-5"></p>
+        <div class="flex gap-3">
+            <button type="button"
+                    onclick="document.getElementById('status-confirm-modal').classList.add('hidden')"
+                    class="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                Cancel
+            </button>
+            <button type="button" id="scm-confirm-btn"
+                    class="flex-1 rounded-xl bg-blue-600 py-2.5 text-sm font-bold text-white hover:bg-blue-700 transition-colors">
+                Yes, Update
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+const statusIcons  = { placed:'📋', confirmed:'✅', shipped:'🚚', delivered:'🎉' };
+const statusColors = { placed:'#d97706', confirmed:'#2563eb', shipped:'#7c3aed', delivered:'#16a34a' };
+
+function openStatusModal(newStatus, formId) {
+    if (!newStatus) { alert('Please select a status first.'); return; }
+    const modal    = document.getElementById('status-confirm-modal');
+    const icon     = document.getElementById('scm-icon');
+    const subtitle = document.getElementById('scm-subtitle');
+    const body     = document.getElementById('scm-body');
+    const confirmBtn = document.getElementById('scm-confirm-btn');
+
+    icon.textContent = statusIcons[newStatus] || '📦';
+    icon.style.background = '#eff6ff';
+    subtitle.textContent = `Move order to: ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`;
+    body.textContent = `Are you sure you want to mark this order as "${newStatus}"? ${newStatus === 'delivered' ? 'This will also mark payment as Paid for COD orders.' : 'A notification email will be sent to the customer.'}`;
+    confirmBtn.style.background = statusColors[newStatus] || '#2563eb';
+
+    confirmBtn.onclick = function () {
+        // Set the hidden input for sidebar form, or select value for top form
+        if (formId === 'status-sidebar-form') {
+            document.getElementById('status-sidebar-input').value = newStatus;
+        } else {
+            // top form: the select already has the value from when button was clicked
+            const sel = document.getElementById('status-top-select');
+            if (sel) sel.value = newStatus;
+        }
+        modal.classList.add('hidden');
+        document.getElementById(formId).submit();
+    };
+
+    modal.classList.remove('hidden');
+}
+
+document.getElementById('status-confirm-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.add('hidden');
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') document.getElementById('status-confirm-modal')?.classList.add('hidden');
+});
+</script>
+@endif
 
 {{-- ── CANCEL ORDER MODAL ── --}}
 @if($order->status !== 'cancelled')

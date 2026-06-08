@@ -10,6 +10,29 @@ use Illuminate\View\View;
 
 class AdminSettingsController extends Controller
 {
+    public function orders(): View
+    {
+        $settings = Setting::getMany([
+            'refund_window_days',
+        ]);
+
+        // Default to 30 if never set
+        $settings['refund_window_days'] = $settings['refund_window_days'] ?? 30;
+
+        return view('admin.settings.orders', compact('settings'));
+    }
+
+    public function saveOrders(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'refund_window_days' => ['required', 'integer', 'min:1', 'max:365'],
+        ]);
+
+        Setting::set('refund_window_days', (string) $data['refund_window_days']);
+
+        return back()->with('status', 'Order settings saved successfully.');
+    }
+
     public function notifications(): View
     {
         $settings = Setting::getMany([
