@@ -53,21 +53,28 @@ class CartController extends Controller
             'quantity' => ['required', 'integer', 'min:0', 'max:99'],
         ]);
 
-        $this->cart->setQuantity($medicine->id, (int) $data['quantity']);
+        $qty = (int) $data['quantity'];
+        $this->cart->setQuantity($medicine->id, $qty);
+
+        // If qty < 1, item was removed from cart
+        $removed = $qty < 1;
 
         if ($request->expectsJson()) {
             return response()->json([
-                'ok' => true,
-                'message' => 'Updated cart quantity: '.$medicine->name,
-                'cartCount' => $this->cart->count(),
-                'linesCount' => $this->cart->lines()->count(),
+                'ok'            => true,
+                'removed'       => $removed,
+                'message'       => $removed
+                    ? 'Removed from cart: ' . $medicine->name
+                    : 'Cart updated: ' . $medicine->name,
+                'cartCount'     => $this->cart->count(),
+                'linesCount'    => $this->cart->lines()->count(),
                 'subtotalPaise' => $this->cart->subtotalPaise(),
-                'quantity' => (int) $data['quantity'],
-                'lineTotalPaise' => $medicine->price_paise * (int) $data['quantity'],
+                'quantity'      => $qty,
+                'lineTotalPaise'=> $removed ? 0 : $medicine->price_paise * $qty,
             ]);
         }
 
-        return back()->with('status', 'Cart updated.');
+        return back()->with('status', $removed ? 'Removed from cart.' : 'Cart updated.');
     }
 
     public function remove(Medicine $medicine): RedirectResponse|JsonResponse

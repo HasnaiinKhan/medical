@@ -11,6 +11,65 @@
 @endphp
 
 <style>
+    /* Filter section pure CSS toggles */
+    .filter-more-toggle {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        border: 0;
+        padding: 0;
+        clip: rect(0 0 0 0);
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    #cat-more-toggle:not(:checked) ~ #cat-list .cat-item.hidden,
+    #brand-more-toggle:not(:checked) ~ #brand-filter-list .brand-filter-item.hidden {
+        display: none;
+    }
+
+    #cat-more-toggle:checked ~ .see-more-btn .btn-label::before,
+    #brand-more-toggle:checked ~ .see-more-btn .btn-label::before {
+        content: attr(data-expanded);
+    }
+
+    #cat-more-toggle:not(:checked) ~ .see-more-btn .btn-label::before,
+    #brand-more-toggle:not(:checked) ~ .see-more-btn .btn-label::before {
+        content: attr(data-collapsed);
+    }
+
+    #cat-more-toggle:checked ~ .see-more-btn .btn-icon,
+    #brand-more-toggle:checked ~ .see-more-btn .btn-icon {
+        transform: rotate(180deg);
+    }
+
+    .see-more-btn {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+        border-radius: 0.75rem;
+        padding: 0.375rem 0;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #2563eb;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+        text-align: center;
+    }
+
+    .see-more-btn:hover {
+        background: #eff6ff;
+    }
+
+    .see-more-btn .btn-icon {
+        transition: transform 0.2s ease;
+    }
+
     /* Custom scrollbar styling with blue gradient */
     #cat-list::-webkit-scrollbar,
     #brand-filter-list::-webkit-scrollbar {
@@ -41,6 +100,94 @@
         scrollbar-color: #2563eb #f1f5f9;
         scrollbar-width: thin;
     }
+
+    .see-more-btn{
+    width:100%;
+    margin-top:10px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:6px;
+
+    padding:8px;
+
+    border:none;
+    background:transparent;
+
+    color:#2563eb;
+    font-size:13px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+}
+
+.see-more-btn:hover{
+    background:#eff6ff;
+    border-radius:8px;
+}
+
+.btn-icon{
+    width:15px;
+    height:15px;
+
+    transition:transform .3s ease;
+}
+
+.btn-icon.rotate-180{
+    transform:rotate(180deg);
+}   
+
+
+.filter-list{
+    max-height:250px;
+    overflow:hidden;
+    transition:max-height .3s ease;
+}
+
+.filter-list.scroll-enabled{
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    overscroll-behavior: contain;
+
+    scroll-behavior:smooth;
+
+    scrollbar-width: thin;
+}
+
+/* Beautiful scrollbar */
+
+.filter-list::-webkit-scrollbar{
+    width:8px;
+}
+
+.filter-list::-webkit-scrollbar-track{
+    background:#f1f5f9;
+    border-radius:10px;
+}
+
+.filter-list::-webkit-scrollbar-thumb{
+    background:linear-gradient(
+        180deg,
+        #1e3a8a,
+        #2563eb,
+        #3b82f6
+    );
+
+    border-radius:10px;
+}
+
+.filter-list::-webkit-scrollbar-thumb:hover{
+    background:linear-gradient(
+        180deg,
+        #1e40af,
+        #1d4ed8,
+        #2563eb
+    );
+}
 </style>
 
 {{-- Filters Header --}}
@@ -72,7 +219,8 @@
         </button>
 
         <div id="cat-section" class="px-3 pb-3">
-            <ul class="space-y-0.5 max-h-64 overflow-y-auto pr-2" id="cat-list">
+            <input type="checkbox" id="cat-more-toggle" class="filter-more-toggle">
+            <ul class="space-y-0.5 pr-2 filter-list" id="cat-list">
                 <li>
                     <a href="{{ route('medicines.index', array_filter(['q' => $q, 'brand' => request('brand')])) }}"
                        class="js-medicine-filter-link flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors {{ !request('category') ? 'bg-blue-700 font-semibold text-white' : 'text-slate-700 hover:bg-slate-50' }}">
@@ -97,15 +245,32 @@
             </ul>
 
             @if($categories->count() > 5)
-                <button type="button" onclick="toggleSeeMore('cat-item', 'cat-more-btn')"
-                        id="cat-more-btn"
-                        class="mt-2 flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-colors">
-                    <span class="btn-label">See {{ $categories->count() - 5 }} more</span>
-                    <svg class="btn-icon h-3.5 w-3.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </button>
-            @endif
+<button
+type="button"
+onclick="toggleSeeMore('cat-item', this)"
+id="cat-more-btn"
+class="see-more-btn"
+data-count="{{ $categories->count()-5 }}">
+
+    <span class="btn-label">
+        See {{ $categories->count() - 5 }} More
+    </span>
+
+    <svg class="btn-icon"
+         fill="none"
+         stroke="currentColor"
+         viewBox="0 0 24 24">
+
+        <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"/>
+    </svg>
+
+</button>
+@endif
+            
         </div>
     </div>
 
@@ -136,7 +301,8 @@
                     <input type="hidden" name="category" value="{{ request('category') }}">
                 @endif
 
-                <div id="brand-filter-list" class="space-y-1.5 max-h-64 overflow-y-auto pr-2">
+                <input type="checkbox" id="brand-more-toggle" class="filter-more-toggle">
+                <div id="brand-filter-list" class="space-y-1.5 pr-2 filter-list">
                     @forelse ($brands as $i => $brandItem)
                         <label class="brand-filter-item {{ $i >= 5 && !in_array($brandItem->name, $selectedBrands) ? 'hidden' : '' }} flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 text-sm transition-colors hover:border-blue-300 hover:bg-slate-50 cursor-pointer"
                                data-brand-name="{{ strtolower($brandItem->name) }}"
@@ -156,16 +322,32 @@
                     @endforelse
                 </div>
 
-                @if($brands->count() > 5)
-                    <button type="button" onclick="toggleSeeMore('brand-filter-item', 'brand-more-btn')"
-                            id="brand-more-btn"
-                            class="mt-2 flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-colors">
-                        <span class="btn-label">See {{ $brands->count() - 5 }} more</span>
-                        <svg class="btn-icon h-3.5 w-3.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
-                @endif
+               @if($brands->count() > 5)
+<button
+type="button"
+onclick="toggleSeeMore('brand-filter-item', this)"
+id="brand-more-btn"
+class="see-more-btn"
+data-count="{{ $brands->count()-5 }}">
+
+    <span class="btn-label">
+        See {{ $brands->count() - 5 }} More
+    </span>
+
+    <svg class="btn-icon"
+         fill="none"
+         stroke="currentColor"
+         viewBox="0 0 24 24">
+
+        <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 9l-7 7-7-7"/>
+    </svg>
+
+</button>
+@endif
             </form>
         </div>
     </div>

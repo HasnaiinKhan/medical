@@ -104,28 +104,30 @@
                                 @csrf
                                 @method('PATCH')
                                 <button type="button"
-                                        onclick="const i=this.closest('form').querySelector('input[name=quantity]');i.value=Math.max(1,+i.value-1);i.dispatchEvent(new Event('input',{bubbles:true}));"
-                                        class="px-2.5 py-1.5 text-slate-600 hover:bg-slate-50 transition-colors font-bold text-sm leading-none">−</button>
-                                <input type="number" name="quantity" value="{{ $line['quantity'] }}" min="1" max="99"
+                                        class="js-card-qty-minus px-2.5 py-1.5 text-slate-600 hover:bg-slate-50 transition-colors font-bold text-sm leading-none">
+                                    −
+                                </button>
+                                <input type="number"
+                                       name="quantity"
+                                       value="{{ $line['quantity'] }}"
+                                       min="1"
+                                       max="99"
                                        class="w-10 border-x border-slate-200 py-1.5 text-center text-sm font-semibold focus:outline-none" />
                                 <button type="button"
-                                        onclick="const i=this.closest('form').querySelector('input[name=quantity]');i.value=Math.min(99,+i.value+1);i.dispatchEvent(new Event('input',{bubbles:true}));"
-                                        class="px-2.5 py-1.5 text-slate-600 hover:bg-slate-50 transition-colors font-bold text-sm leading-none">+</button>
-                                <button type="submit"
-                                        class="px-2.5 py-1.5 bg-blue-50 text-blue-800 text-xs font-semibold hover:bg-blue-100 transition-colors border-l border-slate-200">
-                                    Update
+                                        class="js-card-qty-plus px-2.5 py-1.5 text-slate-600 hover:bg-slate-50 transition-colors font-bold text-sm leading-none">
+                                    +
                                 </button>
                             </form>
 
                             {{-- Remove --}}
                             <form method="post" action="{{ route('cart.remove', $m) }}"
                                   class="js-cart-remove-form"
-                                  data-cart-medicine-id="{{ $m->id }}">
+                                  data-cart-medicine-id="{{ $m->id }}"
+                                  data-medicine-name="{{ $m->name }}">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit"
-                                        class="text-xs font-medium text-red-500 hover:text-red-700 transition-colors hover:underline"
-                                        onclick="return confirm('Remove {{ addslashes($m->name) }} from cart?')">
+                                <button type="button"
+                                        class="js-cart-remove-btn text-xs font-medium text-red-500 hover:text-red-700 transition-colors hover:underline">
                                     Remove
                                 </button>
                             </form>
@@ -192,5 +194,79 @@
         </div>
     </div>
 @endif
+
+<!-- Remove confirmation modal -->
+<div id="remove-modal"
+     class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[9999]">
+    <div class="bg-white rounded-2xl shadow-2xl w-[90%] max-w-md p-6">
+        <h3 class="text-xl font-bold text-slate-800">Remove Item?</h3>
+        <p class="mt-3 text-sm text-slate-500">
+            Are you sure you want to remove
+            <span id="remove-item-name" class="font-semibold text-slate-800"></span>
+            from your cart?
+        </p>
+        <div class="flex justify-end gap-3 mt-6">
+            <button id="cancel-remove"
+                    class="px-5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50">
+                Cancel
+            </button>
+            <button id="confirm-remove"
+                    class="px-5 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700">
+                Remove
+            </button>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+(function () {
+    const modal       = document.getElementById('remove-modal');
+    const itemNameEl  = document.getElementById('remove-item-name');
+    const cancelBtn   = document.getElementById('cancel-remove');
+    const confirmBtn  = document.getElementById('confirm-remove');
+    let pendingForm   = null;
+
+    // Open modal when Remove button clicked
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.js-cart-remove-btn');
+        if (!btn) return;
+        e.preventDefault();
+        pendingForm  = btn.closest('.js-cart-remove-form');
+        itemNameEl.textContent = pendingForm?.dataset.medicineName || 'this item';
+        modal.style.display = 'flex';
+        modal.classList.remove('hidden');
+    });
+
+    cancelBtn.addEventListener('click', function () {
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+        pendingForm = null;
+        window._pendingRemoveForm = null;
+    });
+
+    // Close on backdrop click
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+            pendingForm = null;
+            window._pendingRemoveForm = null;
+        }
+    });
+
+    confirmBtn.addEventListener('click', function () {
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+        const formToSubmit = pendingForm || window._pendingRemoveForm;
+        if (formToSubmit) {
+            formToSubmit.requestSubmit();
+        }
+        pendingForm = null;
+        window._pendingRemoveForm = null;
+    });
+})();
+</script>
+@endpush
 
 @endsection

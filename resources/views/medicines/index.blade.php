@@ -186,21 +186,80 @@
         if (chevron) chevron.classList.toggle('-rotate-180', !hidden);
     }
 
-    function toggleSeeMore(itemClass, btnId) {
-        const items  = Array.from(document.querySelectorAll('.' + itemClass));
-        const btn    = document.getElementById(btnId);
-        if (!btn || !items.length) return;
-        const expand = btn.dataset.expanded !== 'true';
-        items.forEach(el => el.classList.toggle('hidden', !expand && el.dataset.defaultHidden === 'true'));
-        btn.dataset.expanded = expand ? 'true' : 'false';
-        const lbl = btn.querySelector('.btn-label');
-        const ico = btn.querySelector('.btn-icon');
-        if (lbl) lbl.textContent = expand ? 'Show less' : 'See ' + Math.max(items.length - 5, 0) + ' more';
-        if (ico) ico.classList.toggle('rotate-180', expand);
+   function toggleSeeMore(itemClass, button) {
+
+    const container = button.closest('#cat-section, #brand-section');
+
+    const items = container.querySelectorAll('.' + itemClass);
+
+    const expanded = button.dataset.expanded === 'true';
+
+    const hiddenItems = [...items].filter(
+        item => item.dataset.defaultHidden === 'true'
+    );
+
+    const list =
+        itemClass === 'cat-item'
+        ? container.querySelector('#cat-list')
+        : container.querySelector('#brand-filter-list');
+
+    if (!expanded) {
+
+        hiddenItems.forEach(item => {
+            item.classList.remove('hidden');
+        });
+
+        list.classList.add('scroll-enabled');
+
+    } else {
+
+        hiddenItems.forEach(item => {
+            item.classList.add('hidden');
+        });
+
+        list.scrollTop = 0;
+
+        list.classList.remove('scroll-enabled');
+
     }
+
+    button.dataset.expanded = (!expanded).toString();
+
+    const label = button.querySelector('.btn-label');
+
+    if (!expanded) {
+
+        label.textContent = 'See Less';
+
+    } else {
+
+        label.textContent =
+            `See ${button.dataset.count} More`;
+
+    }
+
+    button.querySelector('.btn-icon')
+        .classList.toggle('rotate-180', !expanded);
+}
 
     window.toggleSection = toggleSection;
     window.toggleSeeMore = toggleSeeMore;
+
+   document.addEventListener('wheel', function (e) {
+
+    const list = e.target.closest('.filter-list.scroll-enabled');
+
+    if (!list) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    list.scrollBy({
+        top: e.deltaY,
+        behavior: 'smooth'
+    });
+
+}, { passive: false });
 
     document.addEventListener('submit', function (e) {
         if (!isResultsForm(e.target)) return;

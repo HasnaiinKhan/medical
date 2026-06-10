@@ -489,12 +489,12 @@
                             @csrf
                             @method('PATCH')
                             <button type="button"
-                                    class="js-card-qty-minus w-14 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors font-bold text-lg leading-none"
+                                    class="js-card-qty-minus w-14 h-14 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors font-bold text-lg leading-none"
                                     aria-label="Decrease quantity">−</button>
                             <input type="number" name="quantity" value="{{ $cartItems[$m->id] ?? 1 }}" min="0" max="99" readonly
                                    class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
                             <button type="button"
-                                    class="js-card-qty-plus w-14 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors font-bold text-lg leading-none"
+                                    class="js-card-qty-plus w-14 h-14 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors font-bold text-lg leading-none"
                                     aria-label="Increase quantity">+</button>
                         </form>
                     </div>
@@ -588,9 +588,9 @@
             <span class="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700 mb-4 uppercase tracking-wide w-fit">
                 <i class="fa-solid fa-lungs" style="color: rgb(30, 48, 80);"></i> Lung Health
             </span>
-            <h2 class="text-2xl font-extrabold text-slate-900 leading-tight lg:text-3xl">
-                Advanced Lung Research &amp; Respiratory Care
-            </h2>
+            <h5 class="text-2xl font-extrabold text-slate-900 leading-tight lg:text-3xl">
+            Advanced Lung Research & Respiratory Care
+            </h5>
             <p class="mt-3 text-sm text-slate-500 leading-relaxed">
                 Stay ahead with the latest breakthroughs in pulmonary medicine. From bronchodilators to nebulizers, we stock clinically proven respiratory medicines to help you breathe easier every day.
             </p>
@@ -634,9 +634,9 @@
             <span class="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700 mb-4 uppercase tracking-wide w-fit">
                 🌿 Natural Wellness
             </span>
-            <h2 class="text-2xl font-extrabold text-slate-900 leading-tight lg:text-3xl">
-                Nature-Backed Medicines &amp; Herbal Remedies
-            </h2>
+            <h5 class="text-2xl font-extrabold text-slate-900 leading-tight lg:text-3xl">
+                Nature-Backed Medicines &amp;<br>Herbal Remedies
+            </h5>
             <p class="mt-3 text-sm text-slate-500 leading-relaxed">
                 Harness the power of nature with our curated range of herbal and Ayurvedic medicines. Trusted ingredients, modern formulations - gentle on your body, effective on symptoms.
             </p>

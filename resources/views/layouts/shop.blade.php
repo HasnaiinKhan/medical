@@ -71,12 +71,18 @@
 
         /* ── Header ── */
         .site-header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 40%, #2563eb 70%, #3b82f6 100%);
-            box-shadow: 0 2px 20px rgba(30,58,138,.35);
-            position: sticky;
-            top: 0;
-            z-index: 60;
-        }
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 40%, #2563eb 70%, #3b82f6 100%);
+    box-shadow: 0 2px 20px rgba(30,58,138,.35);
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    width: 100%;
+
+    z-index: 9999;
+}
         .pin-bar {
             background: rgba(30,58,138,.25);
             border-top: 1px solid rgba(255,255,255,.15);
@@ -201,25 +207,29 @@
         }
 
         /* ── Cart badge ── */
-        .cart-badge {
-    display: inline-flex;
+       .cart-badge{
+    position: absolute;
+
+    top: -10px;      /* Move upward */
+    right: -10px;   /* Move outward */
+
+    width: 22px;
+    height: 22px;
+
+    display: flex;
     align-items: center;
     justify-content: center;
-
-    width: 20px;
-    height: 20px;
 
     background: #ff0000;
     color: #fff;
 
     border-radius: 50%;
+    border: 2px solid #fff;
 
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
 
-    position: relative;
-    top: -8px;
-    margin-right:2px;
+    z-index: 10;
 }
 
         /* ── Nav link underline ── */
@@ -440,6 +450,8 @@
             color: #fff;
             text-decoration: none;
             transition: background .15s;
+            padding-right: 12px;
+            margin-right: 4px;
         }
         .hdr-cart-btn:hover { background: rgba(255,255,255,.25); }
 
@@ -869,7 +881,7 @@
         
     </style>
 </head>
-<body class="min-h-screen bg-slate-100 text-slate-900 antialiased">
+<body class="min-h-screen bg-slate-100 text-slate-900 antialiased" style="padding-top:140px;">
 
     {{-- ===== TOP HEADER ===== --}}
     <header id="site-header" class="site-header">
@@ -902,7 +914,7 @@
                                data-medicine-suggest-input
                                autocomplete="off"
                                aria-autocomplete="list"
-                               aria-expanded="false"
+                               aria-expanded="false"a
                                placeholder="Search medicines, brands, categories…"
                                class="flex-1 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 bg-transparent focus:outline-none">
                         <button type="submit"
@@ -1059,8 +1071,9 @@
                         <a href="{{ route('cart.index') }}" @click="mobileMenuOpen = false" class="mob-menu-link mob-menu-link--cart">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                             Cart
-                            <span class="mob-cart-pill">{{ $cartCount ?? 0 }}</span>
+                             <span class="mob-cart-pill">{{ $cartCount ?? 0 }}</span>
                         </a>
+                       
 
                         @auth
                             <a href="{{ route('orders.index') }}" @click="mobileMenuOpen = false" class="mob-menu-link">
@@ -1529,6 +1542,7 @@
     </nav>
 
     <script>
+    let flashTimer = null;
     (function () {
         const siteHeader = document.getElementById('site-header');
         const cartNavLink = document.getElementById('cart-nav-link');
@@ -1681,33 +1695,84 @@
         document.addEventListener('click', function (event) {
             const target = event.target;
             const minus = target.closest('.js-card-qty-minus');
-            if (minus) {
-                event.preventDefault();
-                const form = minus.closest('form.js-cart-update-form');
-                if (!form) return;
-                const qtyInput = form.querySelector('input[name="quantity"]');
-                if (!qtyInput) return;
-                qtyInput.value = Math.max(0, Number(qtyInput.value || 0) - 1);
-                form.requestSubmit();
+if (minus) {
+
+    event.preventDefault();
+
+    const form = minus.closest('form.js-cart-update-form');
+    if (!form) return;
+
+    const qtyInput = form.querySelector('input[name="quantity"]');
+    if (!qtyInput) return;
+
+    const current = Number(qtyInput.value || 1);
+
+    if (current <= 1) {
+        // Check if a remove modal is available (cart page)
+        const removeModal = document.getElementById('remove-modal');
+        if (removeModal) {
+            // Find the corresponding remove form by medicine id
+            const medicineId = form.dataset.cartMedicineId;
+            const removeForm = medicineId
+                ? document.querySelector(`.js-cart-remove-form[data-cart-medicine-id="${medicineId}"]`)
+                : null;
+            if (removeForm) {
+                // Trigger the remove modal (same logic as clicking Remove button)
+                const itemNameEl = document.getElementById('remove-item-name');
+                if (itemNameEl) itemNameEl.textContent = removeForm.dataset.medicineName || 'this item';
+                window._pendingRemoveForm = removeForm;
+                removeModal.style.display = 'flex';
+                removeModal.classList.remove('hidden');
                 return;
             }
-            const plus = target.closest('.js-card-qty-plus');
-            if (plus) {
-                event.preventDefault();
-                const form = plus.closest('form.js-cart-update-form');
-                if (!form) return;
-                const qtyInput = form.querySelector('input[name="quantity"]');
-                if (!qtyInput) return;
-                qtyInput.value = Math.min(99, Number(qtyInput.value || 0) + 1);
-                form.requestSubmit();
-                return;
-            }
+        }
+        // No modal (product page) — submit qty=0 directly
+        qtyInput.value = 0;
+        const existing = cartUpdateTimers.get(form);
+        if (existing) clearTimeout(existing);
+        form.requestSubmit();
+    } else {
+        qtyInput.value = current - 1;
+        const existing = cartUpdateTimers.get(form);
+        if (existing) clearTimeout(existing);
+        cartUpdateTimers.set(form, setTimeout(() => { form.requestSubmit(); }, 400));
+    }
+
+    return;
+}
+
+const plus = target.closest('.js-card-qty-plus');
+if (plus) {
+
+    event.preventDefault();
+
+    const form = plus.closest('form.js-cart-update-form');
+    if (!form) return;
+
+    const qtyInput = form.querySelector('input[name="quantity"]');
+    if (!qtyInput) return;
+
+    qtyInput.value = Math.min(99, Number(qtyInput.value || 0) + 1);
+
+    const existing = cartUpdateTimers.get(form);
+
+    if (existing) clearTimeout(existing);
+
+    cartUpdateTimers.set(form, setTimeout(() => {
+
+        form.requestSubmit();
+
+    }, 500));
+
+    return;
+}
             const card = target.closest('.medicine-card[data-product-url]');
             if (!card) return;
             if (target.closest('form') || target.closest('button') || target.closest('a')) return;
             const url = card.dataset.productUrl;
             if (url) window.location.href = url;
         });
+
 
         document.addEventListener('submit', async function (event) {
             const form = event.target;
@@ -1736,10 +1801,18 @@
                 updateCartBadge(Number(data.cartCount || 0));
                 if (typeof data.linesCount === 'number') updateCartCounts(data.linesCount);
                 if (typeof data.subtotalPaise === 'number') updateCartSummary(data.subtotalPaise, data.linesCount);
-                const card = form.closest('.medicine-card[data-product-id]');
-                if (card) {
-                    const addForm    = card.querySelector('.js-add-to-cart-form');
-                    const updateForm = card.querySelector('.js-cart-update-form');
+                // Find sibling add/update forms — either inside a .medicine-card or
+                // via data-product-id on the form itself (e.g. medicine show page)
+                const card       = form.closest('.medicine-card[data-product-id]');
+                const productId  = form.dataset.productId;
+                const addForm    = card
+                    ? card.querySelector('.js-add-to-cart-form')
+                    : (productId ? document.querySelector(`.js-add-to-cart-form[data-product-id="${productId}"]`) : null);
+                const updateForm = card
+                    ? card.querySelector('.js-cart-update-form')
+                    : (productId ? document.querySelector(`.js-cart-update-form[data-product-id="${productId}"]`) : null);
+
+                if (addForm || updateForm) {
                     if ((isAddToCart || isCartUpdate) && updateForm && typeof data.quantity === 'number') {
                         const qtyInput = updateForm.querySelector('input[name="quantity"]');
                         if (qtyInput) qtyInput.value = data.quantity;
@@ -1748,12 +1821,12 @@
                         addForm?.classList.add('hidden');
                         updateForm?.classList.remove('hidden');
                     }
-                    if (isCartUpdate && typeof data.quantity === 'number' && updateForm) {
-                        if (data.quantity === 0) {
-                            updateForm.classList.add('hidden');
+                    if (isCartUpdate) {
+                        if (data.removed || (typeof data.quantity === 'number' && data.quantity < 1)) {
+                            updateForm?.classList.add('hidden');
                             addForm?.classList.remove('hidden');
                         } else {
-                            updateForm.classList.remove('hidden');
+                            updateForm?.classList.remove('hidden');
                             addForm?.classList.add('hidden');
                         }
                     }
@@ -1762,10 +1835,16 @@
                     const itemId = form.dataset.cartMedicineId;
                     const row = itemId ? document.querySelector(`[data-cart-row-id="${itemId}"]`) : null;
                     if (row) {
-                        const qtyInput = row.querySelector('input[name="quantity"]');
-                        if (qtyInput && typeof data.quantity === 'number') qtyInput.value = data.quantity;
-                        const lineTotal = document.querySelector(`[data-cart-line-total-id="${itemId}"]`);
-                        if (lineTotal && typeof data.lineTotalPaise === 'number') lineTotal.textContent = formatCurrency(data.lineTotalPaise);
+                        if (data.removed || (typeof data.quantity === 'number' && data.quantity < 1)) {
+                            // qty dropped to 0 — treat as remove
+                            row.remove();
+                            if (typeof data.linesCount === 'number' && data.linesCount === 0) showEmptyCart();
+                        } else {
+                            const qtyInput = row.querySelector('input[name="quantity"]');
+                            if (qtyInput && typeof data.quantity === 'number') qtyInput.value = data.quantity;
+                            const lineTotal = document.querySelector(`[data-cart-line-total-id="${itemId}"]`);
+                            if (lineTotal && typeof data.lineTotalPaise === 'number') lineTotal.textContent = formatCurrency(data.lineTotalPaise);
+                        }
                     }
                 }
                 if (isCartRemove) {
@@ -1774,7 +1853,13 @@
                     if (row) row.remove();
                     if (typeof data.linesCount === 'number' && data.linesCount === 0) showEmptyCart();
                 }
-                showFlash(data.message || (isCartRemove ? 'Removed from cart.' : 'Cart updated.'));
+                clearTimeout(flashTimer);
+flashTimer = setTimeout(() => {
+    showFlash(
+        data.message ||
+        (isCartRemove || data.removed ? 'Removed from cart.' : 'Cart updated.')
+    );
+}, 300);
             } catch (error) {
                 showFlash(error.message || 'Something went wrong. Please try again.', 'error');
             } finally {

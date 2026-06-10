@@ -149,7 +149,9 @@
         </div>
 
         {{-- Add to cart form --}}
-        <form method="post" action="{{ route('cart.add') }}" class="js-add-to-cart-form w-full mt-6 {{ $cartQuantity > 0 ? 'hidden' : '' }}">
+        <form method="post" action="{{ route('cart.add') }}"
+              class="js-add-to-cart-form w-full mt-6 {{ $cartQuantity > 0 ? 'hidden' : '' }}"
+              data-product-id="{{ $medicine->id }}">
             @csrf
             <input type="hidden" name="medicine_id" value="{{ $medicine->id }}">
             <input type="hidden" name="quantity" value="1">
@@ -160,18 +162,23 @@
         </form>
 
         <form method="post" action="{{ route('cart.update', $medicine) }}"
-              class="js-cart-update-form flex w-full items-center justify-between rounded-2xl border border-slate-200 overflow-hidden mt-3 {{ $cartQuantity > 0 ? '' : 'hidden' }}"
-              data-cart-medicine-id="{{ $medicine->id }}">
+              class="js-cart-update-form w-full mt-6 {{ $cartQuantity > 0 ? '' : 'hidden' }}"
+              data-cart-medicine-id="{{ $medicine->id }}"
+              data-product-id="{{ $medicine->id }}">
             @csrf
             @method('PATCH')
-            <button type="button"
-                    class="js-card-qty-minus w-14 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors font-bold text-lg leading-none"
-                    aria-label="Decrease quantity">−</button>
-            <input type="number" name="quantity" value="{{ $cartQuantity > 0 ? $cartQuantity : 1 }}" min="0" max="99" readonly
-                   class="flex-1 border-x border-slate-200 bg-white py-3 text-center text-sm font-semibold focus:outline-none" />
-            <button type="button"
-                    class="js-card-qty-plus w-14 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors font-bold text-lg leading-none"
-                    aria-label="Increase quantity">+</button>
+            <div class="flex w-full items-center justify-between rounded-2xl border border-slate-200 overflow-hidden">
+                <button type="button"
+                        class="js-card-qty-minus w-14 py-4 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors font-bold text-lg leading-none"
+                        aria-label="Decrease quantity">−</button>
+                <input type="number" name="quantity"
+                       value="{{ $cartQuantity > 0 ? $cartQuantity : 1 }}"
+                       min="0" max="99" readonly
+                       class="flex-1 border-x border-slate-200 bg-white py-4 text-center text-base font-bold focus:outline-none" />
+                <button type="button"
+                        class="js-card-qty-plus w-14 py-4 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors font-bold text-lg leading-none"
+                        aria-label="Increase quantity">+</button>
+            </div>
         </form>
 
         <a href="{{ route('medicines.index') }}"
