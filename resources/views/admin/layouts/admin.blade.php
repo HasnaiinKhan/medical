@@ -20,6 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W+A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://kit.fontawesome.com/e2d123f69f.js" crossorigin="anonymous"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         * { box-sizing: border-box; }
@@ -44,6 +45,7 @@
                 height: 100vh;
                 flex-shrink: 0;
                 z-index: auto;
+                
             }
             #admin-sidebar-backdrop { display: none !important; }
         }
@@ -86,7 +88,7 @@
             display: flex; 
             align-items: center; 
             gap: 10px; 
-            padding: 8px 14px; 
+            padding: 6px 14px; 
             border-radius: 10px; 
             font-size: 13px; 
             font-weight: 600; 
@@ -241,60 +243,43 @@
             width: 20px;
             height: 20px;
         }
-        /* ── Page Loader Overlay ── */
-        #admin-loader {
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            background: rgba(15, 23, 42, 0.55);
-            backdrop-filter: blur(3px);
-            -webkit-backdrop-filter: blur(3px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity .2s ease;
-        }
-        #admin-loader.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-        .admin-loader-box {
-            background: #fff;
-            border-radius: 20px;
-            padding: 28px 36px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 14px;
-            box-shadow: 0 20px 60px rgba(0,0,0,.25);
-            min-width: 160px;
-        }
-        .admin-loader-ring {
-            width: 44px;
-            height: 44px;
-            border: 4px solid #e2e8f0;
-            border-top-color: #2563eb;
-            border-radius: 50%;
-            animation: adminSpin .75s linear infinite;
-        }
-        .admin-loader-text {
-            font-size: 13px;
-            font-weight: 700;
-            color: #334155;
-            letter-spacing: .01em;
-        }
         @keyframes adminSpin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="min-h-screen">
 
-{{-- ── Global page loader ── --}}
-<div id="admin-loader">
-    <div class="admin-loader-box">
-        <div class="admin-loader-ring"></div>
-        <span class="admin-loader-text" id="admin-loader-text">Loading…</span>
+{{-- ── Screen freeze loader ── --}}
+<div id="admin-loader" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    align-items: center;
+    justify-content: center;
+">
+    <div style="
+        background: #fff;
+        border-radius: 16px;
+        padding: 24px 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 16px 48px rgba(0,0,0,.18);
+        min-width: 140px;
+        text-align: center;
+    ">
+        <div style="
+            width: 36px; height: 36px;
+            border: 3px solid #dbeafe;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: adminSpin .65s linear infinite;
+        "></div>
+        <!-- <span id="admin-loader-text" style="font-size:13px;font-weight:700;color:#334155;">Loading…</span> -->
     </div>
 </div>
 
@@ -323,7 +308,7 @@
         </div>
 
         {{-- Nav --}}
-        <nav class="flex-1 px-3 py-2 space-y-1 flex flex-col">
+        <nav class="px-3  space-y-0.5 flex flex-col">
             <p class="px-3 text-[10px] font-bold uppercase tracking-widest text-blue-400/70 mb-2">Main</p>
 
             <a href="{{ route('admin.dashboard') }}"
@@ -338,6 +323,11 @@
                class="sidebar-link {{ request()->routeIs('admin.medicines.index') ? 'active' : '' }}">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                 All Medicines
+                @if(($outOfStockCount ?? 0) > 0)
+                    <span style="margin-left:auto;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;line-height:1.6;">
+                        {{ $outOfStockCount }}
+                    </span>
+                @endif
             </a>
             <a href="{{ route('admin.medicines.create') }}"
                class="sidebar-link {{ request()->routeIs('admin.medicines.create') ? 'active' : '' }}">
@@ -356,8 +346,8 @@
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                 Import CSV
             </a>
-            <a href="{{ route('admin.medicines.export') }}"
-               class="sidebar-link">
+            <a href="{{ route('admin.medicines.export.form') }}"
+               class="sidebar-link {{ request()->routeIs('admin.medicines.export*') ? 'active' : '' }}">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                 Export CSV
             </a>
@@ -389,10 +379,13 @@
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                 Categories
             </a>
+
+
+            
         </nav>
 
         {{-- Bottom --}}
-        <div class="px-3 border-t border-white/10 flex-shrink-0">
+        <div class="px-3 py-1 border-t border-white/10 flex-shrink-0">
             <p class="px-3 text-[10px] font-bold uppercase tracking-widest text-blue-400/70 mb-2">System</p>
             <a href="{{ route('admin.settings.notifications') }}"
                class="sidebar-link {{ request()->routeIs('admin.settings.notifications*') ? 'active' : '' }}">
@@ -521,40 +514,27 @@
 
 @stack('scripts')
 <script>
-/* ── Global Admin Loader ─────────────────────────────────────────── */
+/* ── Screen freeze loader ─────────────────────────────────────────── */
 (function () {
     var loader     = document.getElementById('admin-loader');
     var loaderText = document.getElementById('admin-loader-text');
 
     function show(msg) {
         loaderText.textContent = msg || 'Loading…';
-        loader.classList.add('active');
+        loader.style.display = 'flex';
     }
     function hide() {
-        loader.classList.remove('active');
+        loader.style.display = 'none';
     }
 
-    // Expose globally so any page script can call window.adminLoader.show/hide
     window.adminLoader = { show: show, hide: hide };
 
-    // ── 1. Form submits ────────────────────────────────────────────────────
-    document.addEventListener('submit', function (e) {
-        var form = e.target;
-        // Skip AJAX forms (they handle their own loading)
-        if (form.dataset.noLoader) return;
-        // Skip forms that open in new tab
-        if (form.target === '_blank') return;
-
-        var msg = 'Saving…';
-        var btn = form.querySelector('[type="submit"]');
-        if (btn) {
-            var txt = btn.textContent.trim();
-            if (txt) msg = txt + '…';
-        }
-        show(msg);
+    // ── Show on page unload (covers F5, Ctrl+R, browser back/forward) ────
+    window.addEventListener('beforeunload', function () {
+        show('Loading…');
     });
 
-    // ── 2. Navigation links (not AJAX, not new-tab, not anchor-only) ──────
+    // ── Navigation links ──────────────────────────────────────────────────
     document.addEventListener('click', function (e) {
         var link = e.target.closest('a[href]');
         if (!link) return;
@@ -563,28 +543,32 @@
         var href = link.getAttribute('href');
         if (!href || href.startsWith('#') || href.startsWith('javascript') || href.startsWith('blob:')) return;
         if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-        // Skip if the original click was on a <button> element (not navigation)
-        var clickedBtn = e.target.closest('button');
-        if (clickedBtn && !link.contains(clickedBtn)) return;
-        // Only internal links
         try {
             var url = new URL(href, window.location.origin);
             if (url.origin !== window.location.origin) return;
         } catch (err) { return; }
-
         show('Loading…');
     });
 
-    // ── 3. Hide on page show (back/forward navigation) ────────────────────
-    window.addEventListener('pageshow', hide);
+    // ── Form submits (skip data-no-loader, _blank, and download forms) ───
+    document.addEventListener('submit', function (e) {
+        var form = e.target;
+        if (form.dataset.noLoader) return;
+        if (form.target === '_blank') return;
+        var btn = form.querySelector('[type="submit"]');
+        var label = btn ? btn.textContent.trim() : '';
+        show(label ? label + '…' : 'Saving…');
+    });
 
-    // ── 4. Hide if already loaded (safety net) ───────────────────────────
-    if (document.readyState === 'complete') {
-        hide();
-    } else {
-        window.addEventListener('load', hide);
-    }
+    // ── Hide as soon as new page is ready ─────────────────────────────────
+    // pageshow covers back/forward cache; load covers normal navigation
+    window.addEventListener('pageshow', hide);
+    window.addEventListener('load',     hide);
+
+    // Safety net — if something goes wrong, never leave frozen forever
+    setTimeout(hide, 15000);
 })();
+
 document.querySelectorAll('.admin-flash-message').forEach(function (message) {
     window.setTimeout(function () {
         message.classList.add('is-hiding');

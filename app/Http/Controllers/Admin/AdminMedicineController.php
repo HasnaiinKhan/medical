@@ -9,7 +9,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use Illuminate\Validation\Rule;
 
 class AdminMedicineController extends Controller
 {
@@ -41,41 +40,36 @@ class AdminMedicineController extends Controller
         return view('admin.medicines.create', compact('categories'));
     }
 
-   public function store(Request $request): RedirectResponse
-{
-    // Prevent duplicate medicine names (case-insensitive)
-    $exists = Medicine::whereRaw('LOWER(name) = ?', [
-        strtolower(trim($request->name))
-    ])->exists();
+    public function store(Request $request): RedirectResponse
+    {
+        $exists = Medicine::whereRaw('LOWER(name) = ?', [
+            strtolower(trim($request->name))
+        ])->exists();
 
-    if ($exists) {
-        return back()
-            ->withErrors([
-                'name' => 'This medicine already exists.'
-            ])
-            ->withInput();
+        if ($exists) {
+            return back()->withErrors(['name' => 'This medicine already exists.'])->withInput();
+        }
+
+        $data       = $this->validated($request);
+        $categoryId = $this->resolveCategory($request);
+
+        Medicine::create([
+            'category_id'           => $categoryId,
+            'name'                  => $data['name'],
+            'slug'                  => Str::slug($data['name']),
+            'manufacturer'          => $data['manufacturer'],
+            'description'           => $data['description'] ?? '',
+            'mrp_paise'             => (int) round($data['mrp'] * 100),
+            'price_paise'           => (int) round($data['price'] * 100),
+            'prescription_required' => (bool) ($data['prescription_required'] ?? false),
+            'stock'                 => (int) $data['stock'],
+            'image_url'             => $this->resolvePrimaryImage($request),
+            'extra_images'          => $this->parseExtraImages($request),
+        ]);
+
+        return redirect()->route('admin.medicines.index')
+            ->with('status', "Medicine '{$data['name']}' created.");
     }
-
-    $data = $this->validated($request);
-    $categoryId = $this->resolveCategory($request);
-
-    Medicine::create([
-        'category_id'           => $categoryId,
-        'name'                  => $data['name'],
-        'slug'                  => Str::slug($data['name']),
-        'manufacturer'          => $data['manufacturer'],
-        'description'           => $data['description'] ?? '',
-        'mrp_paise'             => (int) round($data['mrp'] * 100),
-        'price_paise'           => (int) round($data['price'] * 100),
-        'prescription_required' => (bool) ($data['prescription_required'] ?? false),
-        'stock'                 => (int) $data['stock'],
-        'image_url'             => $this->resolvePrimaryImage($request),
-        'extra_images'          => $this->parseExtraImages($request),
-    ]);
-
-    return redirect()->route('admin.medicines.index')
-        ->with('status', "Medicine '{$data['name']}' created.");
-}
 
     public function edit(Medicine $medicine): View
     {
@@ -85,21 +79,15 @@ class AdminMedicineController extends Controller
 
     public function update(Request $request, Medicine $medicine): RedirectResponse
     {
+        $exists = Medicine::whereRaw('LOWER(name) = ?', [strtolower(trim($request->name))])
+            ->where('id', '!=', $medicine->id)
+            ->exists();
 
-        $exists = Medicine::whereRaw('LOWER(name) = ?', [
-    strtolower(trim($request->name))
-])
-->where('id', '!=', $medicine->id)
-->exists();
+        if ($exists) {
+            return back()->withErrors(['name' => 'This medicine already exists.'])->withInput();
+        }
 
-if ($exists) {
-    return back()
-        ->withErrors([
-            'name' => 'This medicine already exists.'
-        ])
-        ->withInput();
-}
-        $data = $this->validated($request, $medicine->id);
+        $data       = $this->validated($request, $medicine->id);
         $categoryId = $this->resolveCategory($request);
 
         $medicine->update([
@@ -131,51 +119,28 @@ if ($exists) {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    /**
-     * Resolve the primary image: uploaded file takes ABSOLUTE priority over URL input.
-     * File uploads are always preferred, even if URL is present.
-     */
     private function resolvePrimaryImage(Request $request, ?string $existing = null): ?string
     {
-        // File upload takes ABSOLUTE priority - if file exists, ignore any URL
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
             if ($file && $file->isValid()) {
                 $path = $file->store('medicines', 'public');
-                $url = asset('storage/' . $path);
-                \Log::info("Resolved primary image from file upload: {$url}");
-                return $url;
+                return asset('storage/' . $path);
             }
         }
 
-        // Only use URL if NO file was uploaded
         $url = trim((string) $request->input('image_url', ''));
-        if ($url !== '' && !str_starts_with($url, 'blob:')) {
-            // Validate that it's actually a real URL before using it
-            if (filter_var($url, FILTER_VALIDATE_URL)) {
-                \Log::info("Resolved primary image from URL: {$url}");
-                return $url;
-            }
+        if ($url !== '' && !str_starts_with($url, 'blob:') && filter_var($url, FILTER_VALIDATE_URL)) {
+            return $url;
         }
 
-        // Keep existing on update if neither file nor valid URL provided
-        if ($existing) {
-            \Log::info("Keeping existing primary image: {$existing}");
-        }
         return $existing;
     }
 
-    /**
-     * Parse extra images: each slot can be a file upload OR a URL.
-     * extra_image_file[] and extra_image_url[] are parallel arrays by index.
-     * FILE UPLOADS TAKE ABSOLUTE PRIORITY over URLs.
-     */
     private function parseExtraImages(Request $request): array
     {
-        $files = $request->file('extra_image_file', []);
-        $urls  = $request->input('extra_image_url', []);
-
-        // Normalise to same length
+        $files  = $request->file('extra_image_file', []);
+        $urls   = $request->input('extra_image_url', []);
         $count  = max(count((array) $files), count((array) $urls));
         $result = [];
 
@@ -183,29 +148,16 @@ if ($exists) {
             $file = $files[$i] ?? null;
             $url  = trim((string) ($urls[$i] ?? ''));
 
-            // File upload takes ABSOLUTE priority - if file exists, ignore URL completely
             if ($file && $file->isValid()) {
-                $path = $file->store('medicines', 'public');
-                $imageUrl = asset('storage/' . $path);
-                $result[] = $imageUrl;
-                \Log::info("Resolved extra image {$i} from file upload: {$imageUrl}");
-            } 
-            // Only use URL if NO file was uploaded
-            elseif ($url !== '' && !str_starts_with($url, 'blob:')) {
-                // Validate that it's actually a real URL
-                if (filter_var($url, FILTER_VALIDATE_URL)) {
-                    $result[] = $url;
-                    \Log::info("Resolved extra image {$i} from URL: {$url}");
-                }
+                $result[] = asset('storage/' . $file->store('medicines', 'public'));
+            } elseif ($url !== '' && !str_starts_with($url, 'blob:') && filter_var($url, FILTER_VALIDATE_URL)) {
+                $result[] = $url;
             }
         }
 
         return $result;
     }
 
-    /**
-     * If admin typed a new category name, create it on the fly.
-     */
     private function resolveCategory(Request $request): int
     {
         $newName = trim((string) $request->input('new_category_name', ''));
@@ -223,7 +175,6 @@ if ($exists) {
 
     private function validated(Request $request, ?int $ignoreId = null): array
     {
-        // Category is required unless the admin is creating a new one inline
         $newCategoryName = trim((string) $request->input('new_category_name', ''));
         $categoryIdRule  = $newCategoryName !== ''
             ? ['nullable', 'integer']
@@ -238,10 +189,8 @@ if ($exists) {
             'prescription_required' => ['nullable', 'boolean'],
             'stock'                 => ['required', 'integer', 'min:0'],
             'category_id'           => $categoryIdRule,
-            // Primary image: either a URL or a file (both optional)
             'image_url'             => ['nullable', 'string', 'max:500'],
             'image_file'            => ['nullable', 'image', 'max:4096'],
-            // Extra images
             'extra_image_url.*'     => ['nullable', 'string', 'max:500'],
             'extra_image_file.*'    => ['nullable', 'image', 'max:4096'],
         ], [

@@ -23,6 +23,17 @@ class AdminController extends Controller
             'pending'    => Order::where('status', 'placed')->count(),
         ];
 
+        // Out-of-stock medicines (stock <= 0)
+        $outOfStockMedicines = Medicine::where('stock', '<=', 0)
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug', 'stock']);
+
+        // Low-stock medicines (stock between 1 and 5, not zero)
+        $lowStockMedicines = Medicine::where('stock', '>', 0)
+            ->where('stock', '<=', 5)
+            ->orderBy('stock')
+            ->get(['id', 'name', 'slug', 'stock']);
+
         $recentOrders = Order::with('user')
             ->latest()
             ->take(8)
@@ -97,6 +108,6 @@ class AdminController extends Controller
             ->get()
             ->pluck('count', 'status');
 
-        return view('admin.dashboard', compact('stats', 'recentOrders', 'months', 'statusBreakdown'));
+        return view('admin.dashboard', compact('stats', 'recentOrders', 'months', 'statusBreakdown', 'outOfStockMedicines', 'lowStockMedicines'));
     }
 }

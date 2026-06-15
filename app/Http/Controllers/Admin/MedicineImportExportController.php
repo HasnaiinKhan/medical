@@ -112,23 +112,76 @@ class MedicineImportExportController extends Controller
             ->with('import_errors', $errors);
     }
 
-    // ── Export CSV ────────────────────────────────────────────────────────────
+    // ── Export form with filters ─────────────────────────────────────────────────
+    public function exportForm(): View
+    {
+        $categories    = Category::orderBy('name')->get();
+        $manufacturers = Medicine::distinct()
+            ->whereNotNull('manufacturer')
+            ->where('manufacturer', '!=', '')
+            ->orderBy('manufacturer')
+            ->pluck('manufacturer');
+
+        return view('admin.medicines.export', compact('categories', 'manufacturers'));
+    }
+
+    // ── Export CSV with filters ───────────────────────────────────────────────
+    // Accepts GET so the download URL can be triggered directly (no CSRF needed
+    // for a read-only / streaming export operation).
     public function export(Request $request): StreamedResponse
     {
-        $medicines = Medicine::with('category')
-            ->when($request->filled('category'), function ($q) use ($request) {
-                $q->whereHas('category', fn ($c) => $c->where('slug', $request->category));
-            })
-            ->orderBy('name')
-            ->get();
+        $query = Medicine::with('category');
 
-        $filename = 'medicines_' . now()->format('Y-m-d_His') . '.csv';
+        // Filter by categories array (multiple checkboxes)
+        $categorySlugs = array_filter((array) $request->input('categories', []));
+        if (!empty($categorySlugs)) {
+            $query->whereHas('category', fn ($c) => $c->whereIn('slug', $categorySlugs));
+        }
+
+        // Filter by manufacturers array (multiple checkboxes)
+        $manufacturers = array_filter((array) $request->input('manufacturer', []));
+        if (!empty($manufacturers)) {
+            $query->whereIn('manufacturer', $manufacturers);
+        }
+
+        // Keyword search
+        if ($request->filled('q')) {
+            $q = trim((string) $request->q);
+            $query->where(function ($sub) use ($q) {
+                $sub->where('name', 'like', "%{$q}%")
+                    ->orWhere('manufacturer', 'like', "%{$q}%");
+            });
+        }
+
+        // Prescription filter
+        if ($request->filled('prescription') && $request->prescription !== '') {
+            $query->where('prescription_required', (bool)(int) $request->prescription);
+        }
+
+        // Stock status
+        if ($request->filled('stock_status')) {
+            match ($request->stock_status) {
+                'out_of_stock' => $query->where('stock', '<=', 0),
+                'low_stock'    => $query->where('stock', '>', 0)->where('stock', '<=', 5),
+                'in_stock'     => $query->where('stock', '>', 5),
+                default        => null,
+            };
+        }
+
+        // Price range
+        if ($request->filled('price_min')) {
+            $query->where('price_paise', '>=', (int) round((float) $request->price_min * 100));
+        }
+        if ($request->filled('price_max')) {
+            $query->where('price_paise', '<=', (int) round((float) $request->price_max * 100));
+        }
+
+        $medicines = $query->orderBy('name')->get();
+        $filename  = 'medicines_' . now()->format('Y-m-d_His') . '.csv';
 
         return response()->streamDownload(function () use ($medicines) {
             $handle = fopen('php://output', 'w');
-
-            // UTF-8 BOM so Excel opens it correctly
-            fwrite($handle, "\xEF\xBB\xBF");
+            fwrite($handle, "\xEF\xBB\xBF"); // UTF-8 BOM for Excel
 
             fputcsv($handle, [
                 'name', 'manufacturer', 'category', 'mrp', 'price',
@@ -138,19 +191,22 @@ class MedicineImportExportController extends Controller
             foreach ($medicines as $m) {
                 fputcsv($handle, [
                     $m->name,
-                    $m->manufacturer,
+                    $m->manufacturer ?? '',
                     $m->category->name ?? '',
                     number_format($m->mrp_paise   / 100, 2, '.', ''),
                     number_format($m->price_paise / 100, 2, '.', ''),
                     $m->prescription_required ? 'true' : 'false',
                     $m->stock,
-                    $m->description,
+                    $m->description ?? '',
                     $m->image_url ?? '',
                 ]);
             }
 
             fclose($handle);
-        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        }, $filename, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     // ── Download blank template ───────────────────────────────────────────────

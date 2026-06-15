@@ -17,34 +17,75 @@ class CartController extends Controller
 
     public function index(): View
     {
-        $lines = $this->cart->lines();
-        $subtotalPaise = $this->cart->subtotalPaise();
+        $result        = $this->cart->linesWithStockCheck();
+        $lines         = $result['lines'];
+        $subtotalPaise = $lines->sum('line_total_paise');
+        $stockWarnings = [];
 
-        return view('cart.index', compact('lines', 'subtotalPaise'));
+        foreach ($result['removed'] as $name) {
+            $stockWarnings[] = "⚠️ \"{$name}\" is out of stock and was removed from your cart.";
+        }
+        foreach ($result['clamped'] as $item) {
+            $stockWarnings[] = "⚠️ \"{$item['name']}\" quantity reduced to {$item['new']} (only {$item['new']} left in stock).";
+        }
+
+        return view('cart.index', compact('lines', 'subtotalPaise', 'stockWarnings'));
     }
 
     public function add(Request $request): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
             'medicine_id' => ['required', 'integer', 'exists:medicines,id'],
-            'quantity' => ['sometimes', 'integer', 'min:1', 'max:99'],
+            'quantity'    => ['sometimes', 'integer', 'min:1', 'max:99'],
         ]);
 
         $medicine = Medicine::query()->findOrFail($data['medicine_id']);
-        $qty = (int) ($data['quantity'] ?? 1);
+
+        $qty      = (int) ($data['quantity'] ?? 1);
+
+        // Stock check — account for what's already in cart
+        $inCart    = $this->cart->quantity($medicine->id);
+        $available = $medicine->stock;
+
+        if ($available <= 0) {
+            $msg = "{$medicine->displayName()} is out of stock.";
+            if ($request->expectsJson()) {
+                return response()->json(['ok' => false, 'message' => $msg, 'out_of_stock' => true], 422);
+            }
+            return back()->with('error', $msg);
+        }
+
+        if ($inCart + $qty > $available) {
+            $canAdd = max(0, $available - $inCart);
+            if ($canAdd === 0) {
+                $msg = "You already have all {$available} available unit(s) of {$medicine->displayName()} in your cart.";
+            } else {
+                $msg = "Only {$available} unit(s) of {$medicine->displayName()} available. You can add {$canAdd} more.";
+            }
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'ok'         => false,
+                    'message'    => $msg,
+                    'stock_limit' => true,
+                    'available'  => $available,
+                    'in_cart'    => $inCart,
+                ], 422);
+            }
+            return back()->with('error', $msg);
+        }
 
         $this->cart->add($medicine->id, $qty);
 
         if ($request->expectsJson()) {
             return response()->json([
-                'ok' => true,
-                'message' => 'Added to cart: '.$medicine->name,
+                'ok'        => true,
+                'message'   => 'Added to cart: ' . $medicine->displayName(),
                 'cartCount' => $this->cart->count(),
-                'quantity' => $this->cart->quantity($medicine->id),
+                'quantity'  => $this->cart->quantity($medicine->id),
             ]);
         }
 
-        return back()->with('status', 'Added to cart: '.$medicine->name);
+        return back()->with('status', 'Added to cart: ' . $medicine->displayName());
     }
 
     public function update(Request $request, Medicine $medicine): RedirectResponse|JsonResponse
@@ -54,9 +95,48 @@ class CartController extends Controller
         ]);
 
         $qty = (int) $data['quantity'];
-        $this->cart->setQuantity($medicine->id, $qty);
 
-        // If qty < 1, item was removed from cart
+        // Stock check for increases (allow 0 = remove)
+        if ($qty > 0 && $qty > $medicine->stock) {
+            $available = $medicine->stock;
+            if ($available <= 0) {
+                $msg = "{$medicine->name} is now out of stock.";
+                // Remove from cart since stock is gone
+                $this->cart->remove($medicine->id);
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'ok'          => false,
+                        'removed'     => true,
+                        'out_of_stock'=> true,
+                        'message'     => $msg,
+                        'cartCount'   => $this->cart->count(),
+                        'linesCount'  => $this->cart->lines()->count(),
+                        'subtotalPaise' => $this->cart->subtotalPaise(),
+                        'quantity'    => 0,
+                    ], 422);
+                }
+                return back()->with('error', $msg);
+            }
+            // Clamp to available stock
+            $msg = "Only {$available} unit(s) of {$medicine->name} available. Quantity set to {$available}.";
+            $qty = $available;
+            if ($request->expectsJson()) {
+                $this->cart->setQuantity($medicine->id, $qty);
+                return response()->json([
+                    'ok'           => false,
+                    'stock_limit'  => true,
+                    'message'      => $msg,
+                    'cartCount'    => $this->cart->count(),
+                    'linesCount'   => $this->cart->lines()->count(),
+                    'subtotalPaise'=> $this->cart->subtotalPaise(),
+                    'quantity'     => $qty,
+                    'lineTotalPaise' => $medicine->price_paise * $qty,
+                ], 422);
+            }
+            return back()->with('error', $msg);
+        }
+
+        $this->cart->setQuantity($medicine->id, $qty);
         $removed = $qty < 1;
 
         if ($request->expectsJson()) {

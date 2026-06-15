@@ -78,6 +78,63 @@
 @endforeach
 </div>
 
+{{-- ── Stock Alerts ── --}}
+@if($outOfStockMedicines->isNotEmpty() || $lowStockMedicines->isNotEmpty())
+<div class="mb-6 space-y-3">
+
+    {{-- Out of stock --}}
+    @if($outOfStockMedicines->isNotEmpty())
+    <div class="rounded-2xl border border-red-200 bg-red-50 p-4 sm:p-5">
+        <div class="flex items-start gap-3">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-red-100 text-xl"><i class="fa-solid fa-circle-exclamation" style="color: rgb(194, 0, 0);"></i></div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-red-900 mb-1">
+                    {{ $outOfStockMedicines->count() }} Medicine{{ $outOfStockMedicines->count() > 1 ? 's' : '' }} Out of Stock
+                </p>
+                <p class="text-xs text-red-700 mb-3">These products have 0 units remaining. Customers cannot purchase them. Please restock immediately.</p>
+                <div class="flex flex-wrap gap-2">
+                    @foreach($outOfStockMedicines as $m)
+                        <a href="{{ route('admin.medicines.edit', $m) }}"
+                           class="inline-flex items-center gap-1.5 rounded-lg bg-red-100 border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-200 transition-colors">
+                            <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                            {{ $m->name }}
+                            <span class="text-[10px] font-bold text-red-600 bg-red-200 px-1 rounded">0</span>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- Low stock --}}
+    @if($lowStockMedicines->isNotEmpty())
+    <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5">
+        <div class="flex items-start gap-3">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-100 text-xl">⚠️</div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-amber-900 mb-1">
+                    {{ $lowStockMedicines->count() }} Medicine{{ $lowStockMedicines->count() > 1 ? 's' : '' }} Running Low
+                </p>
+                <p class="text-xs text-amber-700 mb-3">These products have 5 or fewer units remaining. Consider restocking soon.</p>
+                <div class="flex flex-wrap gap-2">
+                    @foreach($lowStockMedicines as $m)
+                        <a href="{{ route('admin.medicines.edit', $m) }}"
+                           class="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-200 transition-colors">
+                            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                            {{ $m->name }}
+                            <span class="text-[10px] font-bold text-amber-700 bg-amber-200 px-1 rounded">{{ $m->stock }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+</div>
+@endif
+
 {{-- Quick actions --}}
 <div class="mb-6 grid gap-3 grid-cols-2 lg:grid-cols-4">
     <a href="{{ route('admin.medicines.create') }}"
@@ -119,31 +176,7 @@
     $waEnabled = config('services.whatsapp.enabled', true);
     $waPhone   = config('services.whatsapp.number', '917600264090');
 @endphp
-<div class="mb-6 rounded-2xl border border-green-200 bg-green-50 p-4 sm:p-5">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-white text-lg" style="background-color:green;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.845L0 24l6.335-1.508A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.373l-.36-.213-3.727.977.994-3.634-.234-.374A9.818 9.818 0 1112 21.818z"/></svg>
-            </div>
-            <div>
-                <p class="text-sm font-bold text-green-900">WhatsApp Integration</p>
-                <p class="text-xs text-green-700">
-                    Status: <strong>{{ $waEnabled ? 'Enabled ✓' : 'Disabled ✗' }}</strong> ·
-                    Number: <strong>+{{ $waPhone }}</strong>
-                </p>
-            </div>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 text-xs text-green-800">
-            <span class="rounded-full bg-green-100 px-3 py-1 font-semibold text-[10px] sm:text-xs">
-                Update <code class="font-mono bg-green-200 px-1 rounded">WHATSAPP_NUMBER</code> in <code class="font-mono bg-green-200 px-1 rounded">.env</code>
-            </span>
-            <a href="https://wa.me/{{ $waPhone }}" target="_blank"
-               class="rounded-xl px-4 py-2 font-bold text-white hover:bg-green-600 transition-colors" style="background-color:green;">
-                Test Chat
-            </a>
-        </div>
-    </div>
-</div>
+
 {{-- ── Charts ── --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
 

@@ -69,11 +69,58 @@ class CartService
             }
 
             return [
-                'medicine' => $medicine,
-                'quantity' => $qty,
-                'line_total_paise' => $medicine->price_paise * $qty,
+                'medicine'        => $medicine,
+                'quantity'        => $qty,
+                'line_total_paise'=> $medicine->price_paise * $qty,
             ];
         })->filter()->values();
+    }
+
+    /**
+     * Return lines and auto-fix quantities that exceed current stock.
+     * Returns ['lines' => Collection, 'removed' => [], 'clamped' => []]
+     */
+    public function linesWithStockCheck(): array
+    {
+        $ids = array_keys($this->items());
+        if ($ids === []) {
+            return ['lines' => collect(), 'removed' => [], 'clamped' => []];
+        }
+
+        $medicines = Medicine::query()->whereIn('id', $ids)->get()->keyBy('id');
+        $cart      = $this->items();
+        $removed   = [];
+        $clamped   = [];
+
+        foreach ($cart as $id => $qty) {
+            $medicine = $medicines->get($id);
+            if (! $medicine) {
+                unset($cart[$id]);
+                continue;
+            }
+            if ($medicine->stock <= 0) {
+                $removed[] = $medicine->name;
+                unset($cart[$id]);
+            } elseif ($qty > $medicine->stock) {
+                $clamped[] = ['name' => $medicine->name, 'old' => $qty, 'new' => $medicine->stock];
+                $cart[$id] = $medicine->stock;
+            }
+        }
+
+        // Persist corrected cart back to session
+        Session::put(self::SESSION_KEY, $cart);
+
+        $lines = collect($cart)->map(function (int $qty, int $id) use ($medicines) {
+            $medicine = $medicines->get($id);
+            if (! $medicine) return null;
+            return [
+                'medicine'        => $medicine,
+                'quantity'        => $qty,
+                'line_total_paise'=> $medicine->price_paise * $qty,
+            ];
+        })->filter()->values();
+
+        return ['lines' => $lines, 'removed' => $removed, 'clamped' => $clamped];
     }
 
     public function subtotalPaise(): int

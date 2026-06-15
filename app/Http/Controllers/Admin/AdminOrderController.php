@@ -105,6 +105,21 @@ class AdminOrderController extends Controller
                 'cancelled_at'        => now(),
             ]);
 
+            // Restore stock for cancelled orders
+            // (only if stock was already decremented — COD always, online only if paid/confirmed)
+            $stockWasDeducted = $order->payment_method === 'cod'
+                || in_array($order->payment_status, ['paid'])
+                || in_array($order->status, ['confirmed', 'shipped']);
+
+            if ($stockWasDeducted) {
+                $order->loadMissing('items.medicine');
+                foreach ($order->items as $item) {
+                    if ($item->medicine) {
+                        $item->medicine->increment('stock', $item->quantity);
+                    }
+                }
+            }
+
             // Notify customer
             if ($order->user) {
                 try {

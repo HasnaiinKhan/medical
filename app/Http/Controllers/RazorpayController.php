@@ -82,6 +82,19 @@ class RazorpayController extends Controller
         $deliveryFeePaise = $subtotalPaise >= self::FREE_DELIVERY_ABOVE_PAISE ? 0 : self::DELIVERY_FEE_PAISE;
         $totalPaise       = $subtotalPaise + $deliveryFeePaise;
 
+        // ── Stock validation before placing order ─────────────────────────────
+        foreach ($this->cart->lines() as $line) {
+            $medicine = $line['medicine'];
+            $qty      = $line['quantity'];
+            if ($medicine->stock < $qty) {
+                $available = $medicine->stock;
+                $msg = $available <= 0
+                    ? "{$medicine->name} is out of stock. Please remove it from your cart before proceeding."
+                    : "Only {$available} unit(s) of {$medicine->name} are available. Please update your cart quantity.";
+                return response()->json(['error' => $msg, 'out_of_stock' => true], 422);
+            }
+        }
+
         // ── Save address if requested ─────────────────────────────────────────
         if (!empty($data['save_address'])) {
             $this->saveAddress($data, $pin);
@@ -191,6 +204,13 @@ class RazorpayController extends Controller
             'payment_status'      => 'paid',
             'status'              => 'confirmed',
         ]);
+
+        // Decrement stock now that online payment is confirmed
+        foreach ($order->items as $item) {
+            if ($item->medicine) {
+                $item->medicine->decrementStock($item->quantity);
+            }
+        }
 
         $this->cart->clear();
 
@@ -307,6 +327,12 @@ class RazorpayController extends Controller
                     'line_total_paise'       => $medicine->price_paise * $qty,
                     'medicine_name_snapshot' => $medicine->name,
                 ]);
+
+                // Decrement stock for COD immediately (order is confirmed intent)
+                // For online payments, stock is decremented after payment verification
+                if ($paymentMethod === 'cod') {
+                    $medicine->decrementStock($qty);
+                }
             }
 
             return $order;

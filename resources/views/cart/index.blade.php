@@ -4,6 +4,18 @@
 
 @section('content')
 
+{{-- Stock warnings (out-of-stock items removed, quantities clamped) --}}
+@if(!empty($stockWarnings))
+<div id="cart-stock-warnings">
+    @foreach($stockWarnings as $warning)
+    <div class="mb-3 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 font-medium">
+        <span class="flex-shrink-0 text-base">⚠️</span>
+        <span>{{ $warning }}</span>
+    </div>
+    @endforeach
+</div>
+@endif
+
 {{-- Cart header — animated gradient, no image --}}
 <div class="relative mb-6 overflow-hidden rounded-2xl" style="min-height: 100px;">
     {{-- Animated flowing gradient background --}}
@@ -100,7 +112,8 @@
                             {{-- Quantity update --}}
                             <form method="post" action="{{ route('cart.update', $m) }}"
                                   class="inline-flex items-center gap-0 rounded-lg border border-slate-200 overflow-hidden js-cart-update-form"
-                                  data-cart-medicine-id="{{ $m->id }}">
+                                  data-cart-medicine-id="{{ $m->id }}"
+                                  data-stock="{{ $m->stock }}">
                                 @csrf
                                 @method('PATCH')
                                 <button type="button"

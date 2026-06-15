@@ -85,7 +85,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Import / Export
     Route::get('medicines-import',          [MedicineImportExportController::class, 'importForm'])->name('medicines.import.form');
     Route::post('medicines-import',         [MedicineImportExportController::class, 'import'])->name('medicines.import');
-    Route::get('medicines-export',          [MedicineImportExportController::class, 'export'])->name('medicines.export');
+    Route::get('medicines-export',          [MedicineImportExportController::class, 'exportForm'])->name('medicines.export.form');
+    Route::get('medicines-export-download', [MedicineImportExportController::class, 'export'])->name('medicines.export');
     Route::get('medicines-export-template', [MedicineImportExportController::class, 'template'])->name('medicines.template');
 
     // Orders

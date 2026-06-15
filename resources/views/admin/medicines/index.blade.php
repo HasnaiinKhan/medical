@@ -5,6 +5,47 @@
 
 @section('content')
 
+@php
+    $outOfStockList = \App\Models\Medicine::where('stock', '<=', 0)->orderBy('name')->get(['id','name','slug','stock']);
+    $lowStockList   = \App\Models\Medicine::where('stock', '>', 0)->where('stock', '<=', 5)->orderBy('stock')->get(['id','name','slug','stock']);
+@endphp
+
+{{-- Out-of-stock alert --}}
+@if($outOfStockList->isNotEmpty())
+<div class="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 flex items-start gap-3">
+    <span class="text-xl flex-shrink-0"><i class="fa-solid fa-circle-exclamation" style="color: rgb(194, 0, 0);"></i></span>
+    <div class="flex-1">
+        <p class="text-sm font-bold text-red-900 mb-2">{{ $outOfStockList->count() }} out-of-stock — customers cannot buy these. Restock immediately.</p>
+        <div class="flex flex-wrap gap-2">
+            @foreach($outOfStockList as $m)
+                <a href="{{ route('admin.medicines.edit', $m) }}"
+                   class="inline-flex items-center gap-1 rounded-lg bg-red-100 border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-800 hover:bg-red-200 transition-colors">
+                    {{ $m->name }} <span class="bg-red-200 px-1 rounded font-bold">0</span>
+                </a>
+            @endforeach
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- Low-stock warning --}}
+@if($lowStockList->isNotEmpty())
+<div class="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex items-start gap-3">
+    <span class="text-xl flex-shrink-0">⚠️</span>
+    <div class="flex-1">
+        <p class="text-sm font-bold text-amber-900 mb-2">{{ $lowStockList->count() }} running low (≤5 units) — consider restocking soon.</p>
+        <div class="flex flex-wrap gap-2">
+            @foreach($lowStockList as $m)
+                <a href="{{ route('admin.medicines.edit', $m) }}"
+                   class="inline-flex items-center gap-1 rounded-lg bg-amber-100 border border-amber-200 px-2.5 py-1 text-xs font-semibold text-amber-800 hover:bg-amber-200 transition-colors">
+                    {{ $m->name }} <span class="bg-amber-200 px-1 rounded font-bold">{{ $m->stock }}</span>
+                </a>
+            @endforeach
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- Toolbar --}}
 <div class="mb-5 flex flex-col gap-3">
     <form action="{{ route('admin.medicines.index') }}" method="get" class="flex gap-2 flex-wrap items-center">
@@ -31,7 +72,7 @@
             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
             Import
         </a>
-        <a href="{{ route('admin.medicines.export') }}"
+        <a href="{{ route('admin.medicines.export.form') }}"
            class="btn-sm inline-flex items-center gap-1.5 bg-blue-700 text-white hover:bg-blue-800 rounded-xl">
             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
             Export
@@ -83,8 +124,8 @@
                         <td class="text-slate-500 text-xs line-through">₹{{ number_format($m->mrpRupees(), 2) }}</td>
                         <td class="font-bold text-slate-900">₹{{ number_format($m->priceRupees(), 2) }}</td>
                         <td>
-                            <span class="font-semibold {{ $m->stock < 20 ? 'text-red-600' : 'text-slate-700' }}">
-                                {{ $m->stock }}
+                            <span class="font-semibold {{ $m->stock <= 0 ? 'text-red-600' : ($m->stock <= 5 ? 'text-amber-600' : 'text-slate-700') }}">
+                                {{ $m->stock <= 0 ? '⚠ Out of Stock' : $m->stock }}
                             </span>
                         </td>
                         <td>

@@ -26,10 +26,6 @@ class Medicine extends Model
         'extra_images',
     ];
 
-    /**
-     * Returns the product image URL, falling back to a deterministic
-     * placeholder based on the medicine's primary key.
-     */
     public function imageUrl(): string
     {
         if ($this->image_url) {
@@ -39,7 +35,6 @@ class Medicine extends Model
         return 'https://picsum.photos/seed/med-' . $this->id . '/400/400';
     }
 
-    /** All images: primary + extras */
     public function allImages(): array
     {
         $primary = [$this->imageUrl()];
@@ -77,5 +72,26 @@ class Medicine extends Model
         }
 
         return (int) round(100 - ($this->price_paise / $this->mrp_paise) * 100);
+    }
+
+    /**
+     * Safely decrement stock without going below zero.
+     */
+    public function decrementStock(int $qty): void
+    {
+        \Illuminate\Support\Facades\DB::table('medicines')
+            ->where('id', $this->id)
+            ->update([
+                'stock' => \Illuminate\Support\Facades\DB::raw("GREATEST(0, stock - {$qty})"),
+            ]);
+        $this->refresh();
+    }
+
+    /**
+     * Display name — simple, no variant suffix.
+     */
+    public function displayName(): string
+    {
+        return $this->name;
     }
 }

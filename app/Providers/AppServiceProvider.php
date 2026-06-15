@@ -21,5 +21,10 @@ class AppServiceProvider extends ServiceProvider
         View::composer('*', function ($view) {
             $view->with('cartCount', app(CartService::class)->count());
         });
+
+        // Share out-of-stock count with all admin views for the sidebar badge
+        View::composer('admin.*', function ($view) {
+            $view->with('outOfStockCount', \App\Models\Medicine::where('stock', '<=', 0)->count());
+        });
     }
 }

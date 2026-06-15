@@ -1797,7 +1797,42 @@ if (plus) {
                     body: new FormData(form),
                 });
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Could not update the cart.');
+                if (!response.ok) {
+                    // Stock limit hit — show toast and handle UI updates
+                    if (data.stock_limit || data.out_of_stock) {
+                        showFlash(data.message, 'error');
+                        updateCartBadge(Number(data.cartCount || 0));
+                        if (typeof data.linesCount === 'number') updateCartCounts(data.linesCount);
+                        if (typeof data.subtotalPaise === 'number') updateCartSummary(data.subtotalPaise, data.linesCount);
+
+                        if (data.out_of_stock && data.removed) {
+                            // Item gone — remove row from cart page
+                            const itemId = form.dataset.cartMedicineId;
+                            const row = itemId ? document.querySelector(`[data-cart-row-id="${itemId}"]`) : null;
+                            if (row) row.remove();
+                            if (data.linesCount === 0) showEmptyCart();
+                            // Swap stepper back to add-to-cart on product pages
+                            const productId  = form.dataset.productId;
+                            const addForm    = productId ? document.querySelector(`.js-add-to-cart-form[data-product-id="${productId}"]`) : null;
+                            const updateForm = form.classList.contains('js-cart-update-form') ? form : null;
+                            updateForm?.classList.add('hidden');
+                            addForm?.classList.remove('hidden');
+                        } else if (data.stock_limit && typeof data.quantity === 'number') {
+                            // Clamp qty input to what server accepted
+                            const itemId = form.dataset.cartMedicineId;
+                            const row = itemId ? document.querySelector(`[data-cart-row-id="${itemId}"]`) : null;
+                            const qtyInput = row
+                                ? row.querySelector('input[name="quantity"]')
+                                : form.querySelector('input[name="quantity"]');
+                            if (qtyInput) qtyInput.value = data.quantity;
+                            const lineTotal = itemId ? document.querySelector(`[data-cart-line-total-id="${itemId}"]`) : null;
+                            if (lineTotal && data.lineTotalPaise != null) lineTotal.textContent = formatCurrency(data.lineTotalPaise);
+                            if (typeof data.subtotalPaise === 'number') updateCartSummary(data.subtotalPaise, data.linesCount);
+                        }
+                        return; // Don't throw — we handled it
+                    }
+                    throw new Error(data.message || 'Could not update the cart.');
+                }
                 updateCartBadge(Number(data.cartCount || 0));
                 if (typeof data.linesCount === 'number') updateCartCounts(data.linesCount);
                 if (typeof data.subtotalPaise === 'number') updateCartSummary(data.subtotalPaise, data.linesCount);
