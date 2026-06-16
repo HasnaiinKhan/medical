@@ -62,12 +62,13 @@
 
             @if($refund->proof_image_path)
                 <div class="mt-3">
-                    <p class="text-xs text-slate-500 mb-1">Customer Proof Image</p>
-                    <a href="{{ Storage::url($refund->proof_image_path) }}" target="_blank">
-                        <img src="{{ Storage::url($refund->proof_image_path) }}"
-                             alt="Proof"
-                             class="max-h-48 rounded-xl border border-slate-200 object-contain hover:opacity-90 transition-opacity">
+                    <p class="text-xs text-slate-500 mb-2">Customer Proof Image</p>
+                    <a href="{{ asset('storage/' . $refund->proof_image_path) }}" target="_blank" class="block">
+                        <img src="{{ asset('storage/' . $refund->proof_image_path) }}"
+                             alt="Refund Proof"
+                             class="max-w-full max-h-64 rounded-xl border-2 border-slate-200 object-contain hover:opacity-90 hover:border-blue-400 transition-all shadow-sm">
                     </a>
+                    <p class="text-[10px] text-slate-400 mt-1">Click to view full size</p>
                 </div>
             @endif
         </div>

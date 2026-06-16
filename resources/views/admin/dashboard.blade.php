@@ -180,17 +180,55 @@
 {{-- ── Charts ── --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
 
-    {{-- Revenue bar chart (spans 2 cols) --}}
-    <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-            <div>
-                <h2 class="text-sm font-bold text-slate-900">Revenue Overview</h2>
-                <p class="text-xs text-slate-500 mt-0.5">5 prior months + daily this month · paid orders only</p>
-            </div>
-            <span class="text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg">₹ Revenue</span>
+    {{-- Revenue + Orders charts with filter toggle (spans 2 cols) --}}
+    <div class="lg:col-span-2 space-y-5">
+
+        {{-- Filter toggle --}}
+        <div class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white shadow-sm px-4 py-3">
+            <span class="text-xs font-bold text-slate-500 mr-1">View by:</span>
+            @foreach([
+                ['today', 'Today',      'hourly'],
+                ['week',  'This Week',  'daily'],
+                ['month', 'This Month', 'daily'],
+                ['year',  'This Year',  'monthly'],
+            ] as [$key, $label, $sub])
+                <button type="button"
+                        onclick="setChartFilter('{{ $key }}')"
+                        id="filter-btn-{{ $key }}"
+                        class="chart-filter-btn rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all
+                               {{ $key === 'month' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100' }}">
+                    {{ $label }}
+                    <span class="text-[10px] font-normal opacity-70 ml-0.5">{{ $sub }}</span>
+                </button>
+            @endforeach
         </div>
-        <div class="p-4 sm:p-5">
-            <canvas id="revenueChart" height="110"></canvas>
+
+        {{-- Revenue bar chart --}}
+        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-900">Revenue Overview</h2>
+                    <p class="text-xs text-slate-500 mt-0.5" id="revenue-subtitle">This month · daily · paid orders only</p>
+                </div>
+                <span class="text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg">₹ Revenue</span>
+            </div>
+            <div class="p-4 sm:p-5">
+                <canvas id="revenueChart" height="110"></canvas>
+            </div>
+        </div>
+
+        {{-- Orders line chart --}}
+        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-900">Orders Trend</h2>
+                    <p class="text-xs text-slate-500 mt-0.5" id="orders-subtitle">This month · daily · paid orders only</p>
+                </div>
+                <span class="text-xs font-semibold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg"># Orders</span>
+            </div>
+            <div class="p-4 sm:p-5">
+                <canvas id="ordersChart" height="80"></canvas>
+            </div>
         </div>
     </div>
 
@@ -199,45 +237,14 @@
         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <div>
                 <h2 class="text-sm font-bold text-slate-900">Order Status</h2>
-                <p class="text-xs text-slate-500 mt-0.5">All-time breakdown</p>
+                <p class="text-xs text-slate-500 mt-0.5" id="status-subtitle">This month breakdown</p>
             </div>
         </div>
         <div class="p-4 sm:p-5 flex flex-col items-center">
             <canvas id="statusChart" height="180" style="max-width:220px"></canvas>
-            {{-- Legend --}}
-            <div class="mt-4 w-full grid grid-cols-2 gap-x-4 gap-y-1.5">
-                @php
-                    $statusLabels = [
-                        'placed'         => ['Placed',         '#3b82f6'],
-                        'confirmed'      => ['Confirmed',      '#6366f1'],
-                        'shipped'        => ['Shipped',        '#8b5cf6'],
-                        'delivered'      => ['Delivered',      '#10b981'],
-                        'cancelled'      => ['Cancelled',      '#ef4444'],
-                        'payment_failed' => ['Pay Failed',     '#f97316'],
-                    ];
-                @endphp
-                @foreach($statusBreakdown as $status => $count)
-                    @php $meta = $statusLabels[$status] ?? [ucfirst($status), '#94a3b8']; @endphp
-                    <div class="flex items-center gap-1.5">
-                        <span class="h-2.5 w-2.5 rounded-full flex-shrink-0" style="background:{{ $meta[1] }}"></span>
-                        <span class="text-[11px] text-slate-600 truncate">{{ $meta[0] }} <strong>{{ $count }}</strong></span>
-                    </div>
-                @endforeach
+            <div class="mt-4 w-full grid grid-cols-2 gap-x-4 gap-y-1.5" id="status-legend">
+                {{-- This will be populated dynamically --}}
             </div>
-        </div>
-    </div>
-
-    {{-- Orders per month bar chart (full width) --}}
-    <div class="lg:col-span-3 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-            <div>
-                <h2 class="text-sm font-bold text-slate-900">Orders Trend</h2>
-                <p class="text-xs text-slate-500 mt-0.5">5 prior months + daily this month · paid orders only</p>
-            </div>
-            <span class="text-xs font-semibold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg"># Orders</span>
-        </div>
-        <div class="p-4 sm:p-5">
-            <canvas id="ordersChart" height="70"></canvas>
         </div>
     </div>
 
@@ -309,183 +316,278 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 (function () {
-    const chartData   = @json($months);
-    const labels      = chartData.map(r => r.label);
-    const revenue     = chartData.map(r => r.revenue);
-    const orders      = chartData.map(r => r.orders);
-    const types       = chartData.map(r => r.type);   // 'month' | 'day'
+    // ── All data sets from backend ─────────────────────────────────────
+    const allDataSets = {
+        today: @json($todayData),
+        week:  @json($weekData),
+        month: @json($monthData),
+        year:  @json($yearData),
+    };
 
-    // Today is the last bar — highlight it
-    const todayIdx = types.lastIndexOf('day');
+    // Status breakdown for each time period
+    const statusBreakdownData = {
+        today: @json($statusBreakdownToday),
+        week:  @json($statusBreakdownWeek),
+        month: @json($statusBreakdownMonth),
+        year:  @json($statusBreakdownYear),
+    };
 
-    // Bar colours: monthly = blue tint, daily = stronger blue, today = solid blue
-    const revBg = types.map((t, i) =>
-        i === todayIdx  ? '#2563eb' :
-        t === 'day'     ? 'rgba(37,99,235,0.45)' :
-                          'rgba(37,99,235,0.15)'
-    );
-    const revBorder = types.map((t, i) =>
-        i === todayIdx  ? '#1d4ed8' :
-        t === 'day'     ? '#3b82f6' :
-                          '#93c5fd'
-    );
+    // Chart metadata for each filter
+    const chartMeta = {
+        today: { title: 'Today', subtitle: 'hourly · paid orders only', periodType: 'hour' },
+        week:  { title: 'This Week', subtitle: 'daily · paid orders only', periodType: 'day' },
+        month: { title: 'This Month', subtitle: 'daily · paid orders only', periodType: 'day' },
+        year:  { title: 'This Year', subtitle: 'monthly · paid orders only', periodType: 'month' },
+    };
 
-    const ordBg = types.map((t, i) =>
-        i === todayIdx  ? '#7c3aed' :
-        t === 'day'     ? 'rgba(124,58,237,0.45)' :
-                          'rgba(124,58,237,0.15)'
-    );
+    let currentFilter = 'month'; // default
+    let revenueChartInstance = null;
+    let ordersChartInstance = null;
+    let statusChartInstance = null;
 
     const fontFamily = "'Plus Jakarta Sans', sans-serif";
     Chart.defaults.font.family = fontFamily;
     Chart.defaults.color = '#64748b';
 
-    // ── Revenue bar chart ──────────────────────────────────────────────
-    new Chart(document.getElementById('revenueChart'), {
-        type: 'bar',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Revenue (₹)',
-                data: revenue,
-                backgroundColor: revBg,
-                borderColor: revBorder,
-                borderWidth: 1.5,
-                borderRadius: 6,
-                borderSkipped: false,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        title: ctx => {
-                            const i = ctx[0].dataIndex;
-                            return types[i] === 'day' ? labels[i] + ' (daily)' : labels[i] + ' (monthly)';
-                        },
-                        label: ctx => ' ₹' + Number(ctx.parsed.y).toLocaleString('en-IN', { minimumFractionDigits: 2 })
-                    }
-                },
-                // Vertical divider annotation between monthly and daily sections
-                annotation: undefined,
+    // ── Build & render charts ──────────────────────────────────────────
+    function renderCharts(filterKey) {
+        const data = allDataSets[filterKey];
+        const meta = chartMeta[filterKey];
+
+        const labels  = data.map(r => r.label);
+        const revenue = data.map(r => r.revenue);
+        const orders  = data.map(r => r.orders);
+
+        // Highlight last bar (today/current period)
+        const lastIdx = labels.length - 1;
+
+        // Revenue bar colors
+        const revBg = labels.map((_, i) =>
+            i === lastIdx ? '#2563eb' : 'rgba(37,99,235,0.35)'
+        );
+        const revBorder = labels.map((_, i) =>
+            i === lastIdx ? '#1d4ed8' : '#3b82f6'
+        );
+
+        // Orders line colors
+        const ordPointBg = labels.map((_, i) =>
+            i === lastIdx ? '#7c3aed' : '#a78bfa'
+        );
+        const ordPointRadius = labels.map((_, i) =>
+            i === lastIdx ? 6 : 4
+        );
+
+        // Update subtitles
+        document.getElementById('revenue-subtitle').textContent = meta.subtitle;
+        document.getElementById('orders-subtitle').textContent = meta.subtitle;
+
+        // ── Revenue bar chart ──────────────────────────────────────────
+        const revenueCtx = document.getElementById('revenueChart');
+        if (revenueChartInstance) revenueChartInstance.destroy();
+        revenueChartInstance = new Chart(revenueCtx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: revenue,
+                    backgroundColor: revBg,
+                    borderColor: revBorder,
+                    borderWidth: 1.5,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                }]
             },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: {
-                        maxRotation: 45,
-                        font: { size: 10 },
-                        color: ctx => types[ctx.index] === 'day' ? '#2563eb' : '#94a3b8',
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: ctx => labels[ctx[0].dataIndex] + ' (' + meta.periodType + ')',
+                            label: ctx => ' ₹' + Number(ctx.parsed.y).toLocaleString('en-IN', { minimumFractionDigits: 2 })
+                        }
                     }
                 },
-                y: {
-                    beginAtZero: true,
-                    grid: { color: '#f1f5f9' },
-                    ticks: {
-                        callback: v => '₹' + (v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v)
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            maxRotation: 45,
+                            font: { size: 10 },
+                            color: '#64748b',
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f1f5f9' },
+                        ticks: {
+                            callback: v => '₹' + (v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v)
+                        }
                     }
                 }
             }
-        }
-    });
+        });
 
-    // ── Orders line chart ─────────────────────────────────────────────
-    new Chart(document.getElementById('ordersChart'), {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Orders',
-                data: orders,
-                backgroundColor: 'rgba(124,58,237,0.08)',
-                borderColor: '#7c3aed',
-                borderWidth: 2.5,
-                pointBackgroundColor: types.map((t, i) =>
-                    i === todayIdx ? '#7c3aed' : t === 'day' ? '#a78bfa' : '#c4b5fd'
-                ),
-                pointBorderColor: '#fff',
-                pointBorderWidth: 1.5,
-                pointRadius: types.map((t, i) => i === todayIdx ? 6 : t === 'day' ? 4 : 3),
-                pointHoverRadius: 7,
-                fill: true,
-                tension: 0.4,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        title: ctx => {
-                            const i = ctx[0].dataIndex;
-                            return types[i] === 'day' ? labels[i] + ' (daily)' : labels[i] + ' (monthly)';
-                        },
-                        label: ctx => ' ' + ctx.parsed.y + ' order' + (ctx.parsed.y !== 1 ? 's' : '')
-                    }
-                }
+        // ── Orders line chart ──────────────────────────────────────────
+        const ordersCtx = document.getElementById('ordersChart');
+        if (ordersChartInstance) ordersChartInstance.destroy();
+        ordersChartInstance = new Chart(ordersCtx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Orders',
+                    data: orders,
+                    backgroundColor: 'rgba(124,58,237,0.08)',
+                    borderColor: '#7c3aed',
+                    borderWidth: 2.5,
+                    pointBackgroundColor: ordPointBg,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 1.5,
+                    pointRadius: ordPointRadius,
+                    pointHoverRadius: 7,
+                    fill: true,
+                    tension: 0.4,
+                }]
             },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: {
-                        maxRotation: 45,
-                        font: { size: 10 },
-                        color: ctx => types[ctx.index] === 'day' ? '#7c3aed' : '#94a3b8',
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: ctx => labels[ctx[0].dataIndex] + ' (' + meta.periodType + ')',
+                            label: ctx => ' ' + ctx.parsed.y + ' order' + (ctx.parsed.y !== 1 ? 's' : '')
+                        }
                     }
                 },
-                y: {
-                    beginAtZero: true,
-                    grid: { color: '#f1f5f9' },
-                    ticks: { stepSize: 1 }
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            maxRotation: 45,
+                            font: { size: 10 },
+                            color: '#64748b',
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f1f5f9' },
+                        ticks: { stepSize: 1 }
+                    }
                 }
             }
-        }
-    });
+        });
 
-    // ── Status doughnut ────────────────────────────────────────────────
-    const statusLabels = @json($statusBreakdown->keys());
-    const statusCounts = @json($statusBreakdown->values());
-    const statusColorMap = {
-        placed:                  '#3b82f6',
-        confirmed:               '#6366f1',
-        shipped:                 '#8b5cf6',
-        delivered:               '#10b981',
-        cancelled:               '#ef4444',
-        payment_failed:          '#f97316',
-        cancellation_requested:  '#f59e0b',
-        refund_initiated:        '#06b6d4',
-        refunded:                '#14b8a6',
+        // ── Status doughnut chart ──────────────────────────────────────
+        renderStatusChart(filterKey);
+    }
+
+    // ── Render status doughnut chart ───────────────────────────────────
+    function renderStatusChart(filterKey) {
+        const statusData = statusBreakdownData[filterKey];
+        const statusLabels = Object.keys(statusData);
+        const statusCounts = Object.values(statusData);
+
+        // Update subtitle
+        const subtitles = {
+            today: 'Today breakdown',
+            week: 'This week breakdown',
+            month: 'This month breakdown',
+            year: 'This year breakdown'
+        };
+        document.getElementById('status-subtitle').textContent = subtitles[filterKey];
+
+        const statusColorMap = {
+            placed:                  '#3b82f6',
+            confirmed:               '#6366f1',
+            shipped:                 '#8b5cf6',
+            delivered:               '#10b981',
+            cancelled:               '#ef4444',
+            payment_failed:          '#f97316',
+            cancellation_requested:  '#f59e0b',
+            refund_initiated:        '#06b6d4',
+            refunded:                '#14b8a6',
+        };
+
+        const statusLabelMap = {
+            placed:                  'Placed',
+            confirmed:               'Confirmed',
+            shipped:                 'Shipped',
+            delivered:               'Delivered',
+            cancelled:               'Cancelled',
+            payment_failed:          'Pay Failed',
+            cancellation_requested:  'Cancel Req',
+            refund_initiated:        'Refund Init',
+            refunded:                'Refunded',
+        };
+
+        const pieColors = statusLabels.map(s => statusColorMap[s] || '#94a3b8');
+
+        const statusCtx = document.getElementById('statusChart');
+        if (statusChartInstance) statusChartInstance.destroy();
+        statusChartInstance = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels.map(s => statusLabelMap[s] || s.replace(/_/g, ' ')),
+                datasets: [{
+                    data: statusCounts,
+                    backgroundColor: pieColors,
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                    hoverOffset: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '68%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ' ' + ctx.label + ': ' + ctx.parsed
+                        }
+                    }
+                }
+            }
+        });
+
+        // Update legend below chart
+        const legendHtml = statusLabels.map(status => {
+            const count = statusData[status];
+            const label = statusLabelMap[status] || status.replace(/_/g, ' ');
+            const color = statusColorMap[status] || '#94a3b8';
+            return `
+                <div class="flex items-center gap-1.5">
+                    <span class="h-2.5 w-2.5 rounded-full flex-shrink-0" style="background:${color}"></span>
+                    <span class="text-[11px] text-slate-600 truncate">${label} <strong>${count}</strong></span>
+                </div>
+            `;
+        }).join('');
+        document.getElementById('status-legend').innerHTML = legendHtml;
+    }
+
+    // ── Filter switcher ────────────────────────────────────────────────
+    window.setChartFilter = function(filterKey) {
+        if (currentFilter === filterKey) return;
+        currentFilter = filterKey;
+
+        // Update button styles
+        document.querySelectorAll('.chart-filter-btn').forEach(btn => {
+            const isActive = btn.id === 'filter-btn-' + filterKey;
+            btn.className = 'chart-filter-btn rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ' +
+                (isActive
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-500 hover:bg-slate-100');
+        });
+
+        // Re-render charts
+        renderCharts(filterKey);
     };
-    const pieColors = statusLabels.map(s => statusColorMap[s] || '#94a3b8');
 
-    new Chart(document.getElementById('statusChart'), {
-        type: 'doughnut',
-        data: {
-            labels: statusLabels.map(s => s.replace(/_/g, ' ')),
-            datasets: [{
-                data: statusCounts,
-                backgroundColor: pieColors,
-                borderWidth: 2,
-                borderColor: '#fff',
-                hoverOffset: 6,
-            }]
-        },
-        options: {
-            responsive: true,
-            cutout: '68%',
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => ' ' + ctx.label + ': ' + ctx.parsed
-                    }
-                }
-            }
-        }
-    });
+    // ── Initial render (month by default) ─────────────────────────────
+    renderCharts(currentFilter);
 })();
 </script>
 @endpush
