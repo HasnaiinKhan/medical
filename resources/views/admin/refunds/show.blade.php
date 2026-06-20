@@ -62,13 +62,12 @@
 
             @if($refund->proof_image_path)
                 <div class="mt-3">
-                    <p class="text-xs text-slate-500 mb-2">Customer Proof Image</p>
-                    <a href="{{ asset('storage/' . $refund->proof_image_path) }}" target="_blank" class="block">
-                        <img src="{{ asset('storage/' . $refund->proof_image_path) }}"
-                             alt="Refund Proof"
-                             class="max-w-full max-h-64 rounded-xl border-2 border-slate-200 object-contain hover:opacity-90 hover:border-blue-400 transition-all shadow-sm">
+                    <p class="text-xs text-slate-500 mb-1">Customer Proof Image</p>
+                    <a href="{{ Storage::url($refund->proof_image_path) }}" target="_blank">
+                        <img src="{{ Storage::url($refund->proof_image_path) }}"
+                             alt="Proof"
+                             class="max-h-48 rounded-xl border border-slate-200 object-contain hover:opacity-90 transition-opacity">
                     </a>
-                    <p class="text-[10px] text-slate-400 mt-1">Click to view full size</p>
                 </div>
             @endif
         </div>
@@ -307,6 +306,27 @@
     </div>
     <div class="divide-y divide-slate-100">
         @foreach($refund->auditLogs->sortByDesc('created_at') as $log)
+            @php
+                $metadataLabels = [
+                    'approval_method' => 'Approved Via',
+                    'refund_type' => 'Refund Type',
+                    'approved_by_user_id' => 'Approved By User ID',
+                    'approved_at' => 'Approved At',
+                    'reference' => 'Reference',
+                    'processed_by_user_id' => 'Processed By User ID',
+                    'processed_at' => 'Processed At',
+                    'channel' => 'Transfer Channel',
+                    'rejected_by_user_id' => 'Rejected By User ID',
+                    'rejected_at' => 'Rejected At',
+                    'reason' => 'Reason',
+                    'gateway' => 'Gateway',
+                    'refund_id' => 'Gateway Refund ID',
+                    'gateway_refund_id' => 'Gateway Refund ID',
+                    'webhook_event' => 'Webhook Event',
+                    'error' => 'Gateway Error',
+                    'order_id' => 'Order ID',
+                ];
+            @endphp
             <div class="flex items-start gap-4 px-5 py-3">
                 <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold
                     {{ $log->actor_type === 'admin' ? 'bg-blue-100 text-blue-700' : ($log->actor_type === 'webhook' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600') }}">
@@ -325,6 +345,24 @@
                     </div>
                     @if($log->notes)
                         <p class="text-xs text-slate-500 mt-0.5">{{ $log->notes }}</p>
+                    @endif
+                    @if($log->metadata)
+                        <div class="mt-2 flex flex-wrap gap-1.5">
+                            @foreach($log->metadata as $key => $value)
+                                @php
+                                    $label = $metadataLabels[$key] ?? ucwords(str_replace('_', ' ', $key));
+                                    $displayValue = is_array($value)
+                                        ? json_encode($value)
+                                        : (is_bool($value) ? ($value ? 'Yes' : 'No') : $value);
+                                @endphp
+                                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                                    {{ $label }}:
+                                    <span class="font-semibold text-slate-800">
+                                        {{ $displayValue }}
+                                    </span>
+                                </span>
+                            @endforeach
+                        </div>
                     @endif
                 </div>
                 <span class="text-[10px] text-slate-400 flex-shrink-0">{{ $log->created_at->format('d M Y, h:i A') }}</span>

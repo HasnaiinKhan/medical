@@ -88,6 +88,23 @@ class Medicine extends Model
     }
 
     /**
+     * Atomically reserve stock. Returns false if insufficient stock remains.
+     */
+    public function takeStock(int $qty): bool
+    {
+        $updated = \Illuminate\Support\Facades\DB::table('medicines')
+            ->where('id', $this->id)
+            ->where('stock', '>=', $qty)
+            ->decrement('stock', $qty);
+
+        if ($updated) {
+            $this->refresh();
+        }
+
+        return $updated > 0;
+    }
+
+    /**
      * Display name — simple, no variant suffix.
      */
     public function displayName(): string

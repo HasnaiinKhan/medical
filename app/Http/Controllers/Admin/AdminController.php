@@ -23,131 +23,91 @@ class AdminController extends Controller
             'pending'    => Order::where('status', 'placed')->count(),
         ];
 
+        // Out-of-stock medicines (stock <= 0)
         $outOfStockMedicines = Medicine::where('stock', '<=', 0)
-            ->orderBy('name')->get(['id', 'name', 'slug', 'stock']);
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug', 'stock']);
 
+        // Low-stock medicines (stock between 1 and 5, not zero)
         $lowStockMedicines = Medicine::where('stock', '>', 0)
             ->where('stock', '<=', 5)
-            ->orderBy('stock')->get(['id', 'name', 'slug', 'stock']);
+            ->orderBy('stock')
+            ->get(['id', 'name', 'slug', 'stock']);
 
-        $recentOrders = Order::with('user')->latest()->take(8)->get();
+        $recentOrders = Order::with('user')
+            ->latest()
+            ->take(8)
+            ->get();
 
-        $baseQ = fn () => Order::where('payment_status', 'paid')->where('status', '!=', 'cancelled');
+        // ── Chart data ──────────────────────────────────────────────────
+        // Revenue uses the same source-of-truth as revenueQuery():
+        //   payment_status = 'paid'  AND  status != 'cancelled'
+        //
+        // Strategy: daily bars for the current month (most recent = most detail),
+        // monthly bars for the 5 months before that.
 
-        // ── TODAY — hourly (0–23) ────────────────────────────────────────
-        $todayRaw = (clone $baseQ())
-            ->select(DB::raw("HOUR(created_at) as period"),
-                     DB::raw('SUM(total_paise)/100 as revenue'),
-                     DB::raw('COUNT(*) as orders'))
-            ->whereDate('created_at', today())
-            ->groupBy('period')->orderBy('period')
-            ->get()->keyBy('period');
+        // --- Monthly (5 full months before this month) ---
+        $monthlyRaw = Order::select(
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as period"),
+                DB::raw('SUM(total_paise) / 100 as revenue'),
+                DB::raw('COUNT(*) as orders')
+            )
+            ->where('payment_status', 'paid')
+            ->where('status', '!=', 'cancelled')
+            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->where('created_at', '<', now()->startOfMonth())
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get()
+            ->keyBy('period');
 
-        $todayData = collect();
-        for ($h = 0; $h <= 23; $h++) {
-            $row = $todayRaw->get($h);
-            $todayData->push([
-                'label'   => str_pad($h, 2, '0', STR_PAD_LEFT) . ':00',
-                'revenue' => $row ? round((float)$row->revenue, 2) : 0,
-                'orders'  => $row ? (int)$row->orders : 0,
+        $months = collect();
+
+        // Fill 5 prior months (oldest → newest)
+        for ($i = 5; $i >= 1; $i--) {
+            $key = now()->subMonths($i)->format('Y-m');
+            $row = $monthlyRaw->get($key);
+            $months->push([
+                'label'   => now()->subMonths($i)->format('M Y'),
+                'revenue' => $row ? round((float) $row->revenue, 2) : 0,
+                'orders'  => $row ? (int) $row->orders : 0,
+                'type'    => 'month',
             ]);
         }
 
-        // ── THIS WEEK — daily (Mon–today) ───────────────────────────────
-        $weekRaw = (clone $baseQ())
-            ->select(DB::raw("DATE_FORMAT(created_at,'%Y-%m-%d') as period"),
-                     DB::raw('SUM(total_paise)/100 as revenue'),
-                     DB::raw('COUNT(*) as orders'))
-            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfDay()])
-            ->groupBy('period')->orderBy('period')
-            ->get()->keyBy('period');
-
-        $weekData = collect();
-        $weekStart = now()->startOfWeek()->copy();
-        for ($d = 0; $d <= now()->dayOfWeek - 1 || ($d === 0 && now()->dayOfWeek === 0 ? false : false); $d++) {
-            // simpler: iterate from start of week to today
-        }
-        // Rebuild cleanly
-        $weekData = collect();
-        $day = now()->startOfWeek()->copy();
-        while ($day->lte(now())) {
-            $key = $day->format('Y-m-d');
-            $row = $weekRaw->get($key);
-            $weekData->push([
-                'label'   => $day->format('D d'),
-                'revenue' => $row ? round((float)$row->revenue, 2) : 0,
-                'orders'  => $row ? (int)$row->orders : 0,
-            ]);
-            $day->addDay();
-        }
-
-        // ── THIS MONTH — daily ──────────────────────────────────────────
-        $monthRaw = (clone $baseQ())
-            ->select(DB::raw("DATE_FORMAT(created_at,'%Y-%m-%d') as period"),
-                     DB::raw('SUM(total_paise)/100 as revenue'),
-                     DB::raw('COUNT(*) as orders'))
+        // --- Daily (current month so far) ---
+        $dailyRaw = Order::select(
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as period"),
+                DB::raw('SUM(total_paise) / 100 as revenue'),
+                DB::raw('COUNT(*) as orders')
+            )
+            ->where('payment_status', 'paid')
+            ->where('status', '!=', 'cancelled')
             ->whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
-            ->groupBy('period')->orderBy('period')
-            ->get()->keyBy('period');
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get()
+            ->keyBy('period');
 
-        $monthData = collect();
+        $daysInMonth = now()->daysInMonth;
         for ($d = 1; $d <= now()->day; $d++) {
             $key = now()->format('Y-m-') . str_pad($d, 2, '0', STR_PAD_LEFT);
-            $row = $monthRaw->get($key);
-            $monthData->push([
+            $row = $dailyRaw->get($key);
+            $months->push([
                 'label'   => now()->day($d)->format('d M'),
-                'revenue' => $row ? round((float)$row->revenue, 2) : 0,
-                'orders'  => $row ? (int)$row->orders : 0,
+                'revenue' => $row ? round((float) $row->revenue, 2) : 0,
+                'orders'  => $row ? (int) $row->orders : 0,
+                'type'    => 'day',
             ]);
         }
 
-        // ── THIS YEAR — monthly ─────────────────────────────────────────
-        $yearRaw = (clone $baseQ())
-            ->select(DB::raw("DATE_FORMAT(created_at,'%Y-%m') as period"),
-                     DB::raw('SUM(total_paise)/100 as revenue'),
-                     DB::raw('COUNT(*) as orders'))
-            ->whereYear('created_at', now()->year)
-            ->groupBy('period')->orderBy('period')
-            ->get()->keyBy('period');
+        // Order status breakdown (doughnut chart)
+        $statusBreakdown = Order::select('status', DB::raw('COUNT(*) as count'))
+            ->groupBy('status')
+            ->get()
+            ->pluck('count', 'status');
 
-        $yearData = collect();
-        for ($m = 1; $m <= now()->month; $m++) {
-            $key = now()->year . '-' . str_pad($m, 2, '0', STR_PAD_LEFT);
-            $row = $yearRaw->get($key);
-            $yearData->push([
-                'label'   => now()->month($m)->format('M'),
-                'revenue' => $row ? round((float)$row->revenue, 2) : 0,
-                'orders'  => $row ? (int)$row->orders : 0,
-            ]);
-        }
-
-        // Keep $months for backward compat (used nowhere else in dashboard view now)
-        $months = $monthData;
-
-        // Order status breakdown by time period
-        $statusBreakdownToday = Order::select('status', DB::raw('COUNT(*) as count'))
-            ->whereDate('created_at', today())
-            ->groupBy('status')->get()->pluck('count', 'status');
-
-        $statusBreakdownWeek = Order::select('status', DB::raw('COUNT(*) as count'))
-            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfDay()])
-            ->groupBy('status')->get()->pluck('count', 'status');
-
-        $statusBreakdownMonth = Order::select('status', DB::raw('COUNT(*) as count'))
-            ->whereYear('created_at', now()->year)
-            ->whereMonth('created_at', now()->month)
-            ->groupBy('status')->get()->pluck('count', 'status');
-
-        $statusBreakdownYear = Order::select('status', DB::raw('COUNT(*) as count'))
-            ->whereYear('created_at', now()->year)
-            ->groupBy('status')->get()->pluck('count', 'status');
-
-        return view('admin.dashboard', compact(
-            'stats', 'recentOrders', 'months',
-            'todayData', 'weekData', 'monthData', 'yearData',
-            'statusBreakdownToday', 'statusBreakdownWeek', 'statusBreakdownMonth', 'statusBreakdownYear',
-            'outOfStockMedicines', 'lowStockMedicines'
-        ));
+        return view('admin.dashboard', compact('stats', 'recentOrders', 'months', 'statusBreakdown', 'outOfStockMedicines', 'lowStockMedicines'));
     }
 }

@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -137,7 +136,10 @@ class RefundController extends Controller
     /** Process gateway refund — called internally or by admin */
     public function processGatewayRefund(Order $order, Refund $refund): void
     {
-        $refund->transitionTo('processing', 'Gateway refund initiated.', 'system');
+        $refund->transitionTo('processing', 'Gateway refund initiated.', 'system', [
+            'order_id' => $order->id,
+            'refund_type' => $refund->type,
+        ]);
         $order->update(['status' => 'refund_initiated']);
 
         $response = $this->refundService->process(
@@ -152,7 +154,10 @@ class RefundController extends Controller
                 'metadata'          => $response['raw'],
                 'processed_at'      => now(),
             ]);
-            $refund->transitionTo('processed', 'Gateway refund successful. ID: ' . $response['refund_id'], 'system');
+            $refund->transitionTo('processed', 'Gateway refund successful. ID: ' . $response['refund_id'], 'system', [
+                'gateway' => 'razorpay',
+                'refund_id' => $response['refund_id'],
+            ]);
 
             $order->update(['status' => 'refunded', 'payment_status' => 'refunded']);
 
@@ -175,7 +180,10 @@ class RefundController extends Controller
                 Log::error('RefundProcessed mail failed: ' . $e->getMessage());
             }
         } else {
-            $refund->transitionTo('failed', 'Gateway error: ' . ($response['error'] ?? 'Unknown'), 'system');
+            $refund->transitionTo('failed', 'Gateway error: ' . ($response['error'] ?? 'Unknown'), 'system', [
+                'gateway' => 'razorpay',
+                'error' => $response['error'] ?? 'Unknown',
+            ]);
             Log::error('Refund processing failed', ['order' => $order->id, 'error' => $response['error']]);
         }
     }
@@ -183,8 +191,10 @@ class RefundController extends Controller
     /** Human-readable reason why refund is not eligible */
     private function refundIneligibleReason(Order $order): string
     {
-        if ($order->created_at->diffInDays(now()) > 30) {
-            return 'Refund window has expired. Refunds are only allowed within 30 days of order placement.';
+        $windowDays = (int) \App\Models\Setting::get('refund_window_days', 30);
+
+        if ($order->created_at->diffInDays(now()) > $windowDays) {
+            return "Refund window has expired. Refunds are only allowed within {$windowDays} days of order placement.";
         }
         if ($order->refunds()->whereIn('status', ['requested', 'approved', 'processing', 'processed'])->exists()) {
             return 'A refund request already exists for this order.';

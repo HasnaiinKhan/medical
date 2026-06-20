@@ -50,7 +50,12 @@ class Refund extends Model
     }
 
     /** Transition with audit log */
-    public function transitionTo(string $newStatus, string $notes = '', string $actorType = 'system'): bool
+    public function transitionTo(
+        string $newStatus,
+        string $notes = '',
+        string $actorType = 'system',
+        array $metadata = []
+    ): bool
     {
         if (! $this->canTransitionTo($newStatus)) {
             return false;
@@ -67,6 +72,7 @@ class Refund extends Model
             'to_status'   => $newStatus,
             'notes'       => $notes,
             'actor_type'  => $actorType,
+            'metadata'    => $metadata ?: null,
         ]);
 
         return true;

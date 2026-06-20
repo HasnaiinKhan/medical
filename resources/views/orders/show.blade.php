@@ -23,6 +23,8 @@
             'shipped'   => ['color' => 'from-purple-500 to-purple-600','icon' => '🚚', 'msg' => 'Your order is on the way!'],
             'delivered' => ['color' => 'from-blue-600 to-blue-700','icon' => '🎉','msg' => 'Order delivered successfully.'],
             'cancelled' => ['color' => 'from-red-500 to-red-600',      'icon' => '❌', 'msg' => 'This order has been cancelled.'],
+            'payment_failed' => ['color' => 'from-red-500 to-red-600', 'icon' => '⚠️', 'msg' => 'Payment could not be verified successfully.'],
+            'payment_review' => ['color' => 'from-amber-500 to-orange-600', 'icon' => '💳', 'msg' => 'Payment was received, but the order needs manual review before fulfillment.'],
         ];
         $sc = $statusConfig[$order->status] ?? ['color' => 'from-slate-500 to-slate-600', 'icon' => '📦', 'msg' => ''];
     @endphp

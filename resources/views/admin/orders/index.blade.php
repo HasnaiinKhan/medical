@@ -197,7 +197,7 @@
         {{-- Status --}}
         <select name="status" id="filter-status" class="order-filter-select">
             <option value="all" {{ request('status', 'all') === 'all' ? 'selected' : '' }}>All Statuses</option>
-            @foreach(['placed','confirmed','shipped','delivered','cancelled'] as $s)
+            @foreach(['placed','confirmed','shipped','delivered','cancelled','payment_failed','payment_review'] as $s)
                 <option value="{{ $s }}" {{ request('status') === $s ? 'selected' : '' }}>
                     {{ ucfirst($s) }}
                 </option>
@@ -327,6 +327,10 @@
             'payment_failed' => [
                 'class' => 'bg-red-100 text-red-800',
                 'image' => asset('images/sad.png')
+            ],
+            'payment_review' => [
+                'class' => 'bg-amber-100 text-amber-800',
+                'image' => asset('images/credit-card.png')
             ],
             'refunded' => [
                 'class' => 'bg-orange-100 text-orange-800',
@@ -522,6 +526,7 @@ document.querySelectorAll('.quick-status').forEach(function (sel) {
                     refunded:                'bg-orange-100 text-orange-800',
                     refund_initiated:        'bg-yellow-100 text-yellow-800',
                     cancellation_requested:  'bg-amber-100 text-amber-800',
+                    payment_review:          'bg-amber-100 text-amber-800',
                 };
                 const images = {
                     placed:                  '{{ asset('images/hourglass.gif') }}',
@@ -533,6 +538,7 @@ document.querySelectorAll('.quick-status').forEach(function (sel) {
                     refunded:                '{{ asset('images/refund.png') }}',
                     refund_initiated:        '{{ asset('images/dollars.png') }}',
                     cancellation_requested:  '{{ asset('images/hourglass.gif') }}',
+                    payment_review:          '{{ asset('images/credit-card.png') }}',
                 };
 
                 // Update status badge

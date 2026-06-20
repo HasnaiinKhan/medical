@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException as IlluminateValidationException;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Razorpay\Api\Api;
 use Razorpay\Api\Errors\SignatureVerificationError;
@@ -58,6 +60,12 @@ class RazorpayController extends Controller
     {
         if ($this->cart->lines()->isEmpty()) {
             return response()->json(['error' => 'Cart is empty.'], 422);
+        }
+
+        if (! $this->hasRazorpayCredentials()) {
+            return response()->json([
+                'error' => 'Online payment is temporarily unavailable. Please contact support.',
+            ], 503);
         }
 
         $data = $request->validate([
@@ -172,10 +180,60 @@ class RazorpayController extends Controller
             'order_id'            => ['required', 'integer'],
         ]);
 
-        $order = Order::findOrFail($request->order_id);
+        if (! $this->hasRazorpayCredentials()) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Online payment verification is temporarily unavailable. Please contact support.',
+            ], 503);
+        }
 
-        // Ensure this order belongs to the logged-in user
-        abort_unless($order->user_id === Auth::id(), 403);
+        $requestedOrder = Order::findOrFail($request->order_id);
+
+        // This code finds the correct order for the logged-in user, ensures the Razorpay order exists, prevents duplicate payment processing, and redirects the user appropriately if the payment has already been verified.
+        
+        abort_unless($requestedOrder->user_id === Auth::id(), 403);
+
+        $order = Order::query()
+            ->where('user_id', Auth::id())
+            ->where('razorpay_order_id', $request->razorpay_order_id)
+            ->first();
+
+        if (! $order) {
+            Log::warning('Razorpay order not found for user during verification', [
+                'requested_order_id' => $requestedOrder->id,
+                'received_razorpay_order_id' => $request->razorpay_order_id,
+                'user_id' => Auth::id(),
+            ]);
+
+            return response()->json([
+                'ok' => false,
+                'message' => 'Payment verification failed for this order. Please try again from checkout.',
+            ], 422);
+        }
+
+        if ($order->id !== $requestedOrder->id) {
+            Log::info('Resolved verification against matching Razorpay order for same user', [
+                'requested_order_id' => $requestedOrder->id,
+                'resolved_order_id' => $order->id,
+                'razorpay_order_id' => $request->razorpay_order_id,
+                'user_id'  => Auth::id(),
+            ]);
+        }
+
+        if (
+            $order->payment_status === 'paid'
+            && $order->razorpay_payment_id === $request->razorpay_payment_id
+        ) {
+            return response()->json([
+                'ok' => $order->status === 'confirmed',
+                'message' => $order->status === 'payment_review'
+                    ? 'Payment is already captured for this order and is currently under manual review.'
+                    : null,
+                'redirect_url' => $order->status === 'confirmed'
+                    ? route('checkout.thankyou', $order)
+                    : route('orders.show', $order),
+            ], $order->status === 'confirmed' ? 200 : 409);
+        }
 
         $api = new Api(config('razorpay.key_id'), config('razorpay.key_secret'));
 
@@ -197,21 +255,107 @@ class RazorpayController extends Controller
             return response()->json(['ok' => false, 'message' => 'Payment verification failed. Please contact support.'], 422);
         }
 
-        // Signature valid — mark as paid
-        $order->update([
-            'razorpay_payment_id' => $request->razorpay_payment_id,
-            'razorpay_signature'  => $request->razorpay_signature,
-            'payment_status'      => 'paid',
-            'status'              => 'confirmed',
-        ]);
+        //This code securely verifies the payment with Razorpay, ensures the payment belongs to the correct order, confirms the amount is correct, checks medicine stock availability, deducts stock, and prevents duplicate payment processing.
 
-        // Decrement stock now that online payment is confirmed
-        foreach ($order->items as $item) {
-            if ($item->medicine) {
-                $item->medicine->decrementStock($item->quantity);
+        try {
+            DB::transaction(function () use ($api, $order, $request) {
+                /** @var Order $lockedOrder */
+                $lockedOrder = Order::query()
+                    ->whereKey($order->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if (
+                    $lockedOrder->payment_status === 'paid'
+                    && $lockedOrder->razorpay_payment_id === $request->razorpay_payment_id
+                ) {
+                    return;
+                }
+
+                if (! in_array($lockedOrder->status, ['placed', 'payment_failed', 'payment_review'], true)) {
+                    throw IlluminateValidationException::withMessages([
+                        'order' => ['This order is no longer eligible for payment confirmation.'],
+                    ]);
+                }
+
+                $payment = $api->payment->fetch($request->razorpay_payment_id);
+                $paymentData = $payment->toArray();
+
+                if (($paymentData['order_id'] ?? null) !== $lockedOrder->razorpay_order_id) {
+                    throw IlluminateValidationException::withMessages([
+                        'payment' => ['Payment does not belong to this order.'],
+                    ]);
+                }
+
+                if ((int) ($paymentData['amount'] ?? 0) !== (int) $lockedOrder->total_paise) {
+                    throw IlluminateValidationException::withMessages([
+                        'payment' => ['Payment amount does not match the order total.'],
+                    ]);
+                }
+
+                if (! in_array($paymentData['status'] ?? '', ['captured', 'authorized'], true)) {
+                    throw IlluminateValidationException::withMessages([
+                        'payment' => ['Payment is not in a capturable state.'],
+                    ]);
+                }
+
+                $lockedOrder->loadMissing('items.medicine');
+
+                foreach ($lockedOrder->items as $item) {
+                    if (! $item->medicine) {
+                        continue;
+                    }
+
+                    if (! $item->medicine->takeStock($item->quantity)) {
+                        throw ValidationException::withMessages([
+                            'stock' => ["{$item->medicine->name} is no longer available in the requested quantity."],
+                        ]);
+                    }
+                }
+
+                $lockedOrder->update([
+                    'razorpay_payment_id' => $request->razorpay_payment_id,
+                    'razorpay_signature'  => $request->razorpay_signature,
+                    'payment_status'      => 'paid',
+                    'status'              => 'confirmed',
+                ]);
+            });
+
+            
+        } catch (ValidationException $e) {
+            $messages = $e->errors();
+            $stockConflict = array_key_exists('stock', $messages);
+
+            Log::critical('Razorpay verification could not confirm order', [
+                'order_id' => $order->id,
+                'user_id' => Auth::id(),
+                'errors' => $messages,
+            ]);
+
+            if ($stockConflict) {
+                $order->update([
+                    'payment_status' => 'paid',
+                    'status' => 'payment_review',
+                ]);
+
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'Payment was received, but stock changed before confirmation. Please contact support.',
+                ], 409);
             }
+
+            $order->update([
+                'payment_status' => 'failed',
+                'status' => 'payment_failed',
+            ]);
+
+            return response()->json([
+                'ok' => false,
+                'message' => collect($messages)->flatten()->first() ?? 'Payment verification failed. Please contact support.',
+            ], 422);
         }
 
+        $order->refresh();
         $this->cart->clear();
 
         // Send order confirmation email
@@ -342,12 +486,12 @@ class RazorpayController extends Controller
     public function updateAddress(Request $request)
 {
     $request->validate([
-        'address_id'      => 'required|integer',
-        'customer_name'   => 'required|string|max:120',
-        'customer_phone'  => 'required',
-        'delivery_pin'    => 'required',
-        'address_line1'   => 'required',
-        'address_line2'   => 'nullable',
+        'address_id'      => ['required', 'integer'],
+        'customer_name'   => ['required', 'string', 'max:120'],
+        'customer_phone'  => ['required', 'regex:/^[6-9][0-9]{9}$/'],
+        'delivery_pin'    => ['required', 'regex:/^[0-9]{6}$/'],
+        'address_line1'   => ['required', 'string', 'max:255'],
+        'address_line2'   => ['nullable', 'string', 'max:255'],
     ]);
 
     $address = UserAddress::where('id', $request->address_id)
@@ -355,12 +499,18 @@ class RazorpayController extends Controller
         ->firstOrFail();
 
     $pin = PinCode::where('code', $request->delivery_pin)->first();
+    if (! $pin) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Enter a valid Ahmedabad-area pin code.',
+        ], 422);
+    }
 
     $address->update([
         'customer_name'  => $request->customer_name,
         'customer_phone' => $request->customer_phone,
         'delivery_pin'   => $request->delivery_pin,
-        'delivery_area'  => $pin?->area,
+        'delivery_area'  => $pin->area,
         'address_line1'  => $request->address_line1,
         'address_line2'  => $request->address_line2,
     ]);
@@ -370,4 +520,9 @@ class RazorpayController extends Controller
         'message' => 'Address updated successfully'
     ]);
 }
+
+    private function hasRazorpayCredentials(): bool
+    {
+        return filled(config('razorpay.key_id')) && filled(config('razorpay.key_secret'));
+    }
 }

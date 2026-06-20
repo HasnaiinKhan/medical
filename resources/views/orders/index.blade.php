@@ -61,6 +61,8 @@
                                 'refund_initiated'       => 'bg-orange-100 text-orange-800 ring-orange-200',
                                 'refunded'               => 'bg-green-100 text-green-800 ring-green-200',
                                 'cancelled'              => 'bg-red-100 text-red-800 ring-red-200',
+                                'payment_failed'         => 'bg-red-100 text-red-800 ring-red-200',
+                                'payment_review'         => 'bg-amber-100 text-amber-800 ring-amber-200',
                             ];
                             $statusColor = $statusColors[$order->status] ?? 'bg-slate-100 text-slate-800 ring-slate-200';
                             $activeRefund = $order->refunds()->whereIn('status',['requested','approved','processing'])->first();

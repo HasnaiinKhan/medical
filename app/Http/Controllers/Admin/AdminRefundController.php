@@ -7,7 +7,6 @@ use App\Http\Controllers\RefundController;
 use App\Mail\RefundProcessed;
 use App\Models\Order;
 use App\Models\Refund;
-use App\Models\RefundAuditLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -73,20 +72,19 @@ class AdminRefundController extends Controller
                 'cod_upi', 'online_upi' => 'UPI transfer',
                 default                 => 'bank transfer',
             };
-            $refund->transitionTo('approved', "Admin approved refund. Awaiting {$method}.", 'admin');
-            $order->update(['status' => 'refund_initiated']);
-
-            RefundAuditLog::create([
-                'refund_id'  => $refund->id,
-                'user_id'    => Auth::id(),
-                'action'     => 'approved',
-                'from_status'=> 'requested',
-                'to_status'  => 'approved',
-                'notes'      => "Admin approved. Manual {$method} required.",
-                'actor_type' => 'admin',
-            ]);
-
             $refund->update(['approved_by' => Auth::id(), 'approved_at' => now()]);
+            $refund->transitionTo(
+                'approved',
+                "Admin approved refund. Awaiting {$method}.",
+                'admin',
+                [
+                    'approval_method' => $method,
+                    'refund_type' => $refund->type,
+                    'approved_by_user_id' => Auth::id(),
+                    'approved_at' => now()->toIso8601String(),
+                ]
+            );
+            $order->update(['status' => 'refund_initiated']);
 
             return back()->with('status', "Refund #{$refund->refund_number} approved. Process {$method} manually.");
         }
@@ -114,19 +112,21 @@ class AdminRefundController extends Controller
             'admin_notes'  => $request->admin_notes,
             'processed_at' => now(),
         ]);
-        $refund->transitionTo('processed', 'Transfer completed. Ref: ' . $request->admin_notes, 'admin');
+        $refund->transitionTo(
+            'processed',
+            'Transfer completed. Ref: ' . $request->admin_notes,
+            'admin',
+            [
+                'refund_type' => $refund->type,
+                'reference' => $request->admin_notes,
+                'processed_by_user_id' => Auth::id(),
+                'processed_at' => now()->toIso8601String(),
+                'channel' => str_contains($refund->type, 'upi') ? 'upi' : 'bank_transfer',
+            ]
+        );
 
         $refund->order->update(['status' => 'refunded', 'payment_status' => 'refunded']);
-
-        RefundAuditLog::create([
-            'refund_id'  => $refund->id,
-            'user_id'    => Auth::id(),
-            'action'     => 'processed',
-            'from_status'=> 'approved',
-            'to_status'  => 'processed',
-            'notes'      => ($refund->type === 'cod_upi' ? 'UPI transfer done.' : 'Bank transfer done.') . ' Ref: ' . $request->admin_notes,
-            'actor_type' => 'admin',
-        ]);
+        $this->restockIfEligible($refund->order);
 
         // Notify customer
         try {
@@ -146,17 +146,16 @@ class AdminRefundController extends Controller
         $request->validate(['admin_notes' => ['required', 'string', 'max:500']]);
 
         $refund->update(['admin_notes' => $request->admin_notes]);
-        $refund->transitionTo('rejected', 'Admin rejected: ' . $request->admin_notes, 'admin');
-
-        RefundAuditLog::create([
-            'refund_id'  => $refund->id,
-            'user_id'    => Auth::id(),
-            'action'     => 'rejected',
-            'from_status'=> $refund->getOriginal('status'),
-            'to_status'  => 'rejected',
-            'notes'      => $request->admin_notes,
-            'actor_type' => 'admin',
-        ]);
+        $refund->transitionTo(
+            'rejected',
+            'Admin rejected: ' . $request->admin_notes,
+            'admin',
+            [
+                'rejected_by_user_id' => Auth::id(),
+                'rejected_at' => now()->toIso8601String(),
+                'reason' => $request->admin_notes,
+            ]
+        );
 
         $refund->order->update(['status' => 'delivered']);
 
@@ -167,5 +166,20 @@ class AdminRefundController extends Controller
     {
         $order->update(['is_dispatched' => ! $order->is_dispatched]);
         return back()->with('status', "Order #{$order->order_number} dispatch status updated.");
+    }
+
+    private function restockIfEligible(Order $order): void
+    {
+        if ($order->is_dispatched) {
+            return;
+        }
+
+        $order->loadMissing('items.medicine');
+
+        foreach ($order->items as $item) {
+            if ($item->medicine) {
+                $item->medicine->increment('stock', $item->quantity);
+            }
+        }
     }
 }

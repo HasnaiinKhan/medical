@@ -345,7 +345,7 @@
             View all →
         </a>
     </div>
-
+ $catIcons 
     @php
     $catIcons = [
         'fever-pain'   => ['img'=>'real/fever.png', 'color'=>'#ef4444', 'light'=>'#fef2f2', 'grad'=>'from-red-500 to-orange-400'],
@@ -353,7 +353,7 @@
         'digestive'    => ['img'=>'real/digestive.png', 'color'=>'#22c55e', 'light'=>'#f0fdf4', 'grad'=>'from-green-500 to-emerald-400'],
         'diabetes'     => ['img'=>'real/diabetes.png', 'color'=>'#ec4899', 'light'=>'#fdf2f8', 'grad'=>'from-pink-500 to-rose-400'],
         'heart-bp'     => ['img'=>'real/heart.png', 'color'=>'#f43f5e', 'light'=>'#fff1f2', 'grad'=>'from-rose-500 to-red-400'],
-        'skin'         => ['img'=>'real/skin.png', 'color'=>'#f59e0b', 'light'=>'#fffbeb', 'grad'=>'from-amber-500 to-yellow-400'],
+        'skin'         => ['img'=>'real/heart.png'],
         'cold-allergy' => ['img'=>'real/cold.png', 'color'=>'#0ea5e9', 'light'=>'#f0f9ff', 'grad'=>'from-sky-500 to-cyan-400'],
         'eye-ear'      => ['img'=>'real/eye.png', 'color'=>'#8b5cf6', 'light'=>'#f5f3ff', 'grad'=>'from-violet-500 to-purple-400'],
         'bone-joint'   => ['img'=>'real/bone.png', 'color'=>'#64748b', 'light'=>'#f8fafc', 'grad'=>'from-slate-500 to-gray-400'],
@@ -367,7 +367,7 @@
 
             @php
                 $meta = $catIcons[$cat->slug]
-                    ?? ['img'=>'medicine.png', 'color'=>'#2563eb', 'light'=>'#eff6ff', 'grad'=>'from-blue-600 to-blue-400'];
+                    ?? ['img'=>'real/skin.png', 'color'=>'#2563eb', 'light'=>'#eff6ff', 'grad'=>'from-blue-600 to-blue-400'];
 
                 $delay = ($loop->index % 5) + 1;
             @endphp
