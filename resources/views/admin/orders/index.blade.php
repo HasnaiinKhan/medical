@@ -382,7 +382,7 @@
                         <td class="text-right font-bold text-slate-900 text-sm">
                             ₹{{ number_format($order->totalRupees(), 2) }}
                         </td>
-                        <td>
+                        <td style="width:150px;">
                             <span class="badge {{ $order->payment_method === 'online' ? 'bg-indigo-100 text-indigo-800' : 'bg-amber-100 text-amber-800' }}">
                                 {{ $order->payment_method === 'online' ? 'Online' : 'COD' }}
                             </span>

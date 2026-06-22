@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AdminMedicineController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminRefundController;
 use App\Http\Controllers\Admin\AdminSettingsController;
+use App\Http\Controllers\Admin\AdminStockController;
 use App\Http\Controllers\Admin\MedicineImportExportController;
 use Illuminate\Support\Facades\Route;
 
@@ -73,6 +74,9 @@ Route::middleware('auth')->group(function () {
 // ── Admin ─────────────────────────────────────────────────────────────────────
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // Stock Alerts
+    Route::get('stock/alerts', [AdminStockController::class, 'alerts'])->name('stock.alerts');
 
     // Medicine CRUD
     Route::resource('medicines', AdminMedicineController::class)->except(['show']);

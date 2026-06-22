@@ -13,7 +13,7 @@
 {{-- Out-of-stock alert --}}
 @if($outOfStockList->isNotEmpty())
 <div class="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 flex items-start gap-3">
-    <span class="text-xl flex-shrink-0"><i class="fa-solid fa-circle-exclamation" style="color: rgb(194, 0, 0);"></i></span>
+    <span class="text-xl flex-shrink-0"><i class="fa-solid fa-circle-exclamation" style="color: rgb(255, 0, 0);"></i></span>
     <div class="flex-1">
         <p class="text-sm font-bold text-red-900 mb-2">{{ $outOfStockList->count() }} out-of-stock — customers cannot buy these. Restock immediately.</p>
         <div class="flex flex-wrap gap-2">
@@ -31,7 +31,7 @@
 {{-- Low-stock warning --}}
 @if($lowStockList->isNotEmpty())
 <div class="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex items-start gap-3">
-    <span class="text-xl flex-shrink-0">⚠️</span>
+    <span class="text-xl flex-shrink-0"><i class="fa-solid fa-arrow-trend-down" style="color: rgb(255, 0, 0);"></i></span>
     <div class="flex-1">
         <p class="text-sm font-bold text-amber-900 mb-2">{{ $lowStockList->count() }} running low (≤5 units) — consider restocking soon.</p>
         <div class="flex flex-wrap gap-2">
@@ -91,7 +91,7 @@
         <table class="w-full min-w-[720px] admin-table">
             <thead>
                 <tr>
-                    <th class="text-left w-12">#</th>
+                    <th class="text-left w-12">Sr. No.</th>
                     <th class="text-left">Medicine</th>
                     <th class="text-left">Category</th>
                     <th class="text-left">MRP</th>
