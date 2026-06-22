@@ -10,7 +10,7 @@
     <div class="mb-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-8 text-center text-white shadow-xl">
         {{-- Delivery boy image --}}
         <div class="pointer-events-none absolute bottom-0 right-4 hidden sm:block">
-            <img src="{{ asset('images/MedicalDelhiveryboy.png') }}"
+            <img src="{{ asset('Images/MedicalDelhiveryboy.png') }}"
                  alt="" class="h-32 w-auto object-contain object-bottom opacity-30" draggable="false">
         </div>
         <div class="relative" style="margin-bottom:10px;">

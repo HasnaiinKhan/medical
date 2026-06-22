@@ -93,38 +93,24 @@
                 </p>
                 <p class="text-xs text-red-700 mb-3">These products have 0 units remaining. Customers cannot purchase them. Please restock immediately.</p>
                 
-                @if($outOfStockMedicines->count() <= 5)
-                    {{-- Show all if 5 or fewer --}}
-                    <div class="flex flex-wrap gap-2">
-                        @foreach($outOfStockMedicines as $m)
-                            <a href="{{ route('admin.medicines.edit', $m) }}"
-                               class="inline-flex items-center gap-1.5 rounded-lg bg-red-100 border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-200 transition-colors">
-                                <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
-                                {{ $m->name }}
-                                <span class="text-[10px] font-bold text-red-600 bg-red-200 px-1 rounded">0</span>
-                            </a>
-                        @endforeach
-                    </div>
-                @else
-                    {{-- Show first 5 + View All button --}}
-                    <div class="flex flex-wrap gap-2 mb-3">
-                        @foreach($outOfStockMedicines->take(5) as $m)
-                            <a href="{{ route('admin.medicines.edit', $m) }}"
-                               class="inline-flex items-center gap-1.5 rounded-lg bg-red-100 border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-200 transition-colors">
-                                <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
-                                {{ Str::limit($m->name, 25) }}
-                                <span class="text-[10px] font-bold text-red-600 bg-red-200 px-1 rounded">0</span>
-                            </a>
-                        @endforeach
-                    </div>
-                    <a href="{{ route('admin.stock.alerts') }}" 
-                       class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700 transition-colors shadow-sm">
-                        View All {{ $outOfStockMedicines->count() }} Out of Stock Items
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </a>
-                @endif
+                {{-- Always show max 5 + always show View All link --}}
+                <div class="flex flex-wrap gap-2 mb-3">
+                    @foreach($outOfStockMedicines->take(5) as $m)
+                        <a href="{{ route('admin.medicines.edit', $m) }}"
+                           class="inline-flex items-center gap-1.5 rounded-lg bg-red-100 border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-200 transition-colors">
+                            <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                            {{ Str::limit($m->name, 25) }}
+                            <span class="text-[10px] font-bold text-red-600 bg-red-200 px-1 rounded">0</span>
+                        </a>
+                    @endforeach
+                </div>
+                <a href="{{ route('admin.stock.alerts') }}"
+                   class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700 transition-colors shadow-sm">
+                    View All {{ $outOfStockMedicines->count() }} Out of Stock
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
             </div>
         </div>
     </div>
@@ -134,46 +120,31 @@
     @if($lowStockMedicines->isNotEmpty())
     <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5">
         <div class="flex items-start gap-3">
-            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-100 text-xl">⚠️</div>
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-100 text-xl"><i class="fa-solid fa-arrow-trend-down" style="color: rgb(255, 0, 0);"></i></div>
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-bold text-amber-900 mb-1">
                     {{ $lowStockMedicines->count() }} Medicine{{ $lowStockMedicines->count() > 1 ? 's' : '' }} Running Low
                 </p>
                 <p class="text-xs text-amber-700 mb-3">These products have 5 or fewer units remaining. Consider restocking soon.</p>
                 
-                @if($lowStockMedicines->count() <= 5)
-                    {{-- Show all if 5 or fewer --}}
-                    <div class="flex flex-wrap gap-2">
-                        @foreach($lowStockMedicines as $m)
-                            <a href="{{ route('admin.medicines.edit', $m) }}"
-                               class="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-200 transition-colors">
-                                <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-                                {{ $m->name }}
-                                <span class="text-[10px] font-bold text-amber-700 bg-amber-200 px-1 rounded">{{ $m->stock }}</span>
-                            </a>
-                        @endforeach
-                    </div>
-                @else
-                    {{-- Show first 5 + View All button --}}
-                    <div class="flex flex-wrap gap-2 mb-3">
-                        @foreach($lowStockMedicines->take(5) as $m)
-                            <a href="{{ route('admin.medicines.edit', $m) }}"
-                               class="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-200 transition-colors">
-                                <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
-                                {{ Str::limit($m->name, 25) }}
-                                <span class="text-[10px] font-bold text-amber-700 bg-amber-200 px-1 rounded">{{ $m->stock }}</span>
-                            </a>
-                        @endforeach
-                    </div>
-                    <a href="{{ route('admin.stock.alerts') }}" 
-                       class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700 transition-colors shadow-sm">
-                        View All {{ $lowStockMedicines->count() }} Low Stock Items
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </a>
-                    
-                @endif
+                {{-- Always show max 5 + always show View All link --}}
+                <div class="flex flex-wrap gap-2 mb-3">
+                    @foreach($lowStockMedicines->take(5) as $m)
+                        <a href="{{ route('admin.medicines.edit', $m) }}"
+                           class="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-200 transition-colors">
+                            <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                            {{ Str::limit($m->name, 25) }}
+                            <span class="text-[10px] font-bold text-amber-700 bg-amber-200 px-1 rounded">{{ $m->stock }}</span>
+                        </a>
+                    @endforeach
+                </div>
+                <a href="{{ route('admin.stock.alerts') }}"
+                   class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700 transition-colors shadow-sm">
+                    View All {{ $lowStockMedicines->count() }} Low Stock
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
             </div>
         </div>
     </div>
@@ -319,18 +290,18 @@
                 @forelse($recentOrders as $order)
                     @php
                         $statusCfg = [
-                            'placed'                 => ['bg-amber-100 text-amber-800',  asset('images/hourglass.gif')],
-                            'confirmed'              => ['bg-blue-100 text-blue-800',    asset('images/check.png')],
-                            'shipped'                => ['bg-purple-100 text-purple-800',asset('images/package.png')],
-                            'delivered'              => ['bg-green-100 text-green-800',  asset('images/confetti.png')],
-                            'cancelled'              => ['bg-red-100 text-red-800',      asset('images/letter-x.png')],
-                            'payment_failed'         => ['bg-red-100 text-red-800',      asset('images/sad.png')],
-                            'payment_review'         => ['bg-amber-100 text-amber-800',  asset('images/credit-card.png')],
-                            'refunded'               => ['bg-orange-100 text-orange-800',asset('images/refund.png')],
-                            'refund_initiated'       => ['bg-yellow-100 text-yellow-800',asset('images/dollars.png')],
-                            'cancellation_requested' => ['bg-amber-100 text-amber-800',  asset('images/hourglass.gif')],
+                            'placed'                 => ['bg-amber-100 text-amber-800',  asset('Images/hourglass.gif')],
+                            'confirmed'              => ['bg-blue-100 text-blue-800',    asset('Images/check.png')],
+                            'shipped'                => ['bg-purple-100 text-purple-800',asset('Images/package.png')],
+                            'delivered'              => ['bg-green-100 text-green-800',  asset('Images/confetti.png')],
+                            'cancelled'              => ['bg-red-100 text-red-800',      asset('Images/letter-x.png')],
+                            'payment_failed'         => ['bg-red-100 text-red-800',      asset('Images/sad.png')],
+                            'payment_review'         => ['bg-amber-100 text-amber-800',  asset('Images/credit-card.png')],
+                            'refunded'               => ['bg-orange-100 text-orange-800',asset('Images/refund.png')],
+                            'refund_initiated'       => ['bg-yellow-100 text-yellow-800',asset('Images/dollars.png')],
+                            'Refund_requested' => ['bg-amber-100 text-amber-800',  asset('Images/hourglass.gif')],
                         ];
-                        [$sc, $sImg] = $statusCfg[$order->status] ?? ['bg-slate-100 text-slate-700', asset('images/box.png')];
+                        [$sc, $sImg] = $statusCfg[$order->status] ?? ['bg-slate-100 text-slate-700', asset('Images/box.png')];
                     @endphp
                     <tr>
                         <td class="font-mono font-semibold text-slate-800 text-xs">{{ $order->order_number }}</td>
@@ -555,7 +526,7 @@
             cancelled:               '#ef4444',
             payment_failed:          '#f97316',
             payment_review:          '#f59e0b',
-            cancellation_requested:  '#f59e0b',
+            Refund_requested:  '#f59e0b',
             refund_initiated:        '#06b6d4',
             refunded:                '#14b8a6',
         };
@@ -568,7 +539,7 @@
             cancelled:               'Cancelled',
             payment_failed:          'Pay Failed',
             payment_review:          'Pay Review',
-            cancellation_requested:  'Cancel Req',
+            Refund_requested:  'Cancel Req',
             refund_initiated:        'Refund Init',
             refunded:                'Refunded',
         };

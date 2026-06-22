@@ -108,7 +108,7 @@ class RefundController extends Controller
             ]);
 
             $order->update([
-                'status'              => 'cancellation_requested',
+                'status'              => 'Refund_requested',
                 'cancellation_reason' => $data['reason'],
             ]);
 

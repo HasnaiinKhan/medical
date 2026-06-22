@@ -17,7 +17,7 @@
 @endif
 
 {{-- Cart header — animated gradient, no image --}}
-<div class="relative mb-6 overflow-hidden rounded-2xl" style="min-height: 100px;">
+<div class="relative mb-6 overflow-hidden rounded-2xl" style="min-height: 10%;">
     {{-- Animated flowing gradient background --}}
     <div class="absolute inset-0 cart-header-bg"></div>
     {{-- Floating orbs for depth --}}
@@ -50,7 +50,7 @@
 @if ($lines->isEmpty())
     {{-- Empty cart --}}
     <div class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white py-16 text-center shadow-sm">
-        <img src="{{ asset('images/emptycart1.png') }}"
+        <img src="{{ asset('Images/emptycart1.png') }}"
              alt="Empty cart"
              class="h-36 w-auto object-contain mb-4 opacity-80"
              loading="lazy">

@@ -12,17 +12,38 @@
 
 {{-- Out-of-stock alert --}}
 @if($outOfStockList->isNotEmpty())
-<div class="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 flex items-start gap-3">
-    <span class="text-xl flex-shrink-0"><i class="fa-solid fa-circle-exclamation" style="color: rgb(255, 0, 0);"></i></span>
-    <div class="flex-1">
-        <p class="text-sm font-bold text-red-900 mb-2">{{ $outOfStockList->count() }} out-of-stock — customers cannot buy these. Restock immediately.</p>
-        <div class="flex flex-wrap gap-2">
-            @foreach($outOfStockList as $m)
-                <a href="{{ route('admin.medicines.edit', $m) }}"
-                   class="inline-flex items-center gap-1 rounded-lg bg-red-100 border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-800 hover:bg-red-200 transition-colors">
-                    {{ $m->name }} <span class="bg-red-200 px-1 rounded font-bold">0</span>
-                </a>
-            @endforeach
+<div class="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 relative" id="medicines-out-of-stock-alert" style="display: none;">
+    {{-- Close button --}}
+    <button type="button" 
+            onclick="dismissMedicineAlert('medicines-out-of-stock-alert')" 
+            class="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-red-100 hover:bg-red-200 transition-all text-red-700 hover:text-red-900 shadow-sm hover:shadow-md"
+            aria-label="Dismiss alert">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+    </button>
+    
+    <div class="flex items-start gap-3 pr-12">
+        <span class="text-xl flex-shrink-0"><i class="fa-solid fa-circle-exclamation" style="color: rgb(255, 0, 0);"></i></span>
+        <div class="flex-1">
+            <p class="text-sm font-bold text-red-900 mb-2">{{ $outOfStockList->count() }} out-of-stock — customers cannot buy these. Restock immediately.</p>
+            <div class="flex flex-wrap gap-2">
+                @foreach($outOfStockList->take(10) as $m)
+                    <a href="{{ route('admin.medicines.edit', $m) }}"
+                       class="inline-flex items-center gap-1 rounded-lg bg-red-100 border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-800 hover:bg-red-200 transition-colors">
+                        {{ Str::limit($m->name, 25) }} <span class="bg-red-200 px-1 rounded font-bold">0</span>
+                    </a>
+                @endforeach
+                @if($outOfStockList->count() > 10)
+                    <a href="{{ route('admin.stock.alerts') }}" 
+                       class="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1 text-xs font-bold text-white hover:bg-red-700 transition-colors">
+                        +{{ $outOfStockList->count() - 10 }} more
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                @endif
+            </div>
         </div>
     </div>
 </div>
@@ -30,21 +51,90 @@
 
 {{-- Low-stock warning --}}
 @if($lowStockList->isNotEmpty())
-<div class="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex items-start gap-3">
-    <span class="text-xl flex-shrink-0"><i class="fa-solid fa-arrow-trend-down" style="color: rgb(255, 0, 0);"></i></span>
-    <div class="flex-1">
-        <p class="text-sm font-bold text-amber-900 mb-2">{{ $lowStockList->count() }} running low (≤5 units) — consider restocking soon.</p>
-        <div class="flex flex-wrap gap-2">
-            @foreach($lowStockList as $m)
-                <a href="{{ route('admin.medicines.edit', $m) }}"
-                   class="inline-flex items-center gap-1 rounded-lg bg-amber-100 border border-amber-200 px-2.5 py-1 text-xs font-semibold text-amber-800 hover:bg-amber-200 transition-colors">
-                    {{ $m->name }} <span class="bg-amber-200 px-1 rounded font-bold">{{ $m->stock }}</span>
-                </a>
-            @endforeach
+<div class="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 relative" id="medicines-low-stock-alert" style="display: none;">
+    {{-- Close button --}}
+    <button type="button" 
+            onclick="dismissMedicineAlert('medicines-low-stock-alert')" 
+            class="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 hover:bg-amber-200 transition-all text-amber-700 hover:text-amber-900 shadow-sm hover:shadow-md"
+            aria-label="Dismiss alert">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+    </button>
+    
+    <div class="flex items-start gap-3 pr-12">
+        <span class="text-xl flex-shrink-0"><i class="fa-solid fa-arrow-trend-down" style="color: rgb(255, 0, 0);"></i></span>
+        <div class="flex-1">
+            <p class="text-sm font-bold text-amber-900 mb-2">{{ $lowStockList->count() }} running low (≤5 units) — consider restocking soon.</p>
+            <div class="flex flex-wrap gap-2">
+                @foreach($lowStockList->take(10) as $m)
+                    <a href="{{ route('admin.medicines.edit', $m) }}"
+                       class="inline-flex items-center gap-1 rounded-lg bg-amber-100 border border-amber-200 px-2.5 py-1 text-xs font-semibold text-amber-800 hover:bg-amber-200 transition-colors">
+                        {{ Str::limit($m->name, 25) }} <span class="bg-amber-200 px-1 rounded font-bold">{{ $m->stock }}</span>
+                    </a>
+                @endforeach
+                @if($lowStockList->count() > 10)
+                    <a href="{{ route('admin.stock.alerts') }}" 
+                       class="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1 text-xs font-bold text-white hover:bg-amber-700 transition-colors">
+                        +{{ $lowStockList->count() - 10 }} more
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                @endif
+            </div>
         </div>
     </div>
 </div>
 @endif
+
+<script>
+// Check if this is a hard refresh or first visit to page
+(function() {
+    const pageKey = 'medicines-page-visited';
+    const wasVisited = sessionStorage.getItem(pageKey);
+    
+    ['medicines-out-of-stock-alert', 'medicines-low-stock-alert'].forEach(alertId => {
+        const alert = document.getElementById(alertId);
+        if (!alert) return;
+        
+        // Check if permanently dismissed (24 hours)
+        const dismissedTime = localStorage.getItem(alertId + '_dismissed');
+        if (dismissedTime) {
+            const hoursSinceDismiss = (Date.now() - dismissedTime) / (1000 * 60 * 60);
+            if (hoursSinceDismiss < 24) {
+                // Keep hidden - dismissed within 24 hours
+                return;
+            } else {
+                // Clear old dismissal
+                localStorage.removeItem(alertId + '_dismissed');
+            }
+        }
+        
+        // Show alert only on hard refresh (first visit in this session)
+        if (!wasVisited) {
+            alert.style.display = 'block';
+        }
+    });
+    
+    // Mark page as visited in this session
+    sessionStorage.setItem(pageKey, 'true');
+})();
+
+function dismissMedicineAlert(alertId) {
+    const alert = document.getElementById(alertId);
+    if (alert) {
+        alert.style.transition = 'opacity 0.3s, transform 0.3s';
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+            alert.style.display = 'none';
+            // Save dismissal in localStorage (24 hours)
+            localStorage.setItem(alertId + '_dismissed', Date.now());
+        }, 300);
+    }
+}
+</script>
 
 {{-- Toolbar --}}
 <div class="mb-5 flex flex-col gap-3">

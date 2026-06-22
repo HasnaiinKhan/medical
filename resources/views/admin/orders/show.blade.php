@@ -220,17 +220,17 @@
                     <span class="text-slate-500">Status</span>
                     @php
                         $statusCfgShow = [
-                            'placed'                 => ['bg-amber-100 text-amber-800',  asset('images/hourglass.gif')],
-                            'confirmed'              => ['bg-blue-100 text-blue-800',    asset('images/check.png')],
-                            'shipped'                => ['bg-purple-100 text-purple-800',asset('images/package.png')],
-                            'delivered'              => ['bg-green-100 text-green-800',  asset('images/confetti.png')],
-                            'cancelled'              => ['bg-red-100 text-red-800',      asset('images/letter-x.png')],
-                            'payment_failed'         => ['bg-red-100 text-red-800',      asset('images/sad.png')],
-                            'refunded'               => ['bg-orange-100 text-orange-800',asset('images/refund.png')],
-                            'refund_initiated'       => ['bg-yellow-100 text-yellow-800',asset('images/dollars.png')],
-                            'cancellation_requested' => ['bg-amber-100 text-amber-800',  asset('images/hourglass.gif')],
+                            'placed'                 => ['bg-amber-100 text-amber-800',  asset('Images/hourglass.gif')],
+                            'confirmed'              => ['bg-blue-100 text-blue-800',    asset('Images/check.png')],
+                            'shipped'                => ['bg-purple-100 text-purple-800',asset('Images/package.png')],
+                            'delivered'              => ['bg-green-100 text-green-800',  asset('Images/confetti.png')],
+                            'cancelled'              => ['bg-red-100 text-red-800',      asset('Images/letter-x.png')],
+                            'payment_failed'         => ['bg-red-100 text-red-800',      asset('Images/sad.png')],
+                            'refunded'               => ['bg-orange-100 text-orange-800',asset('Images/refund.png')],
+                            'refund_initiated'       => ['bg-yellow-100 text-yellow-800',asset('Images/dollars.png')],
+                            'Refund_requested' => ['bg-amber-100 text-amber-800',  asset('Images/hourglass.gif')],
                         ];
-                        [$showSc, $showImg] = $statusCfgShow[$order->status] ?? ['bg-slate-100 text-slate-700', asset('images/box.png')];
+                        [$showSc, $showImg] = $statusCfgShow[$order->status] ?? ['bg-slate-100 text-slate-700', asset('Images/box.png')];
                     @endphp
                     <span class="badge {{ $showSc }} inline-flex items-center gap-1.5">
                         <img src="{{ $showImg }}" alt="{{ $order->status }}" class="h-4 w-4 object-contain flex-shrink-0">

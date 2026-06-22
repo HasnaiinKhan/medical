@@ -127,10 +127,10 @@
                 <p class="text-xs text-slate-500 mb-1">Payment Options</p>
                 <div class="flex flex-wrap gap-1.5">
                     <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-blue-200">
-                        <img src="{{ asset('images/credit-card.png') }}" class="w-4 h-4" alt=""> Online
+                        <img src="{{ asset('Images/credit-card.png') }}" class="w-4 h-4" alt=""> Online
                     </span>
                     <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
-                        <img src="{{ asset('images/dollars.png') }}" class="w-4 h-4" alt=""> COD
+                        <img src="{{ asset('Images/dollars.png') }}" class="w-4 h-4" alt=""> COD
                     </span>
                 </div>
             </div>
@@ -146,7 +146,8 @@
             <button type="submit"
                     class="btn-primary w-full rounded-2xl py-4 text-sm font-black text-white shadow-sm {{ $medicine->stock <= 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
                     {{ $medicine->stock <= 0 ? 'disabled' : '' }}>
-                {{ $medicine->stock <= 0 ? 'Out of Stock' : '🛒 Add to Cart' }}
+                    <i class="fa-solid fa-cart-arrow-down fa-l" style="color: rgb(266, 266, 266);"></i>
+                {{ $medicine->stock <= 0 ? 'Out of Stock' : ' Add to Cart' }}
             </button>
         </form>
 
@@ -177,7 +178,7 @@
         </a>
 
         <div class="mt-4 flex items-center gap-2 rounded-xl bg-blue-50 border border-blue-100 px-4 py-3">
-            <img src="{{ asset('images/free-delivery.png') }}" class="w-9 h-9 flex-shrink-0" alt="">
+            <img src="{{ asset('Images/free-delivery.png') }}" class="w-9 h-9 flex-shrink-0" alt="">
             <p class="text-xs text-slate-700">
                 <strong>Free delivery</strong> on orders above ₹500. Enter your pincode to check availability.
             </p>

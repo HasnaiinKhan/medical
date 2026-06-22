@@ -210,7 +210,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 overflow-hidden">
-                        <img src="{{ asset('images/CashonDeliveryicon.png') }}" alt="COD" class="h-7 w-7 object-contain">
+                        <img src="{{ asset('Images/CashonDeliveryicon.png') }}" alt="COD" class="h-7 w-7 object-contain">
                     </div>
                     <span class="text-sm font-bold text-slate-900">Cash on Delivery</span>
                 </div>
@@ -637,9 +637,22 @@ document.getElementById('update-address-btn').addEventListener('click', async fu
 
 
 
+// ── Full-screen overlay ───────────────────────────────────────────────────────
+function showOverlay() {
+    document.getElementById('checkout-overlay').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function hideOverlay() {
+    document.getElementById('checkout-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
 // ── Form submit ───────────────────────────────────────────────────────────────
 document.getElementById('checkout-form').addEventListener('submit', async function (e) {
     e.preventDefault();
+
+    // Show overlay IMMEDIATELY — before anything else
+    showOverlay();
     clearErrors();
     setLoading(true);
 
@@ -667,28 +680,33 @@ document.getElementById('checkout-form').addEventListener('submit', async functi
         });
         data = await res.json();
     } catch {
+        hideOverlay();
         showGeneralError('Network error. Please try again.');
         setLoading(false);
         return;
     }
 
     if (res.status === 422) {
+        hideOverlay();
         if (data.errors) showErrors(data.errors);
         else showGeneralError(data.error || 'Please fix the errors above.');
         setLoading(false);
         return;
     }
     if (!res.ok) {
+        hideOverlay();
         showGeneralError(data.error || 'Something went wrong. Please try again.');
         setLoading(false);
         return;
     }
 
+    // COD — overlay stays, redirect immediately
     if (data.method === 'cod') {
         window.location.href = data.redirect_url;
         return;
     }
 
+    // Online — overlay stays behind Razorpay modal
     const options = {
         key:         RZP_KEY,
         amount:      data.amount,
@@ -700,11 +718,16 @@ document.getElementById('checkout-form').addEventListener('submit', async functi
         theme:       { color: '#1e3a8a' },
         modal: {
             ondismiss: function () {
+                hideOverlay();
                 showGeneralError('Payment was cancelled. You can try again.');
                 setLoading(false);
             }
         },
         handler: async function (response) {
+            // Overlay already visible — update message during verification
+            const overlayMsg = document.getElementById('overlay-msg');
+            if (overlayMsg) overlayMsg.textContent = 'Verifying payment…';
+
             let vRes, vData;
             try {
                 vRes  = await fetch(@json(route('checkout.verify')), {
@@ -719,13 +742,16 @@ document.getElementById('checkout-form').addEventListener('submit', async functi
                 });
                 vData = await vRes.json();
             } catch {
+                hideOverlay();
                 showGeneralError('Could not verify payment. Please contact support.');
                 setLoading(false);
                 return;
             }
             if (vData.ok) {
+                // Overlay stays visible until confirmation page loads
                 window.location.href = vData.redirect_url;
             } else {
+                hideOverlay();
                 showGeneralError(vData.message || 'Payment verification failed.');
                 setLoading(false);
             }
@@ -737,6 +763,36 @@ document.getElementById('checkout-form').addEventListener('submit', async functi
     setLoading(false);
 });
 </script>
+
+{{-- ── Full-screen loading overlay ─────────────────────────────────────────── --}}
+<div id="checkout-overlay"
+     style="display:none; position:fixed; inset:0; z-index:99999;
+            background:rgba(15,23,42,0.92); backdrop-filter:blur(6px);
+            flex-direction:column; align-items:center; justify-content:center; gap:20px;">
+
+    {{-- Spinner --}}
+    <svg width="56" height="56" viewBox="0 0 56 56" fill="none"
+         style="animation:co-spin 0.9s linear infinite; flex-shrink:0;">
+        <circle cx="28" cy="28" r="22" stroke="#1e3a8a" stroke-width="5" opacity="0.2"/>
+        <path d="M28 6 A22 22 0 0 1 50 28" stroke="#3b82f6" stroke-width="5"
+              stroke-linecap="round"/>
+    </svg>
+
+    <div style="text-align:center;">
+        <p style="color:#f1f5f9; font-size:1.1rem; font-weight:700; margin:0 0 6px;">
+            Processing your order…
+        </p>
+        <p id="overlay-msg"
+           style="color:#94a3b8; font-size:0.85rem; margin:0;">
+            Please wait, do not close this page
+        </p>
+    </div>
+</div>
+
+<style>
+@keyframes co-spin { to { transform: rotate(360deg); } }
+</style>
+
 @endpush
 
 @endsection

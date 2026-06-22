@@ -11,25 +11,25 @@
         [
             'label' => 'Total Orders',
             'value' => $totalOrders,
-            'image' => asset('images/box.png'),
+            'image' => asset('Images/box.png'),
             'color' => 'bg-blue-50'
         ],
         [
             'label' => 'Pending',
             'value' => $pendingOrders,
-            'image' => asset('images/shipping-and-delivery.png'),
+            'image' => asset('Images/shipping-and-delivery.png'),
             'color' => 'bg-amber-50'
         ],
         [
             'label' => "Today's Orders",
             'value' => $todayOrders,
-            'image' => asset('images/calendar.png'),
+            'image' => asset('Images/calendar.png'),
             'color' => 'bg-purple-50'
         ],
         [
             'label' => 'Total Revenue',
             'value' => '₹' . number_format($totalRevenue, 2),
-            'image' => asset('images/revenue.png'),
+            'image' => asset('Images/revenue.png'),
             'color' => 'bg-green-50'
         ],
     ] as $s)
@@ -306,49 +306,49 @@
         $statusCfg = [
             'placed' => [
                 'class' => 'bg-amber-100 text-amber-800',
-                'image' => asset('images/hourglass.gif')
+                'image' => asset('Images/hourglass.gif')
             ],
             'confirmed' => [
                 'class' => 'bg-blue-100 text-blue-800',
-                'image' => asset('images/check.png')
+                'image' => asset('Images/check.png')
             ],
             'shipped' => [
                 'class' => 'bg-purple-100 text-purple-800',
-                'image' => asset('images/package.png')
+                'image' => asset('Images/package.png')
             ],
             'delivered' => [
                 'class' => 'bg-green-100 text-green-800',
-                'image' => asset('images/Deliver.png')
+                'image' => asset('Images/Deliver.png')
             ],
             'cancelled' => [
                 'class' => 'bg-red-100 text-red-800',
-                'image' => asset('images/letter-x.png')
+                'image' => asset('Images/prohibition.png')
             ],
             'payment_failed' => [
                 'class' => 'bg-red-100 text-red-800',
-                'image' => asset('images/sad.png')
+                'image' => asset('Images/sad.png')
             ],
             'payment_review' => [
                 'class' => 'bg-amber-100 text-amber-800',
-                'image' => asset('images/credit-card.png')
+                'image' => asset('Images/credit-card.png')
             ],
             'refunded' => [
                 'class' => 'bg-orange-100 text-orange-800',
-                'image' => asset('images/refund.png')
+                'image' => asset('Images/refund.png')
             ],
             'refund_initiated' => [
                 'class' => 'bg-yellow-100 text-yellow-800',
-                'image' => asset('images/dollars.png')
+                'image' => asset('Images/dollars.png')
             ],
-            'cancellation_requested' => [
+            'Refund_requested' => [
                 'class' => 'bg-amber-100 text-amber-800',
-                'image' => asset('images/hourglass.gif')
+                'image' => asset('Images/hourglass.gif')
             ],
         ];
 
         $status = $statusCfg[$order->status] ?? [
             'class' => 'bg-slate-100 text-slate-700',
-            'image' => asset('images/box.png')
+            'image' => asset('Images/box.png')
         ];
 
         $sc = $status['class'];
@@ -404,40 +404,57 @@
                             <span class="text-[10px]">{{ $order->created_at->format('h:i A') }}</span>
                         </td>
                         <td class="whitespace-nowrap">
-                            <div class="inline-flex items-center gap-1.5">
-                                <a href="{{ route('admin.orders.show', $order) }}"
-                                   class="btn-sm bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200">
-                                    View
+                            @php
+                                // Check if order has active refund request
+                                $hasActiveRefund = $order->refunds && $order->refunds->whereIn('status', ['requested', 'approved', 'processing', 'processed'])->isNotEmpty();
+                            @endphp
+                            
+                            @if($hasActiveRefund)
+                                {{-- Order has refund request - show link to refunds page --}}
+                                <a href="{{ route('admin.refunds.show', $order->refunds->first()) }}"
+                                   class="inline-flex items-center gap-1.5 rounded-lg bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200 px-3 py-1.5 text-xs font-bold transition-colors">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                    View in Refunds
                                 </a>
-                                {{-- Quick status change via JS fetch (avoids nested form issue) --}}
-                                <select
-                                    class="quick-status rounded-lg border border-slate-200 py-1 pl-2 pr-6 text-xs font-semibold focus:outline-none focus:border-blue-500 bg-white cursor-pointer"
-                                    style="width:110px"
-                                    data-url="{{ route('admin.orders.updateStatus', $order) }}"
-                                    data-order="{{ $order->order_number }}"
-                                    data-show-url="{{ route('admin.orders.show', $order) }}"
-                                    data-payment-method="{{ $order->payment_method }}"
-                                    data-payment-status="{{ $order->payment_status }}"
-                                    data-current="{{ $order->status }}">
-                                    @php
-                                        $flow        = ['placed','confirmed','shipped','delivered'];
-                                        $currentIdx  = array_search($order->status, $flow);
-                                    @endphp
-                                    {{-- Current status as disabled label --}}
-                                    <option value="{{ $order->status }}" selected disabled>
-                                        {{ ucfirst(str_replace('_',' ',$order->status)) }}
-                                    </option>
-                                    {{-- Only forward steps --}}
-                                    @if($currentIdx !== false)
-                                        @foreach(array_slice($flow, $currentIdx + 1) as $s)
-                                            <option value="{{ $s }}"> {{ ucfirst($s) }}</option>
-                                        @endforeach
-                                    @endif
-                                    @if(!in_array($order->status, ['cancelled','delivered']))
-                                        <option value="cancelled" style="color:#ef4444">❌ Cancel</option>
-                                    @endif
-                                </select>
-                            </div>
+                            @else
+                                {{-- Normal order - show view button and status dropdown --}}
+                                <div class="inline-flex items-center gap-1.5">
+                                    <a href="{{ route('admin.orders.show', $order) }}"
+                                       class="btn-sm bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200">
+                                        View
+                                    </a>
+                                    {{-- Quick status change via JS fetch (avoids nested form issue) --}}
+                                    <select
+                                        class="quick-status rounded-lg border border-slate-200 py-1 pl-2 pr-6 text-xs font-semibold focus:outline-none focus:border-blue-500 bg-white cursor-pointer"
+                                        style="width:110px"
+                                        data-url="{{ route('admin.orders.updateStatus', $order) }}"
+                                        data-order="{{ $order->order_number }}"
+                                        data-show-url="{{ route('admin.orders.show', $order) }}"
+                                        data-payment-method="{{ $order->payment_method }}"
+                                        data-payment-status="{{ $order->payment_status }}"
+                                        data-current="{{ $order->status }}">
+                                        @php
+                                            $flow        = ['placed','confirmed','shipped','delivered'];
+                                            $currentIdx  = array_search($order->status, $flow);
+                                        @endphp
+                                        {{-- Current status as disabled label --}}
+                                        <option value="{{ $order->status }}" selected disabled>
+                                            {{ ucfirst(str_replace('_',' ',$order->status)) }}
+                                        </option>
+                                        {{-- Only forward steps --}}
+                                        @if($currentIdx !== false)
+                                            @foreach(array_slice($flow, $currentIdx + 1) as $s)
+                                                <option value="{{ $s }}"> {{ ucfirst($s) }}</option>
+                                            @endforeach
+                                        @endif
+                                        @if(!in_array($order->status, ['cancelled','delivered']))
+                                            <option value="cancelled" style="color:#ef4444">❌ Cancel</option>
+                                        @endif
+                                    </select>
+                                </div>
+                            @endif
                         </td>
                     </tr>
                 @empty
@@ -525,26 +542,26 @@ document.querySelectorAll('.quick-status').forEach(function (sel) {
                     payment_failed:          'bg-red-100 text-red-800',
                     refunded:                'bg-orange-100 text-orange-800',
                     refund_initiated:        'bg-yellow-100 text-yellow-800',
-                    cancellation_requested:  'bg-amber-100 text-amber-800',
+                    Refund_requested:  'bg-amber-100 text-amber-800',
                     payment_review:          'bg-amber-100 text-amber-800',
                 };
                 const images = {
-                    placed:                  '{{ asset('images/hourglass.gif') }}',
-                    confirmed:               '{{ asset('images/check.png') }}',
-                    shipped:                 '{{ asset('images/package.png') }}',
-                    delivered:               '{{ asset('images/confetti.png') }}',
-                    cancelled:               '{{ asset('images/letter-x.png') }}',
-                    payment_failed:          '{{ asset('images/sad.png') }}',
-                    refunded:                '{{ asset('images/refund.png') }}',
-                    refund_initiated:        '{{ asset('images/dollars.png') }}',
-                    cancellation_requested:  '{{ asset('images/hourglass.gif') }}',
-                    payment_review:          '{{ asset('images/credit-card.png') }}',
+                    placed:                  '{{ asset('Images/hourglass.gif') }}',
+                    confirmed:               '{{ asset('Images/check.png') }}',
+                    shipped:                 '{{ asset('Images/package.png') }}',
+                    delivered:               '{{ asset('Images/confetti.png') }}',
+                    cancelled:               '{{ asset('Images/letter-x.png') }}',
+                    payment_failed:          '{{ asset('Images/sad.png') }}',
+                    refunded:                '{{ asset('Images/refund.png') }}',
+                    refund_initiated:        '{{ asset('Images/dollars.png') }}',
+                    Refund_requested:        '{{ asset('Images/hourglass.gif') }}',
+                    payment_review:          '{{ asset('Images/credit-card.png') }}',
                 };
 
                 // Update status badge
                 if (badge) {
                     badge.className = 'badge status-badge ' + (colors[status] || 'bg-slate-100 text-slate-700');
-                    const imgSrc = images[status] || '{{ asset('images/box.png') }}';
+                    const imgSrc = images[status] || '{{ asset('Images/box.png') }}';
                     badge.innerHTML = `<img src="${imgSrc}" alt="${status}" class="h-4 w-4 object-contain" style="margin-right:5px;">` + status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, ' ');
                 }
 

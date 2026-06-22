@@ -57,7 +57,7 @@
                                 'confirmed'              => 'bg-blue-100 text-blue-900 ring-blue-200',
                                 'shipped'                => 'bg-purple-100 text-purple-800 ring-purple-200',
                                 'delivered'              => 'bg-green-100 text-green-900 ring-green-200',
-                                'cancellation_requested' => 'bg-amber-100 text-amber-800 ring-amber-200',
+                                'Refund_requested' => 'bg-amber-100 text-amber-800 ring-amber-200',
                                 'refund_initiated'       => 'bg-orange-100 text-orange-800 ring-orange-200',
                                 'refunded'               => 'bg-green-100 text-green-800 ring-green-200',
                                 'cancelled'              => 'bg-red-100 text-red-800 ring-red-200',

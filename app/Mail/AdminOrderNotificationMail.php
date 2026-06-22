@@ -17,7 +17,7 @@ class AdminOrderNotificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '🛒 New Order #' . $this->order->order_number . ' — Medikart Admin',
+            subject: 'New Order #' . $this->order->order_number . ' — Medikart Admin',
         );
     }
 

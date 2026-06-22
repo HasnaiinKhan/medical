@@ -31,7 +31,7 @@ class AdminOrderController extends Controller
 
     public function index(Request $request): View
     {
-        $query = Order::with('user')->latest();
+        $query = Order::with(['user', 'refunds'])->latest();
 
         $status        = $request->input('status', 'all');
         $payment       = $request->input('payment', 'all');

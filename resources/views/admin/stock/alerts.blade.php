@@ -30,7 +30,7 @@
                 <p class="text-xs text-amber-700 mt-1">Products with 5 or fewer units</p>
             </div>
             <div class="flex h-16 w-16 items-center justify-center rounded-xl bg-amber-100 text-3xl">
-                ⚠️
+               <i class="fa-solid fa-arrow-trend-down" style="color: rgb(255, 0, 0);"></i>
             </div>
         </div>
     </div>

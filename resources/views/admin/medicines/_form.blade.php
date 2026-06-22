@@ -66,7 +66,7 @@
 
         {{-- Header --}}
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-            <div style="width:60px;height:60px;border-radius:12px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:50px;flex-shrink:0;"><img src="{{ asset('images/chatbot.gif') }}" alt="Loading" class="h-16 w-max"></div>
+            <div style="width:60px;height:60px;border-radius:12px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:50px;flex-shrink:0;"><img src="{{ asset('Images/chatbot.gif') }}" alt="Loading" class="h-16 w-max"></div>
             <div>
                 <p style="font-size:13px;font-weight:700;color:#0f172a;margin:0;">Medikart Auto-Fill</p>
                 <p style="font-size:11px;color:#64748b;margin:2px 0 0;">Search any medicine, face wash, diaper, supplement — click a result to fill all form fields.</p>

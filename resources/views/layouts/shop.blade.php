@@ -1387,7 +1387,7 @@
                         <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">✓ Verified</span>
                         <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">
                         <div class=lock style="width:20px;">
-                        <img src="{{ asset('images/locked.png') }}" 
+                        <img src="{{ asset('Images/locked.png') }}" 
                         alt="lock"> 
                         </div>
                         Secure</span>
@@ -1668,7 +1668,7 @@
             if (!pageContent) return;
             pageContent.innerHTML = `
                 <div class="col-span-3 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white py-16 text-center shadow-sm">
-                    <img src="${@json(asset('images/emptycart1.png'))}"
+                    <img src="${@json(asset('Images/emptycart1.png'))}"
                          alt="Empty cart"
                          class="h-36 w-auto object-contain mb-4 opacity-80"
                          loading="lazy">
@@ -2639,7 +2639,7 @@ flashTimer = setTimeout(() => {
                     'delivered': '🎉',
                     'cancelled': '❌',
                     'payment_failed': '⚠️',
-                    'cancellation_requested': '🔄',
+                    'Refund_requested': '🔄',
                     'refund_initiated': '💸',
                     'refunded': '✅',
                 }[order.status] || '📦';

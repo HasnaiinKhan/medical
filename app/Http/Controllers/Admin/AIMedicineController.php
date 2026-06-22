@@ -477,7 +477,7 @@ class AIMedicineController extends Controller
         // We just save as-is; modern browsers (Chrome 85+, Firefox 93+) handle avif fine
 
         // ── Save locally ────────────────────────────────────────────────────
-        $dir = public_path('images/medicines');
+        $dir = public_path('Images/medicines');
         if (!is_dir($dir)) mkdir($dir, 0755, true);
 
         $filename = 'med_' . uniqid() . '.' . $ext;
@@ -487,7 +487,7 @@ class AIMedicineController extends Controller
             return response()->json(['error' => 'Could not save image.'], 500);
         }
 
-        $localUrl = asset('images/medicines/' . $filename);
+        $localUrl = asset('Images/medicines/' . $filename);
         Log::info("MediBot image downloaded [{$platform}]: {$remoteUrl} → {$localUrl}");
 
         return response()->json(['url' => $localUrl, 'filename' => $filename]);

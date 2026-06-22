@@ -344,8 +344,7 @@
            class="reveal text-sm font-bold text-blue-700 hover:text-blue-800 transition-colors hover:underline">
             View all →
         </a>
-    </div>
- $catIcons 
+</div>
     @php
     $catIcons = [
         'fever-pain'   => ['img'=>'real/fever.png', 'color'=>'#ef4444', 'light'=>'#fef2f2', 'grad'=>'from-red-500 to-orange-400'],
@@ -522,15 +521,15 @@
 
     @php
     $brands = [
-    ['name' => 'Himalaya',     'img' => 'images/HimalayaLogo.png',    'color' => 'from-green-50 to-emerald-50',  'border' => 'border-green-200', 'text' => 'text-green-800'],
-    ['name' => 'Cipla',        'img' => 'images/CiplaLogo.png',       'color' => 'from-blue-50 to-sky-50',       'border' => 'border-green-200', 'text' => 'text-blue-800'],
-    ['name' => 'Sun Pharma',   'img' => 'images/sunpharmalogo.png',   'color' => 'from-orange-50 to-amber-50',   'border' => 'border-green-200', 'text' => 'text-orange-800'],
-    ['name' => 'Abbott',       'img' => 'images/Abbottlogo.png',      'color' => 'from-red-50 to-rose-50',       'border' => 'border-green-200', 'text' => 'text-red-800'],
-    ['name' => 'Dr. Reddy\'s', 'img' => 'images/DrReddyslogo.png',   'color' => 'from-indigo-50 to-violet-50',  'border' => 'border-green-200', 'text' => 'text-indigo-800'],
-    ['name' => 'Dabur',        'img' => 'images/Daburlogo.png',       'color' => 'from-yellow-50 to-amber-50',   'border' => 'border-green-200', 'text' => 'text-yellow-800'],
-    ['name' => 'Zydus',        'img' => 'images/zyduslogo.png',       'color' => 'from-teal-50 to-cyan-50',      'border' => 'border-green-200', 'text' => 'text-teal-800'],
-    ['name' => 'Micro Labs',   'img' => 'images/microlabslogo.png',   'color' => 'from-slate-50 to-gray-50',     'border' => 'border-green-200', 'text' => 'text-slate-800'],
-    ['name' => 'Sanofi',       'img' => 'images/sanofilogo.png',      'color' => 'from-slate-50 to-gray-50',     'border' => 'border-green-200', 'text' => 'text-slate-800'],
+    ['name' => 'Himalaya',     'img' => 'Images/HimalayaLogo.png',    'color' => 'from-green-50 to-emerald-50',  'border' => 'border-green-200', 'text' => 'text-green-800'],
+    ['name' => 'Cipla',        'img' => 'Images/CiplaLogo.png',       'color' => 'from-blue-50 to-sky-50',       'border' => 'border-green-200', 'text' => 'text-blue-800'],
+    ['name' => 'Sun Pharma',   'img' => 'Images/sunpharmalogo.png',   'color' => 'from-orange-50 to-amber-50',   'border' => 'border-green-200', 'text' => 'text-orange-800'],
+    ['name' => 'Abbott',       'img' => 'Images/Abbottlogo.png',      'color' => 'from-red-50 to-rose-50',       'border' => 'border-green-200', 'text' => 'text-red-800'],
+    ['name' => 'Dr. Reddy\'s', 'img' => 'Images/DrReddyslogo.png',   'color' => 'from-indigo-50 to-violet-50',  'border' => 'border-green-200', 'text' => 'text-indigo-800'],
+    ['name' => 'Dabur',        'img' => 'Images/Daburlogo.png',       'color' => 'from-yellow-50 to-amber-50',   'border' => 'border-green-200', 'text' => 'text-yellow-800'],
+    ['name' => 'Zydus',        'img' => 'Images/zyduslogo.png',       'color' => 'from-teal-50 to-cyan-50',      'border' => 'border-green-200', 'text' => 'text-teal-800'],
+    ['name' => 'Micro Labs',   'img' => 'Images/microlabslogo.png',   'color' => 'from-slate-50 to-gray-50',     'border' => 'border-green-200', 'text' => 'text-slate-800'],
+    ['name' => 'Sanofi',       'img' => 'Images/sanofilogo.png',      'color' => 'from-slate-50 to-gray-50',     'border' => 'border-green-200', 'text' => 'text-slate-800'],
 ];
     @endphp
 

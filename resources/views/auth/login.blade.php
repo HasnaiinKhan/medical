@@ -123,7 +123,7 @@
     <div style="position:relative;z-index:1;">
         {{-- Big medical cross icon --}}
         <div style="width:100px;height:100px;border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:48px;margin-bottom:28px;">
-            <img src="{{ asset('images/medical-report.png') }}" alt="Medical report">
+            <img src="{{ asset('Images/medical-report.png') }}" alt="Medical report">
         </div>
         <h2 style="color:#fff;font-size:30px;font-weight:900;line-height:1.2;margin-bottom:14px;">
             Your Health,<br>Our Priority
@@ -136,15 +136,15 @@
         <div style="display:flex;flex-direction:column;gap:10px;">
             <div class="feature-pill">
              <div style="width:30px;height:10px;border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:48px;margin:10px 0px 10px 0px;">    
-            <img src="{{ asset('images/delivery-bike.png') }}" alt="Medical report"></div> Free delivery on orders above ₹500
+            <img src="{{ asset('Images/delivery-bike.png') }}" alt="Medical report"></div> Free delivery on orders above ₹500
         
         </div>
             <div class="feature-pill"><div style="width:30px;height:10px;border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:48px;margin:10px 0px 10px 0px;">
                 
-            <img src="{{ asset('images/check.png') }}" alt="Medical report"></div>100% genuine medicines</div>
+            <img src="{{ asset('Images/check.png') }}" alt="Medical report"></div>100% genuine medicines</div>
 
 
-            <div class="feature-pill"><div style="width:30px;height:10px;border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:48px;margin:10px 0px 10px 0px;"><img src="{{ asset('images/atm-card.png') }}" alt="Medical report"></div> COD & online payment</div>
+            <div class="feature-pill"><div style="width:30px;height:10px;border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:48px;margin:10px 0px 10px 0px;"><img src="{{ asset('Images/atm-card.png') }}" alt="Medical report"></div> COD & online payment</div>
         </div>
     </div>
 

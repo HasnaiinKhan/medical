@@ -120,7 +120,7 @@ $cartItems = app(\App\Services\CartService::class)->items();
     @empty
         <div class="col-span-full flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white py-16 text-center">
             <div class="notfound" style="width: 60px; height: auto; margin-bottom: 1rem;">
-                <img src="{{ asset('images/sad.png') }}" alt="Application Logo">
+                <img src="{{ asset('Images/sad.png') }}" alt="Application Logo">
             </div>
             <p class="text-lg font-semibold text-slate-700">No medicines found</p>
             <p class="mt-1 text-sm text-slate-500">Try a different search term or browse all categories.</p>
