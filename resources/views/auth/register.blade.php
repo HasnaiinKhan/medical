@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Create Account — Medikart</title>
+    <title>Create Account - Rx Plus 365</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css'])
@@ -110,7 +110,7 @@
         <a href="{{ route('home') }}" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;">
             <div style="width:44px;height:44px;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;border:1px solid rgba(255,255,255,.25);">✚</div>
             <div>
-                <p style="color:#fff;font-size:18px;font-weight:800;line-height:1;">Medikart</p>
+                <p style="color:#fff;font-size:18px;font-weight:800;line-height:1;">Rx Plus 365</p>
                 <p style="color:rgba(255,255,255,.6);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;">Pharmacy</p>
             </div>
         </a>
@@ -122,7 +122,7 @@
             <img src="{{ asset('Images/medical-team.png') }}" alt="Medical Team">
         </div>
         <h2 style="color:#fff;font-size:28px;font-weight:900;line-height:1.25;margin-bottom:12px;">
-            Join Medikart<br>Today
+            Join Rx Plus 365<br>Today
         </h2>
         <p style="color:rgba(255,255,255,.7);font-size:14px;line-height:1.7;max-width:280px;margin-bottom:36px;">
             Create your free account and get access to thousands of genuine medicines delivered to your door.
@@ -147,7 +147,7 @@
     </div>
 
     <div style="position:relative;z-index:1;">
-        <p style="color:rgba(255,255,255,.4);font-size:12px;">© {{ date('Y') }} Medikart, Ahmedabad</p>
+        <p style="color:rgba(255,255,255,.4);font-size:12px;">© {{ date('Y') }} Rx Plus 365, Ahmedabad</p>
     </div>
 </div>
 
@@ -159,7 +159,7 @@
         <div style="display:none;margin-bottom:24px;" class="mobile-logo">
             <a href="{{ route('home') }}" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">
                 <div style="width:36px;height:36px;background:#2563eb;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:900;">✚</div>
-                <span style="font-size:18px;font-weight:800;color:#1e293b;">Medikart</span>
+                <span style="font-size:18px;font-weight:800;color:#1e293b;">Rx Plus 365</span>
             </a>
         </div>
 

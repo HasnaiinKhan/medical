@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Sign In — Medikart</title>
+    <title>Sign In - Rx Plus 365</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css'])
@@ -113,7 +113,7 @@
         <a href="{{ route('home') }}" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;">
             <div style="width:44px;height:44px;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;border:1px solid rgba(255,255,255,.25);">✚</div>
             <div>
-                <p style="color:#fff;font-size:18px;font-weight:800;line-height:1;">Medikart</p>
+                <p style="color:#fff;font-size:18px;font-weight:800;line-height:1;">Rx Plus 365</p>
                 <p style="color:rgba(255,255,255,.65);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;">Pharmacy</p>
             </div>
         </a>
@@ -150,7 +150,7 @@
 
     {{-- Bottom --}}
     <div style="position:relative;z-index:1;">
-        <p style="color:rgba(255,255,255,.45);font-size:12px;">© {{ date('Y') }} Medikart, Ahmedabad</p>
+        <p style="color:rgba(255,255,255,.45);font-size:12px;">© {{ date('Y') }} Rx Plus 365, Ahmedabad</p>
     </div>
 </div>
 
@@ -162,14 +162,14 @@
         <div style="display:none;margin-bottom:28px;" class="mobile-logo">
             <a href="{{ route('home') }}" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">
                 <div style="width:36px;height:36px;background:#2563eb;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:900;">✚</div>
-                <span style="font-size:18px;font-weight:800;color:#1e293b;">Medikart</span>
+                <span style="font-size:18px;font-weight:800;color:#1e293b;">Rx Plus 365</span>
             </a>
         </div>
 
         {{-- Heading --}}
         <div style="margin-bottom:32px;">
             <h1 style="font-size:26px;font-weight:900;color:#0f172a;letter-spacing:-.5px;">Welcome back 👋</h1>
-            <p style="margin-top:6px;font-size:14px;color:#64748b;">Sign in to your Medikart account to continue.</p>
+            <p style="margin-top:6px;font-size:14px;color:#64748b;">Sign in to your Rx Plus 365 account to continue.</p>
         </div>
 
         {{-- Flash --}}
@@ -227,7 +227,7 @@
         {{-- Divider --}}
         <div style="display:flex;align-items:center;gap:12px;margin:24px 0;">
             <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-            <span style="font-size:12px;color:#94a3b8;font-weight:600;">NEW TO MEDIKART?</span>
+            <span style="font-size:12px;color:#94a3b8;font-weight:600;">NEW TO Rx Plus 365?</span>
             <div style="flex:1;height:1px;background:#e2e8f0;"></div>
         </div>
 

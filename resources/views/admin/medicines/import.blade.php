@@ -171,7 +171,7 @@
                 <div class="rounded-xl bg-amber-50 p-3 border border-amber-200 sm:col-span-1 sm:col-start-3">
                     <p class="font-bold text-amber-900 mb-1">Notes</p>
                     <ul class="text-amber-800 space-y-1">
-                        <li>• mrp and price must be in ₹ (e.g. 45.00) — not paise</li>
+                        <li>• mrp and price must be in ₹ (e.g. 45.00) - not paise</li>
                         <li>• prescription_required: use <code class="bg-amber-100 px-1 rounded">true</code> or <code class="bg-amber-100 px-1 rounded">false</code></li>
                         <li>• Existing medicines (matched by name slug) will be updated, not duplicated</li>
                     </ul>

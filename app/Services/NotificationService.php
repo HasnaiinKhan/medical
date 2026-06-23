@@ -13,7 +13,7 @@ class NotificationService
 {
     /**
      * Notify admin of a new order via configured channels.
-     * Never throws — errors are logged silently.
+     * Never throws - errors are logged silently.
      */
     public static function notifyAdmin(Order $order): void
     {

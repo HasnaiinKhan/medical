@@ -325,7 +325,7 @@
                 <p class="text-xs text-slate-500 italic">Order has reached final status.</p>
             @endif
 
-            {{-- Cancel — separate, opens modal --}}
+            {{-- Cancel - separate, opens modal --}}
             <div class="mt-3 pt-3 border-t border-blue-200">
                 <button type="button"
                         onclick="document.getElementById('cancel-modal').classList.remove('hidden')"
@@ -341,11 +341,11 @@
             <div class="space-y-2 text-sm">
                 <div>
                     <p class="text-xs text-red-500 font-semibold uppercase tracking-wide">Reason</p>
-                    <p class="text-red-800 mt-0.5">{{ $order->cancellation_reason ?? '—' }}</p>
+                    <p class="text-red-800 mt-0.5">{{ $order->cancellation_reason ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-xs text-red-500 font-semibold uppercase tracking-wide">Cancelled By</p>
-                    <p class="text-red-800 mt-0.5 capitalize">{{ $order->cancelled_by ?? '—' }}</p>
+                    <p class="text-red-800 mt-0.5 capitalize">{{ $order->cancelled_by ?? '-' }}</p>
                 </div>
                 @if($order->cancelled_at)
                 <div>

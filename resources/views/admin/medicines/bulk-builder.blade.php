@@ -175,7 +175,7 @@
                 <input x-model="query"
                        @keydown.enter.prevent="doSearch"
                        type="text"
-                       placeholder="Search brand or product — e.g. Himalaya, Dolo…"
+                       placeholder="Search brand or product - e.g. Himalaya, Dolo…"
                        class="bb-search-input">
             </div>
             <button @click="doSearch"
@@ -293,11 +293,11 @@
                 {{-- Info --}}
                 <div class="bb-card-body">
                     <p class="bb-card-name" x-text="item.name"></p>
-                    <p class="bb-card-mfr"  x-text="item.manufacturer || '—'"></p>
+                    <p class="bb-card-mfr"  x-text="item.manufacturer || '-'"></p>
 
                     <div class="bb-card-price">
                         <span class="bb-card-price-val"
-                              x-text="item.price_suggestion ? '₹' + parseFloat(item.price_suggestion).toFixed(2) : '—'"></span>
+                              x-text="item.price_suggestion ? '₹' + parseFloat(item.price_suggestion).toFixed(2) : '-'"></span>
                         <span x-show="item.mrp_suggestion && item.mrp_suggestion > item.price_suggestion"
                               class="bb-card-price-mrp"
                               x-text="'₹' + parseFloat(item.mrp_suggestion).toFixed(2)"></span>
@@ -519,7 +519,7 @@
                     'bone-joint':'Bone & Joint','immunity':'Immunity'
                 };
 
-                // Build a description from product fields — used when AI hasn't generated one
+                // Build a description from product fields - used when AI hasn't generated one
                 var autoDesc = function (item) {
                     var name = item.name        || '';
                     var mfr  = item.manufacturer || '';

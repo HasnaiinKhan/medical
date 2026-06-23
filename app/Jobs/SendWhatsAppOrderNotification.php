@@ -36,7 +36,7 @@ class SendWhatsAppOrderNotification implements ShouldQueue
 
         // Build items list
         $itemLines = $order->items->map(fn ($i) =>
-            "• {$i->medicine_name_snapshot} x{$i->quantity} — ₹" . number_format($i->line_total_paise / 100, 2)
+            "• {$i->medicine_name_snapshot} x{$i->quantity} - ₹" . number_format($i->line_total_paise / 100, 2)
         )->implode("\n");
 
         $adminUrl = rtrim(config('app.url'), '/') . '/admin/orders/' . $order->id;

@@ -43,6 +43,19 @@ class Refund extends Model
         return round($this->amount_paise / 100, 2);
     }
 
+    /**
+     * Return the fully-qualified public URL for the proof image.
+     * Files are stored in public/images/refund-proofs/ and served via asset().
+     */
+    public function proofImageUrl(): ?string
+    {
+        if (! $this->proof_image_path) {
+            return null;
+        }
+
+        return asset($this->proof_image_path);
+    }
+
     /** Enforce valid state transitions */
     public function canTransitionTo(string $newStatus): bool
     {

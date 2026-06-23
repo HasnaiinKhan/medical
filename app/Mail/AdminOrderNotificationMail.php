@@ -17,12 +17,16 @@ class AdminOrderNotificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Order #' . $this->order->order_number . ' — Medikart Admin',
+            subject: 'New Order #' . $this->order->order_number . ' - Rx Plus 365 Admin',
         );
     }
 
     public function content(): Content
     {
+        // Always reload relations at render time so they are never stripped
+        // by SerializesModels serialization/deserialization.
+        $this->order->load(['items', 'user']);
+
         return new Content(view: 'emails.admin-order-notification');
     }
 }

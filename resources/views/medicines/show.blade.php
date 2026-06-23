@@ -68,7 +68,7 @@
         <div class="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
             <span class="h-2 w-2 rounded-full {{ $medicine->stock > 0 ? 'bg-blue-600 animate-pulse' : 'bg-red-500' }}"></span>
             <span class="text-sm font-medium text-slate-800">
-                {{ $medicine->stock > 0 ? 'In Stock — ' . $medicine->stock . ' units available' : 'Out of Stock' }}
+                {{ $medicine->stock > 0 ? 'In Stock - ' . $medicine->stock . ' units available' : 'Out of Stock' }}
             </span>
         </div>
     </div>

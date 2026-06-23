@@ -43,7 +43,7 @@ class CartController extends Controller
 
         $qty      = (int) ($data['quantity'] ?? 1);
 
-        // Stock check — account for what's already in cart
+        // Stock check - account for what's already in cart
         $inCart    = $this->cart->quantity($medicine->id);
         $available = $medicine->stock;
 

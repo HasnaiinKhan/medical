@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ChatbotController extends Controller
 {
-    // ── Emergency keywords — always handled first ──────────────────────────────
+    // ── Emergency keywords - always handled first ──────────────────────────────
     private const EMERGENCY_KEYWORDS = [
         'chest pain','heart attack','can\'t breathe','cannot breathe','difficulty breathing',
         'severe allergic','anaphylaxis','overdose','seizure','unconscious','stroke',
@@ -114,11 +114,11 @@ class ChatbotController extends Controller
         ],
         'store' => [
             'keywords' => ['store','shop','location','where','open','timing','hours','near me'],
-            'reply'    => "📍 <strong>Store Info:</strong><br>Medikart Pharmacy<br>Shop 54/04, opp. Unigold Hospital Main Gate, near Jivraj, Jivraj Park, Ahmedabad – 380051<br><br>We also deliver online across Ahmedabad. Enter your pincode to check availability.",
+            'reply'    => "📍 <strong>Store Info:</strong><br>Rx Plus 365<br>Shop 54/04, opp. Unigold Hospital Main Gate, near Jivraj, Jivraj Park, Ahmedabad – 380051<br><br>We also deliver online across Ahmedabad. Enter your pincode to check availability.",
         ],
         'navigate' => [
             'keywords' => ['how to order','how do i','place order','add to cart','checkout','register','login','sign in','sign up','account'],
-            'reply'    => "🛒 <strong>How to Order:</strong><br>1. Browse or search for medicines<br>2. Click <em>Add to Cart</em><br>3. Go to Cart and click <em>Checkout</em><br>4. Enter your delivery details and choose payment<br>5. Confirm your order — done! 🎉<br><br>Need an account? Click <em>Register</em> in the top menu.",
+            'reply'    => "🛒 <strong>How to Order:</strong><br>1. Browse or search for medicines<br>2. Click <em>Add to Cart</em><br>3. Go to Cart and click <em>Checkout</em><br>4. Enter your delivery details and choose payment<br>5. Confirm your order - done! 🎉<br><br>Need an account? Click <em>Register</em> in the top menu.",
         ],
     ];
 
@@ -153,7 +153,7 @@ class ChatbotController extends Controller
         $message = strtolower($raw);
 
         if ($message === '') {
-            return $this->reply("Please type your symptom, medicine name, or question — I'm here to help! 😊");
+            return $this->reply("Please type your symptom, medicine name, or question - I'm here to help! 😊");
         }
 
         // ── Fuzzy-correct the message before any matching ──────────────────────
@@ -161,18 +161,18 @@ class ChatbotController extends Controller
         $wasCorrected     = $corrected !== $message;
         $message          = $corrected;
 
-        // 1. Emergency check — always first
+        // 1. Emergency check - always first
         foreach (self::EMERGENCY_KEYWORDS as $kw) {
             if (str_contains($message, $kw)) {
                 return $this->reply(
                     "🚨 <strong>This sounds like a medical emergency.</strong><br><br>" .
                     "Please call <strong>112</strong> (emergency) or go to the nearest hospital immediately.<br><br>" .
-                    "Do not wait — your safety comes first. 🏥"
+                    "Do not wait - your safety comes first. 🏥"
                 );
             }
         }
 
-        // 2. "How are you?" / "Kese ho?" — conversational check-in
+        // 2. "How are you?" / "Kese ho?" - conversational check-in
         foreach (self::HOW_ARE_YOU as $h) {
             if (str_contains($message, $h)) {
                 return $this->reply(
@@ -183,12 +183,12 @@ class ChatbotController extends Controller
             }
         }
 
-        // 2b. "What's up?" / "Kya chal raha?" — casual check-in
+        // 2b. "What's up?" / "Kya chal raha?" - casual check-in
         foreach (self::WHATS_UP as $w) {
             if (str_contains($message, $w)) {
                 return $this->reply(
                     "Not much, just here to help! 😄<br><br>" .
-                    "Ask me anything — medicines, order tracking, delivery info, or health tips. I've got you covered! 💊"
+                    "Ask me anything - medicines, order tracking, delivery info, or health tips. I've got you covered! 💊"
                 );
             }
         }
@@ -198,7 +198,7 @@ class ChatbotController extends Controller
             if (str_contains($message, $g)) {
                 $timeGreeting = $this->getTimeGreeting();
                 return $this->reply(
-                    "{$timeGreeting} 👋 I'm <strong>MedCare AI</strong>, your smart pharmacy assistant at Medikart.<br><br>" .
+                    "{$timeGreeting} 👋 I'm <strong>MedCare AI</strong>, your smart pharmacy assistant at Rx Plus 365.<br><br>" .
                     "I can help you:<br>" .
                     "• 💊 Find medicines & health products<br>" .
                     "• 📦 Track your orders<br>" .
@@ -225,7 +225,7 @@ class ChatbotController extends Controller
 
         // 6. Ok / acknowledgement
         foreach (self::OK as $o) {
-            if ($message === $o) {   // exact match only — avoids "ok bye", "okay let me check" etc.
+            if ($message === $o) {   // exact match only - avoids "ok bye", "okay let me check" etc.
                 return $this->reply(
                     "👍 Sure! Let me know if there's anything else I can help you with.<br><br>" .
                     "You can ask me about medicines, symptoms, orders, or delivery anytime. 😊"
@@ -238,7 +238,7 @@ class ChatbotController extends Controller
             return $this->handleOrderTracking($message, $raw);
         }
 
-        // 6. FAQ intents — for order-related topics, ask which order if logged in
+        // 6. FAQ intents - for order-related topics, ask which order if logged in
         foreach (self::FAQ_MAP as $intent => $data) {
             if ($this->matchesAny($message, $data['keywords'])) {
                 if (in_array($intent, self::ORDER_RELATED_INTENTS) && Auth::check()) {
@@ -262,7 +262,7 @@ class ChatbotController extends Controller
             return $this->searchAndRespond(implode(' ', array_slice($keywords, 0, 3)), $message, false, $keywords);
         }
 
-        // 9. Generic fallback — try searching the raw message
+        // 9. Generic fallback - try searching the raw message
         $products = $this->searchMedicines(array_filter(explode(' ', $message), fn($w) => strlen($w) >= 3));
         if ($products->isNotEmpty()) {
             return response()->json([
@@ -320,7 +320,7 @@ class ChatbotController extends Controller
             $orderNumber = $matches[1] ?? null;
 
             if ($orderNumber) {
-                // User gave a specific order number — look it up
+                // User gave a specific order number - look it up
                 $order = Order::where('order_number', $orderNumber)
                                ->where('user_id', Auth::id())
                                ->first()
@@ -340,7 +340,7 @@ class ChatbotController extends Controller
                 );
             }
 
-            // No order number — ask which order they want to process
+            // No order number - ask which order they want to process
             return $this->askWhichOrder();
         }
 
@@ -364,7 +364,7 @@ class ChatbotController extends Controller
         }
 
         $prefix = $contextReply ? $contextReply . "<br><br>" : "";
-        $reply  = $prefix . "📦 <strong>Which order would you like to process?</strong><br>Here are your recent orders — tap one to see full details:";
+        $reply  = $prefix . "📦 <strong>Which order would you like to process?</strong><br>Here are your recent orders - tap one to see full details:";
 
         $orderList = $orders->take(5)->map(fn($o) => [
             'id'           => $o->id,

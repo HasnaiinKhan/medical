@@ -68,7 +68,7 @@
                     @if($order->address_line2)
                         <p class="text-slate-600">{{ $order->address_line2 }}</p>
                     @endif
-                    <p class="text-slate-600">{{ $order->delivery_area }}, Ahmedabad — {{ $order->delivery_pin }}</p>
+                    <p class="text-slate-600">{{ $order->delivery_area }}, Ahmedabad - {{ $order->delivery_pin }}</p>
                 </div>
             </div>
         </div>
@@ -162,7 +162,7 @@
     {{-- WhatsApp help --}}
     @php
         $waPhone  = config('services.whatsapp.number', '917600264090');
-        $waMsg    = "Hi! I need help with my order {$order->order_number} on Medikart.";
+        $waMsg    = "Hi! I need help with my order {$order->order_number} on Rx Plus 365.";
     @endphp
     <a href="https://wa.me/{{ $waPhone }}?text={{ urlencode($waMsg) }}" target="_blank"
        class="mt-4 flex items-center justify-center gap-2 rounded-xl border border-green-200 bg-green-50 py-3 text-sm font-semibold text-green-800 hover:bg-green-100 transition-colors">

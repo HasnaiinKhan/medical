@@ -17,7 +17,7 @@ class RefundRequested extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: '↩ Refund Request Received — ' . $this->refund->refund_number . ' | Medikart');
+        return new Envelope(subject: 'Refund Request Received - ' . $this->refund->refund_number . ' | Rx Plus 365');
     }
 
     public function content(): Content

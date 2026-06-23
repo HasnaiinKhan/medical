@@ -16,7 +16,7 @@
 </div>
 @endif
 
-{{-- Cart header — animated gradient, no image --}}
+{{-- Cart header - animated gradient, no image --}}
 <div class="relative mb-6 overflow-hidden rounded-2xl" style="min-height: 10%;">
     {{-- Animated flowing gradient background --}}
     <div class="absolute inset-0 cart-header-bg"></div>

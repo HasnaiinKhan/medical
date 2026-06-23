@@ -42,7 +42,7 @@ class AdminController extends Controller
         // Base query for paid orders only
         $baseQ = fn () => Order::where('payment_status', 'paid')->where('status', '!=', 'cancelled');
 
-        // ── TODAY — hourly (0–23) ────────────────────────────────────────
+        // ── TODAY - hourly (0–23) ────────────────────────────────────────
         $todayRaw = (clone $baseQ())
             ->select(DB::raw("HOUR(created_at) as period"),
                      DB::raw('SUM(total_paise)/100 as revenue'),
@@ -61,7 +61,7 @@ class AdminController extends Controller
             ]);
         }
 
-        // ── THIS WEEK — daily (Mon–today) ───────────────────────────────
+        // ── THIS WEEK - daily (Mon–today) ───────────────────────────────
         $weekRaw = (clone $baseQ())
             ->select(DB::raw("DATE_FORMAT(created_at,'%Y-%m-%d') as period"),
                      DB::raw('SUM(total_paise)/100 as revenue'),
@@ -83,7 +83,7 @@ class AdminController extends Controller
             $day->addDay();
         }
 
-        // ── THIS MONTH — daily ──────────────────────────────────────────
+        // ── THIS MONTH - daily ──────────────────────────────────────────
         $monthRaw = (clone $baseQ())
             ->select(DB::raw("DATE_FORMAT(created_at,'%Y-%m-%d') as period"),
                      DB::raw('SUM(total_paise)/100 as revenue'),
@@ -104,7 +104,7 @@ class AdminController extends Controller
             ]);
         }
 
-        // ── THIS YEAR — monthly ─────────────────────────────────────────
+        // ── THIS YEAR - monthly ─────────────────────────────────────────
         $yearRaw = (clone $baseQ())
             ->select(DB::raw("DATE_FORMAT(created_at,'%Y-%m') as period"),
                      DB::raw('SUM(total_paise)/100 as revenue'),

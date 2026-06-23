@@ -26,7 +26,7 @@
     <div class="flex items-start gap-3 pr-12">
         <span class="text-xl flex-shrink-0"><i class="fa-solid fa-circle-exclamation" style="color: rgb(255, 0, 0);"></i></span>
         <div class="flex-1">
-            <p class="text-sm font-bold text-red-900 mb-2">{{ $outOfStockList->count() }} out-of-stock — customers cannot buy these. Restock immediately.</p>
+            <p class="text-sm font-bold text-red-900 mb-2">{{ $outOfStockList->count() }} out-of-stock - customers cannot buy these. Restock immediately.</p>
             <div class="flex flex-wrap gap-2">
                 @foreach($outOfStockList->take(10) as $m)
                     <a href="{{ route('admin.medicines.edit', $m) }}"
@@ -65,7 +65,7 @@
     <div class="flex items-start gap-3 pr-12">
         <span class="text-xl flex-shrink-0"><i class="fa-solid fa-arrow-trend-down" style="color: rgb(255, 0, 0);"></i></span>
         <div class="flex-1">
-            <p class="text-sm font-bold text-amber-900 mb-2">{{ $lowStockList->count() }} running low (≤5 units) — consider restocking soon.</p>
+            <p class="text-sm font-bold text-amber-900 mb-2">{{ $lowStockList->count() }} running low (≤5 units) - consider restocking soon.</p>
             <div class="flex flex-wrap gap-2">
                 @foreach($lowStockList->take(10) as $m)
                     <a href="{{ route('admin.medicines.edit', $m) }}"
@@ -222,7 +222,7 @@ function dismissMedicineAlert(alertId) {
                             @if($m->prescription_required)
                                 <span class="badge bg-amber-100 text-amber-800">Rx</span>
                             @else
-                                <span class="text-slate-300 text-xs">—</span>
+                                <span class="text-slate-300 text-xs">-</span>
                             @endif
                         </td>
                         <td class="text-right">

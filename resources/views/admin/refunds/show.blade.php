@@ -62,12 +62,14 @@
 
             @if($refund->proof_image_path)
                 <div class="mt-3">
-                    <p class="text-xs text-slate-500 mb-1">Customer Proof Image</p>
-                    <a href="{{ Storage::url($refund->proof_image_path) }}" target="_blank">
-                        <img src="{{ Storage::url($refund->proof_image_path) }}"
-                             alt="Proof"
-                             class="max-h-48 rounded-xl border border-slate-200 object-contain hover:opacity-90 transition-opacity">
+                    <p class="text-xs text-slate-500 mb-2">Customer Proof Image</p>
+                    <a href="{{ $refund->proofImageUrl() }}" target="_blank" rel="noopener">
+                        <img src="{{ $refund->proofImageUrl() }}"
+                             alt="Proof image uploaded by customer"
+                             onerror="this.closest('a').insertAdjacentHTML('afterend', '<p class=\'text-xs text-red-500 mt-1\'>Image could not be loaded. <a href=\'' + this.src + '\' target=\'_blank\' class=\'underline\'>Open directly</a></p>'); this.closest('a').remove();"
+                             class="max-h-64 w-auto rounded-xl border border-slate-200 object-contain hover:opacity-90 transition-opacity cursor-zoom-in">
                     </a>
+                    <p class="mt-1 text-[10px] text-slate-400 break-all">{{ $refund->proofImageUrl() }}</p>
                 </div>
             @endif
         </div>
@@ -102,7 +104,7 @@
         {{-- Bank details (Online bank transfer) --}}
         @if($refund->type === 'online_bank_transfer' && $refund->bank_account_number)
             <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5 shadow-sm">
-                <h3 class="text-sm font-bold text-blue-900 mb-4">🏦 Online Refund — Bank Transfer Details</h3>
+                <h3 class="text-sm font-bold text-blue-900 mb-4">🏦 Online Refund - Bank Transfer Details</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                     <div><p class="text-xs text-blue-700">Account Name</p><p class="font-bold text-slate-800">{{ $refund->bank_account_name }}</p></div>
                     <div><p class="text-xs text-blue-700">Account Number</p><p class="font-mono font-bold text-slate-800">{{ $refund->bank_account_number }}</p></div>
@@ -114,7 +116,7 @@
         {{-- UPI details (Online UPI) --}}
         @if($refund->type === 'online_upi' && $refund->upi_id)
             <div class="rounded-2xl border border-violet-200 bg-violet-50 p-5 shadow-sm">
-                <h3 class="text-sm font-bold text-violet-900 mb-4">📱 Online Refund — UPI Details</h3>
+                <h3 class="text-sm font-bold text-violet-900 mb-4">📱 Online Refund - UPI Details</h3>
                 <div class="flex items-center gap-4 text-sm">
                     <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-xl flex-shrink-0">📱</div>
                     <div>

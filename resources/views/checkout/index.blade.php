@@ -651,7 +651,7 @@ function hideOverlay() {
 document.getElementById('checkout-form').addEventListener('submit', async function (e) {
     e.preventDefault();
 
-    // Show overlay IMMEDIATELY — before anything else
+    // Show overlay IMMEDIATELY - before anything else
     showOverlay();
     clearErrors();
     setLoading(true);
@@ -700,13 +700,13 @@ document.getElementById('checkout-form').addEventListener('submit', async functi
         return;
     }
 
-    // COD — overlay stays, redirect immediately
+    // COD - overlay stays, redirect immediately
     if (data.method === 'cod') {
         window.location.href = data.redirect_url;
         return;
     }
 
-    // Online — overlay stays behind Razorpay modal
+    // Online - overlay stays behind Razorpay modal
     const options = {
         key:         RZP_KEY,
         amount:      data.amount,
@@ -724,7 +724,7 @@ document.getElementById('checkout-form').addEventListener('submit', async functi
             }
         },
         handler: async function (response) {
-            // Overlay already visible — update message during verification
+            // Overlay already visible - update message during verification
             const overlayMsg = document.getElementById('overlay-msg');
             if (overlayMsg) overlayMsg.textContent = 'Verifying payment…';
 

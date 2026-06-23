@@ -29,7 +29,7 @@ class MedicineImportExportController extends Controller
         $file   = $request->file('csv_file');
         $handle = fopen($file->getRealPath(), 'r');
 
-        // Read header row — strip UTF-8 BOM if present
+        // Read header row - strip UTF-8 BOM if present
         $rawHeaders = fgetcsv($handle);
         $rawHeaders[0] = ltrim($rawHeaders[0], "\xEF\xBB\xBF");
         $headers = array_map('strtolower', array_map('trim', $rawHeaders));

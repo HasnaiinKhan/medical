@@ -18,7 +18,7 @@ class OrderCancelled extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '❌ Order Cancelled — ' . $this->order->order_number . ' | Medikart',
+            subject: 'Order Cancelled - ' . $this->order->order_number . ' | Rx Plus 365',
         );
     }
 

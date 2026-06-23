@@ -106,7 +106,7 @@ class AdminOrderController extends Controller
             ]);
 
             // Restore stock for cancelled orders
-            // (only if stock was already decremented — COD always, online only if paid/confirmed)
+            // (only if stock was already decremented - COD always, online only if paid/confirmed)
             $stockWasDeducted = $order->payment_method === 'cod'
                 || in_array($order->payment_status, ['paid'])
                 || in_array($order->status, ['confirmed', 'shipped']);
@@ -164,7 +164,7 @@ class AdminOrderController extends Controller
         elseif ($newStatus === 'delivered') {
             $updates = ['status' => $newStatus];
 
-            // COD orders are paid on delivery — always sync payment_status
+            // COD orders are paid on delivery - always sync payment_status
             if ($order->payment_method === 'cod' && $order->payment_status !== 'paid') {
                 $updates['payment_status'] = 'paid';
             }
@@ -198,7 +198,7 @@ class AdminOrderController extends Controller
             'status'      => ['required', 'in:' . implode(',', self::STATUSES)],
         ]);
 
-        // Bulk cancel is not allowed — must be done individually with a reason
+        // Bulk cancel is not allowed - must be done individually with a reason
         if ($request->status === 'cancelled') {
             return back()->with('status', 'Bulk cancellation is not allowed. Please cancel orders individually to provide a reason.');
         }

@@ -45,11 +45,11 @@ class RefundController extends Controller
         $data = $request->validate([
             'reason'              => ['required', 'string', 'max:1000'],
             'proof_image'         => ['nullable', 'image', 'max:4096'],
-            // Bank details — required when bank transfer is chosen
+            // Bank details - required when bank transfer is chosen
             'bank_account_number' => ['nullable', 'string', 'max:20', 'regex:/^[0-9]{9,18}$/'],
             'bank_ifsc'           => ['nullable', 'string', 'regex:/^[A-Z]{4}0[A-Z0-9]{6}$/'],
             'bank_account_name'   => ['nullable', 'string', 'max:100'],
-            // UPI — alternative to bank
+            // UPI - alternative to bank
             'upi_id'              => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$/'],
             'refund_method_choice'=> ['required', 'in:bank,upi'],
         ]);
@@ -76,10 +76,13 @@ class RefundController extends Controller
                 $refundType = $chosenMethod === 'upi' ? 'online_upi' : 'online_bank_transfer';
             }
 
-            // Handle proof image upload
+            // Handle proof image upload — saved directly to public/images/refund-proofs/
             $proofPath = null;
             if ($request->hasFile('proof_image')) {
-                $proofPath = $request->file('proof_image')->store('refund-proofs', 'public');
+                $file      = $request->file('proof_image');
+                $filename  = 'proof_' . strtolower(Str::random(16)) . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('images/refund-proofs'), $filename);
+                $proofPath = 'images/refund-proofs/' . $filename;
             }
 
             $refund = Refund::create([
@@ -133,7 +136,7 @@ class RefundController extends Controller
             ->with('status', 'Refund request submitted. You will receive a confirmation email shortly.');
     }
 
-    /** Process gateway refund — called internally or by admin */
+    /** Process gateway refund - called internally or by admin */
     public function processGatewayRefund(Order $order, Refund $refund): void
     {
         $refund->transitionTo('processing', 'Gateway refund initiated.', 'system', [

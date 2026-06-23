@@ -2,100 +2,161 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Your Order is Shipped</title>
-<style>
-  body { margin:0; padding:0; background:#f0f4f8; font-family:'Segoe UI',Arial,sans-serif; color:#1e293b; }
-  .wrap { max-width:600px; margin:32px auto; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(30,58,138,.10); }
-  .header { background:linear-gradient(135deg,#7c3aed 0%,#2563eb 100%); padding:36px 40px; text-align:center; }
-  .header h1 { margin:0; color:#fff; font-size:24px; font-weight:800; }
-  .header p  { margin:6px 0 0; color:rgba(255,255,255,.8); font-size:14px; }
-  .badge { display:inline-block; background:rgba(255,255,255,.2); color:#fff; border-radius:99px; padding:4px 16px; font-size:13px; font-weight:700; margin-top:12px; }
-  .body  { padding:36px 40px; }
-  .greeting { font-size:16px; font-weight:600; margin-bottom:8px; }
-  .msg { font-size:14px; color:#475569; line-height:1.7; margin-bottom:24px; }
-  .track-box { background:linear-gradient(135deg,#ede9fe,#dbeafe); border:1px solid #c4b5fd; border-radius:12px; padding:24px; text-align:center; margin-bottom:24px; }
-  .track-box .icon { font-size:48px; margin-bottom:8px; }
-  .track-box h2 { margin:0 0 6px; font-size:20px; font-weight:800; color:#1e3a8a; }
-  .track-box p  { margin:0; font-size:13px; color:#475569; }
-  .order-box { background:#f8faff; border:1px solid #bfdbfe; border-radius:12px; padding:20px 24px; margin-bottom:24px; }
-  .order-box h3 { margin:0 0 14px; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#64748b; }
-  .row { display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px solid #e2e8f0; }
-  .row:last-child { border-bottom:none; }
-  .row .label { color:#64748b; }
-  .row .val   { font-weight:600; color:#1e293b; }
-  .steps { display:flex; justify-content:space-between; margin:24px 0; }
-  .step { flex:1; text-align:center; position:relative; }
-  .step::after { content:''; position:absolute; top:16px; left:50%; width:100%; height:2px; background:#e2e8f0; z-index:0; }
-  .step:last-child::after { display:none; }
-  .step-dot { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 6px; font-size:14px; position:relative; z-index:1; }
-  .step-dot.done { background:#2563eb; color:#fff; }
-  .step-dot.active { background:#7c3aed; color:#fff; box-shadow:0 0 0 4px #ede9fe; }
-  .step-dot.pending { background:#e2e8f0; color:#94a3b8; }
-  .step-label { font-size:11px; font-weight:600; color:#64748b; }
-  .step-label.active { color:#7c3aed; font-weight:700; }
-  .cta { text-align:center; margin:28px 0; }
-  .cta a { display:inline-block; background:linear-gradient(135deg,#7c3aed,#2563eb); color:#fff; text-decoration:none; padding:13px 32px; border-radius:12px; font-size:14px; font-weight:700; }
-  .footer { background:#f8fafc; border-top:1px solid #e2e8f0; padding:20px 40px; text-align:center; font-size:12px; color:#94a3b8; }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Order is On the Way - {{ $order->order_number }}</title>
+<style type="text/css">
+  body,table,td,p,a { -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+  table { border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; }
+  body { margin:0; padding:0; background-color:#f0f2f5; font-family:Arial,Helvetica,sans-serif; color:#1a202c; }
+  a { color:#1a56db; text-decoration:none; }
+  @media only screen and (max-width:600px) {
+    .outer { padding:12px 0 !important; }
+    .card  { width:100% !important; border-radius:0 !important; }
+    .hpad  { padding:28px 20px !important; }
+    .bpad  { padding:28px 20px !important; }
+    .fpad  { padding:16px 20px !important; }
+    .th, .td { padding:8px 10px !important; font-size:12px !important; }
+    .h1 { font-size:20px !important; }
+    .step-td { padding:6px 4px !important; font-size:10px !important; }
+  }
 </style>
 </head>
-<body>
-<div class="wrap">
+<body style="margin:0;padding:0;background-color:#f0f2f5;">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+  <tr>
+    <td class="outer" align="center" style="padding:32px 16px;background-color:#f0f2f5;">
+      <table class="card" width="580" cellpadding="0" cellspacing="0" role="presentation"
+             style="background-color:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
 
-  {{-- Header --}}
-  <div class="header">
-    <h1>🚚 Your Order is On the Way!</h1>
-    <p>Sit tight — your medicines are heading to you</p>
-    <span class="badge">{{ $order->order_number }}</span>
-  </div>
+        <!-- HEADER -->
+        <tr>
+          <td class="hpad" align="center" style="background-color:#553c9a;padding:36px 40px;">
+            <p style="margin:0 0 4px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.7);font-family:Arial,Helvetica,sans-serif;">Order Update</p>
+            <h1 class="h1" style="margin:0 0 8px 0;font-size:24px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">Your Order is On the Way!</h1>
+            <p style="margin:0 0 16px 0;font-size:14px;color:rgba(255,255,255,0.8);font-family:Arial,Helvetica,sans-serif;">Your medicines are being delivered to you now.</p>
+            <table cellpadding="0" cellspacing="0" role="presentation" align="center">
+              <tr><td style="background-color:rgba(255,255,255,0.15);border-radius:4px;padding:6px 18px;">
+                <span style="font-size:13px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">{{ $order->order_number }}</span>
+              </td></tr>
+            </table>
+          </td>
+        </tr>
 
-  {{-- Body --}}
-  <div class="body">
-    <p class="greeting">Hi {{ $order->customer_name }},</p>
-    <p class="msg">
-      Great news! Your order <strong>{{ $order->order_number }}</strong> has been shipped and is on its way to your address in <strong>{{ $order->delivery_area }}</strong>.
-      @if($order->payment_method === 'cod')
-        Please keep <strong>₹{{ number_format($order->totalRupees(), 2) }}</strong> ready for cash on delivery.
-      @endif
-    </p>
+        <!-- BODY -->
+        <tr>
+          <td class="bpad" style="padding:32px 40px;">
 
-    {{-- Shipping animation box --}}
-    <div class="track-box">
-      <div class="icon">📦</div>
-      <h2>Package Dispatched!</h2>
-      <p>Expected delivery within 1–3 business days to {{ $order->delivery_area }}, {{ $order->delivery_pin }}</p>
-    </div>
+            <p style="margin:0 0 6px 0;font-size:16px;font-weight:700;color:#1a202c;font-family:Arial,Helvetica,sans-serif;">Hi {{ $order->customer_name }},</p>
+            <p style="margin:0 0 24px 0;font-size:14px;color:#4a5568;line-height:1.7;font-family:Arial,Helvetica,sans-serif;">
+              Your order <strong style="color:#1a202c;">{{ $order->order_number }}</strong> has been shipped and is on its way to <strong style="color:#1a202c;">{{ $order->delivery_area }}</strong>.
+              @if($order->payment_method === 'cod')
+                Please keep <strong style="color:#1a202c;">Rs. {{ number_format($order->totalRupees(), 2) }}</strong> ready for cash on delivery.
+              @endif
+              Your invoice is attached to this email for reference.
+            </p>
 
-    {{-- Order details --}}
-    <div class="order-box">
-      <h3>Order Details</h3>
-      <div class="row"><span class="label">Order Number</span><span class="val">{{ $order->order_number }}</span></div>
-      <div class="row"><span class="label">Ordered On</span><span class="val">{{ $order->created_at->format('d M Y') }}</span></div>
-      <div class="row"><span class="label">Total Amount</span><span class="val">₹{{ number_format($order->totalRupees(), 2) }}</span></div>
-      <div class="row"><span class="label">Payment</span><span class="val">{{ $order->payment_method === 'online' ? '💳 Paid Online' : '💵 Cash on Delivery' }}</span></div>
-    </div>
+            <!-- PROGRESS TRACKER -->
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:28px;">
+              <tr>
+                <!-- Step 1: Placed -->
+                <td class="step-td" align="center" style="padding:8px 4px;width:25%;">
+                  <table cellpadding="0" cellspacing="0" align="center"><tr>
+                    <td align="center" style="width:32px;height:32px;background-color:#1a56db;border-radius:16px;font-size:13px;color:#ffffff;font-weight:700;font-family:Arial,Helvetica,sans-serif;">&#10003;</td>
+                  </tr></table>
+                  <p style="margin:5px 0 0;font-size:11px;font-weight:600;color:#1a56db;font-family:Arial,Helvetica,sans-serif;">Placed</p>
+                </td>
+                <td style="padding-bottom:18px;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="height:2px;background-color:#1a56db;font-size:0;line-height:0;">&nbsp;</td></tr></table></td>
+                <!-- Step 2: Confirmed -->
+                <td class="step-td" align="center" style="padding:8px 4px;width:25%;">
+                  <table cellpadding="0" cellspacing="0" align="center"><tr>
+                    <td align="center" style="width:32px;height:32px;background-color:#1a56db;border-radius:16px;font-size:13px;color:#ffffff;font-weight:700;font-family:Arial,Helvetica,sans-serif;">&#10003;</td>
+                  </tr></table>
+                  <p style="margin:5px 0 0;font-size:11px;font-weight:600;color:#1a56db;font-family:Arial,Helvetica,sans-serif;">Confirmed</p>
+                </td>
+                <td style="padding-bottom:18px;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="height:2px;background-color:#1a56db;font-size:0;line-height:0;">&nbsp;</td></tr></table></td>
+                <!-- Step 3: Shipped (active) -->
+                <td class="step-td" align="center" style="padding:8px 4px;width:25%;">
+                  <table cellpadding="0" cellspacing="0" align="center"><tr>
+                    <td align="center" style="width:32px;height:32px;background-color:#553c9a;border-radius:16px;font-size:13px;color:#ffffff;font-weight:700;font-family:Arial,Helvetica,sans-serif;border:3px solid #c4b5fd;">3</td>
+                  </tr></table>
+                  <p style="margin:5px 0 0;font-size:11px;font-weight:700;color:#553c9a;font-family:Arial,Helvetica,sans-serif;">Shipped</p>
+                </td>
+                <td style="padding-bottom:18px;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="height:2px;background-color:#e2e8f0;font-size:0;line-height:0;">&nbsp;</td></tr></table></td>
+                <!-- Step 4: Delivered -->
+                <td class="step-td" align="center" style="padding:8px 4px;width:25%;">
+                  <table cellpadding="0" cellspacing="0" align="center"><tr>
+                    <td align="center" style="width:32px;height:32px;background-color:#e2e8f0;border-radius:16px;font-size:13px;color:#a0aec0;font-weight:700;font-family:Arial,Helvetica,sans-serif;">4</td>
+                  </tr></table>
+                  <p style="margin:5px 0 0;font-size:11px;font-weight:600;color:#a0aec0;font-family:Arial,Helvetica,sans-serif;">Delivered</p>
+                </td>
+              </tr>
+            </table>
 
-    {{-- Delivery address --}}
-    <div class="order-box">
-      <h3>📍 Delivering To</h3>
-      <p style="margin:0;font-size:13px;line-height:1.7;color:#334155;">
-        <strong>{{ $order->customer_name }}</strong><br>
-        {{ $order->address_line1 }}<br>
-        @if($order->address_line2){{ $order->address_line2 }}<br>@endif
-        {{ $order->delivery_area }}, Ahmedabad — {{ $order->delivery_pin }}<br>
-        📞 +91 {{ $order->customer_phone }}
-      </p>
-    </div>
+            <!-- ORDER DETAILS -->
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+                   style="border:1px solid #e2e8f0;border-radius:6px;margin-bottom:24px;">
+              <tr><td style="background-color:#f7fafc;padding:10px 16px;border-bottom:1px solid #e2e8f0;">
+                <p style="margin:0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#718096;font-family:Arial,Helvetica,sans-serif;">Order Details</p>
+              </td></tr>
+              <tr><td style="padding:0 16px;">
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                  <tr>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;color:#718096;font-family:Arial,Helvetica,sans-serif;">Order Number</td>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;font-weight:700;color:#1a202c;text-align:right;font-family:Arial,Helvetica,sans-serif;">{{ $order->order_number }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;color:#718096;font-family:Arial,Helvetica,sans-serif;">Ordered On</td>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;font-weight:700;color:#1a202c;text-align:right;font-family:Arial,Helvetica,sans-serif;">{{ $order->created_at->format('d M Y') }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;color:#718096;font-family:Arial,Helvetica,sans-serif;">Order Total</td>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;font-weight:700;color:#1a202c;text-align:right;font-family:Arial,Helvetica,sans-serif;">Rs. {{ number_format($order->totalRupees(), 2) }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:9px 0;font-size:13px;color:#718096;font-family:Arial,Helvetica,sans-serif;">Payment</td>
+                    <td style="padding:9px 0;font-size:13px;font-weight:700;color:#1a202c;text-align:right;font-family:Arial,Helvetica,sans-serif;">{{ $order->payment_method === 'online' ? 'Paid Online' : 'Cash on Delivery' }}</td>
+                  </tr>
+                </table>
+              </td></tr>
+            </table>
 
-    <div class="cta">
-      <a href="{{ route('orders.show', $order) }}">Track My Order →</a>
-    </div>
-  </div>
+            <!-- DELIVERY ADDRESS -->
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+                   style="border:1px solid #e2e8f0;border-radius:6px;margin-bottom:24px;">
+              <tr><td style="background-color:#f7fafc;padding:10px 16px;border-bottom:1px solid #e2e8f0;">
+                <p style="margin:0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#718096;font-family:Arial,Helvetica,sans-serif;">Delivering To</p>
+              </td></tr>
+              <tr><td style="padding:12px 16px;font-size:13px;color:#2d3748;line-height:1.8;font-family:Arial,Helvetica,sans-serif;">
+                <strong>{{ $order->customer_name }}</strong><br>
+                {{ $order->address_line1 }}<br>
+                @if($order->address_line2){{ $order->address_line2 }}<br>@endif
+                {{ $order->delivery_area }}, Ahmedabad - {{ $order->delivery_pin }}<br>
+                +91 {{ $order->customer_phone }}
+              </td></tr>
+            </table>
 
-  <div class="footer">
-    © {{ date('Y') }} Medikart, Ahmedabad · This is an automated email, please do not reply.<br>
-    <span style="color:#cbd5e1">Questions? Contact us at support@medikart.in</span>
-  </div>
-</div>
+            <!-- CTA -->
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+              <tr><td align="center" style="padding:8px 0 4px 0;">
+                <a href="{{ route('orders.show', $order) }}"
+                   style="display:inline-block;background-color:#553c9a;color:#ffffff;text-decoration:none;padding:13px 34px;border-radius:6px;font-size:14px;font-weight:700;font-family:Arial,Helvetica,sans-serif;">Track My Order</a>
+              </td></tr>
+            </table>
+
+          </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+          <td class="fpad" align="center" style="background-color:#f7fafc;border-top:1px solid #e2e8f0;padding:20px 40px;">
+            <p style="margin:0 0 4px 0;font-size:12px;color:#a0aec0;font-family:Arial,Helvetica,sans-serif;">&copy; {{ date('Y') }} Rx Plus 365, Ahmedabad. This is an automated email, please do not reply.</p>
+            <p style="margin:0;font-size:12px;color:#a0aec0;font-family:Arial,Helvetica,sans-serif;">Questions? <a href="mailto:support@medikart.in" style="color:#718096;text-decoration:underline;">support@medikart.in</a></p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
 </body>
 </html>

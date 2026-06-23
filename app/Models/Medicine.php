@@ -105,7 +105,7 @@ class Medicine extends Model
     }
 
     /**
-     * Display name — simple, no variant suffix.
+     * Display name - simple, no variant suffix.
      */
     public function displayName(): string
     {

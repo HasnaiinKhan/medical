@@ -3,7 +3,7 @@
 {{-- If this is an AJAX navigation request, return only the page fragment --}}
 @if(request()->ajax() || request()->header('X-Admin-Ajax'))
     <script>
-    window.__adminPageTitle    = @json(\Illuminate\Support\Facades\View::yieldContent('title', 'Admin') . ' — MediCart Admin');
+    window.__adminPageTitle    = @json(\Illuminate\Support\Facades\View::yieldContent('title', 'Admin') . ' - MediCart Admin');
     window.__adminPageHeading  = @json(\Illuminate\Support\Facades\View::yieldContent('page-title', 'Dashboard'));
     window.__adminPageSubtitle = @json(\Illuminate\Support\Facades\View::yieldContent('page-subtitle', ''));
     </script>
@@ -15,7 +15,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin') — MediCart Admin</title>
+    <title>@yield('title', 'Admin') - MediCart Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W+A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -50,7 +50,7 @@
             #admin-sidebar-backdrop { display: none !important; }
         }
 
-        /* Mobile: sidebar is a fixed overlay — NOT in the flex row */
+        /* Mobile: sidebar is a fixed overlay - NOT in the flex row */
         @media (max-width: 767px) {
             .sidebar {
                 position: fixed;
@@ -187,7 +187,7 @@
             z-index: 0;
         }
 
-        /* Hamburger button — mobile only */
+        /* Hamburger button - mobile only */
         @media (max-width: 767px) {
             #admin-sidebar-open { display: inline-flex !important; }
             #admin-sidebar-close { display: flex !important; }
@@ -411,7 +411,7 @@
         </div>
     </aside>
 
-    {{-- Sidebar backdrop — mobile only --}}
+    {{-- Sidebar backdrop - mobile only --}}
     <div id="admin-sidebar-backdrop"></div>
 
     {{-- ===== MAIN ===== --}}
@@ -420,7 +420,7 @@
         {{-- Top bar --}}
         <header class="bg-white border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-sm">
             <div class="flex items-center gap-3 flex-1 min-w-0">
-                {{-- Hamburger — mobile only --}}
+                {{-- Hamburger - mobile only --}}
                 <button id="admin-sidebar-open"
                         class="md:hidden flex-shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300 transition-colors"
                         aria-label="Open menu"
@@ -565,7 +565,7 @@
     window.addEventListener('pageshow', hide);
     window.addEventListener('load',     hide);
 
-    // Safety net — if something goes wrong, never leave frozen forever
+    // Safety net - if something goes wrong, never leave frozen forever
     setTimeout(hide, 15000);
 })();
 
@@ -607,7 +607,7 @@ document.querySelectorAll('.admin-flash-message').forEach(function (message) {
 })();
 </script>
 
-{{-- Bottom Navigation — Mobile Only --}}
+{{-- Bottom Navigation - Mobile Only --}}
 <nav class="bottom-nav">
     <a href="{{ route('admin.dashboard') }}" class="bottom-nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" title="Dashboard">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>

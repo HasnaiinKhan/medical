@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Medikart') - Pharmacy</title>
+    <title>@yield('title', 'Rx Plus 365')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -402,10 +402,10 @@
         [x-cloak] { display: none !important; }
 
         /* ══════════════════════════════════════
-           HEADER NAV — plain CSS
+           HEADER NAV - plain CSS
            ══════════════════════════════════════ */
 
-        /* Nav wrapper — flex row, right-aligned */
+        /* Nav wrapper - flex row, right-aligned */
         .hdr-nav {
             display: flex;
             align-items: center;
@@ -547,7 +547,7 @@
         }
         .hdr-register-btn:hover { background: #eff6ff; }
 
-        /* ── Hamburger button — mobile only ── */
+        /* ── Hamburger button - mobile only ── */
         .hdr-hamburger {
             display: none;              /* hidden on desktop */
             align-items: center;
@@ -583,7 +583,7 @@
             background: rgba(15,23,42,.40);
         }
 
-        /* Slide-in drawer — full height from the right */
+        /* Slide-in drawer - full height from the right */
         .mob-menu-panel {
             position: fixed;
             top: 0;
@@ -898,8 +898,7 @@
                         ✚
                     </div>
                     <div class="leading-none">
-                        <span class="logo-text text-xl font-extrabold tracking-tight">Medikart</span>
-                        <span class="ml-1.5 hidden text-[10px] font-semibold text-white sm:inline tracking-widest logo-text">Pharmacy</span>
+                        <span class="logo-text text-xl font-extrabold tracking-tight">Rx Plus 365</span>
                     </div>
                 </a>
 
@@ -930,7 +929,7 @@
                 {{-- Nav links (desktop) --}}
                 <nav class="hdr-nav">
 
-                    {{-- ── Hamburger button — mobile only ── --}}
+                    {{-- ── Hamburger button - mobile only ── --}}
                     <button @click="mobileMenuOpen = !mobileMenuOpen"
                             class="hdr-hamburger"
                             :aria-expanded="mobileMenuOpen"
@@ -961,7 +960,7 @@
                         @endif
                     @endauth
 
-                    {{-- Cart (desktop only — mobile uses bottom nav) --}}
+                    {{-- Cart (desktop only - mobile uses bottom nav) --}}
                     <a id="cart-nav-link" href="{{ route('cart.index') }}" class="hdr-cart-btn hdr-desktop-only">
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         Cart
@@ -1038,7 +1037,7 @@
 
                     {{-- Close row --}}
                     <div class="mob-menu-close-row">
-                        <span class="mob-menu-brand">✚ Medikart</span>
+                        <span class="mob-menu-brand">✚ Rx Plus 365</span>
                         <button @click="mobileMenuOpen = false" class="mob-menu-close-btn" aria-label="Close menu">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
@@ -1285,7 +1284,7 @@
         }
     </style>
 
-    <div id="page-loader" role="status" aria-label="Loading Medikart">
+    <div id="page-loader" role="status" aria-label="Loading Rx Plus 365">
         @foreach([
             ['w'=>18,'h'=>7,'l'=>8,'delay'=>0,'dur'=>7],
             ['w'=>28,'h'=>11,'l'=>22,'delay'=>1.2,'dur'=>9],
@@ -1310,7 +1309,7 @@
             </div>
         </div>
         <div class="loader-cross"></div>
-        <p class="loader-brand">Medikart</p>
+        <p class="loader-brand">Rx Plus 365</p>
         <div class="loader-bar-track">
             <div class="loader-bar-fill" id="loader-bar"></div>
         </div>
@@ -1380,7 +1379,7 @@
                 <div>
                     <div class="flex items-center gap-2.5 mb-4">
                         <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-700 text-white font-black text-base shadow-md">✚</div>
-                        <span class="text-lg font-extrabold text-slate-900 tracking-tight">Medikart</span>
+                        <span class="text-lg font-extrabold text-slate-900 tracking-tight">Rx Plus 365</span>
                     </div>
                     <p class="text-sm text-slate-500 leading-relaxed">Your trusted online pharmacy in Ahmedabad. Genuine medicines, fast delivery, cash on delivery.</p>
                     <div class="mt-4 flex gap-2">
@@ -1448,7 +1447,7 @@
                         <li class="flex items-center gap-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs">✓</span>Free delivery on ₹500+</li>
                         <li class="flex items-center gap-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs">✓</span>Cash on delivery</li>
                         <li class="flex items-center gap-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs">✓</span>Online payment via Razorpay</li>
-                        <li class="flex items-center gap-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs">✓</span>Ahmedabad area — 32+ pincodes</li>
+                        <li class="flex items-center gap-2"><span class="flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs">✓</span>Ahmedabad area - 32+ pincodes</li>
                     </ul>
                 </div>
 
@@ -1472,7 +1471,7 @@
             </div>
 
             <div class="mt-8 border-t border-slate-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <p class="text-xs text-slate-400">© {{ date('Y') }} Medikart — Ahmedabad, Gujarat</p>
+                <p class="text-xs text-slate-400">© {{ date('Y') }} Rx Plus 365 - Ahmedabad, Gujarat</p>
                 <p class="text-xs text-slate-400">Built by <a href="https://softgenixinfotech.com/" class="text-blue-500 hover:underline" style="margin-right:25px;">SoftGenix Infotech</a></p>
             </div>
         </div>
@@ -1726,7 +1725,7 @@ if (minus) {
                 return;
             }
         }
-        // No modal (product page) — submit qty=0 directly
+        // No modal (product page) - submit qty=0 directly
         qtyInput.value = 0;
         const existing = cartUpdateTimers.get(form);
         if (existing) clearTimeout(existing);
@@ -1798,7 +1797,7 @@ if (plus) {
                 });
                 const data = await response.json();
                 if (!response.ok) {
-                    // Stock limit hit — show toast and handle UI updates
+                    // Stock limit hit - show toast and handle UI updates
                     if (data.stock_limit || data.out_of_stock) {
                         showFlash(data.message, 'error');
                         updateCartBadge(Number(data.cartCount || 0));
@@ -1806,7 +1805,7 @@ if (plus) {
                         if (typeof data.subtotalPaise === 'number') updateCartSummary(data.subtotalPaise, data.linesCount);
 
                         if (data.out_of_stock && data.removed) {
-                            // Item gone — remove row from cart page
+                            // Item gone - remove row from cart page
                             const itemId = form.dataset.cartMedicineId;
                             const row = itemId ? document.querySelector(`[data-cart-row-id="${itemId}"]`) : null;
                             if (row) row.remove();
@@ -1829,14 +1828,14 @@ if (plus) {
                             if (lineTotal && data.lineTotalPaise != null) lineTotal.textContent = formatCurrency(data.lineTotalPaise);
                             if (typeof data.subtotalPaise === 'number') updateCartSummary(data.subtotalPaise, data.linesCount);
                         }
-                        return; // Don't throw — we handled it
+                        return; // Don't throw - we handled it
                     }
                     throw new Error(data.message || 'Could not update the cart.');
                 }
                 updateCartBadge(Number(data.cartCount || 0));
                 if (typeof data.linesCount === 'number') updateCartCounts(data.linesCount);
                 if (typeof data.subtotalPaise === 'number') updateCartSummary(data.subtotalPaise, data.linesCount);
-                // Find sibling add/update forms — either inside a .medicine-card or
+                // Find sibling add/update forms - either inside a .medicine-card or
                 // via data-product-id on the form itself (e.g. medicine show page)
                 const card       = form.closest('.medicine-card[data-product-id]');
                 const productId  = form.dataset.productId;
@@ -1871,7 +1870,7 @@ if (plus) {
                     const row = itemId ? document.querySelector(`[data-cart-row-id="${itemId}"]`) : null;
                     if (row) {
                         if (data.removed || (typeof data.quantity === 'number' && data.quantity < 1)) {
-                            // qty dropped to 0 — treat as remove
+                            // qty dropped to 0 - treat as remove
                             row.remove();
                             if (typeof data.linesCount === 'number' && data.linesCount === 0) showEmptyCart();
                         } else {
@@ -2162,7 +2161,7 @@ flashTimer = setTimeout(() => {
     @stack('scripts')
 
     {{-- ═══════════════════════════════════════
-         MEDIBOT — AI Medicine Assistant
+         MEDIBOT - AI Medicine Assistant
          ─────────────────────────────────────── --}}
     <style>
         /* ── Chatbot widget ── */
@@ -2291,6 +2290,7 @@ flashTimer = setTimeout(() => {
             }
         }
         #medibot-window.is-open {
+            z-index:999999;
             transform: scale(1) translateY(0);
             opacity: 1;
             pointer-events: all;
@@ -2495,14 +2495,14 @@ flashTimer = setTimeout(() => {
     </button>
 
     {{-- Tooltip --}}
-    <div id="medibot-tooltip">💊 Need help? Ask me</div>
+    <div id="medibot-tooltip">Need help? Ask me</div>
 
     {{-- Chat window --}}
     <div id="medibot-window" role="dialog" aria-label="MediBot chat" aria-modal="true">
 
         {{-- Header --}}
         <div class="bot-header">
-            <div class="bot-avatar">💊</div>
+            <div class="bot-avatar"><i class="fa-solid fa-hexagon-nodes" style="color: rgb(255, 255, 255);"></i></div>
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-bold text-white leading-tight">MedCare AI</p>
                 <div class="flex items-center gap-1.5 mt-0.5">
@@ -2579,7 +2579,7 @@ flashTimer = setTimeout(() => {
 
         // ── Welcome message ───────────────────────────────────────────────────
         function showWelcome() {
-            appendBotMsg("👋 Hi! I'm <strong>MedCare AI</strong>, your smart pharmacy assistant at Medikart.<br><br>I can help you find medicines, track orders, answer delivery questions, and more.<br><br><em>How can I help you today?</em>");
+            appendBotMsg("👋 Hi! I'm <strong>MedCare AI</strong>, your smart pharmacy assistant at Rx Plus 365.<br><br>I can help you find medicines, track orders, answer delivery questions, and more.<br><br><em>How can I help you today?</em>");
             setTimeout(() => {
                 const chips = ['I have a fever', 'Headache relief', 'Track my order', 'Delivery info', 'Payment options', 'Cold & Cough'];
                 appendChips(chips);
@@ -2647,7 +2647,7 @@ flashTimer = setTimeout(() => {
                 const statusText = order.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
                 if (isSelectable) {
-                    // Selectable card — user picks which order to view
+                    // Selectable card - user picks which order to view
                     card.style.cssText = 'background:#fff;border:1.5px solid #bfdbfe;border-radius:14px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.05);cursor:pointer;transition:border-color .2s,box-shadow .2s;';
                     card.innerHTML = `
                         <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -2927,10 +2927,10 @@ flashTimer = setTimeout(() => {
 
                 appendBotMsg(data.reply || 'Sorry, I could not process that.');
 
-                // Order selection — user must tap one to see details
+                // Order selection - user must tap one to see details
                 if (data.order_selection && data.orders && data.orders.length > 0) {
                     appendOrders(data.orders, [], true);
-                    // No generic chips — the order cards are the CTA
+                    // No generic chips - the order cards are the CTA
                 }
                 // Direct order detail (e.g. user typed a specific order number)
                 else if (data.order) {
@@ -2947,7 +2947,7 @@ flashTimer = setTimeout(() => {
                 else if (data.products && data.products.length > 0) {
                     appendProducts(data.products, data.search_url || null);
                     setTimeout(() => {
-                        appendChips(['Headache', 'Fever', 'Acidity', 'Track order', 'Delivery info']);
+                        appendChips(['Headache', 'Fever', 'Pain', 'Track order', 'Delivery info']);
                     }, 300);
                 } else if (data.search_url) {
                     const link = document.createElement('a');

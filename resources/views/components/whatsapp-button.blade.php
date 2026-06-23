@@ -22,7 +22,7 @@
                 </svg>
             </div>
             <div style="flex:1;min-width:0;">
-                <p style="color:#fff;font-size:14px;font-weight:700;margin:0;line-height:1.2;">Medikart Support</p>
+                <p style="color:#fff;font-size:14px;font-weight:700;margin:0;line-height:1.2;">Rx Plus 365 Support</p>
                 <p style="color:rgba(255,255,255,.8);font-size:12px;margin:3px 0 0;display:flex;align-items:center;gap:5px;">
                     <span style="width:7px;height:7px;background:#4ade80;border-radius:50%;display:inline-block;"></span>
                     Typically replies within minutes
@@ -37,7 +37,7 @@
         <div style="background:#e5ddd5;padding:16px 14px;">
             <div style="background:#fff;border-radius:0 12px 12px 12px;padding:12px 14px;max-width:85%;box-shadow:0 1px 2px rgba(0,0,0,.1);">
                 <p style="font-size:13px;color:#1a1a1a;line-height:1.5;margin:0;">
-                    👋 Hi! Welcome to <strong>Medikart</strong>.<br>
+                    👋 Hi! Welcome to <strong>Rx Plus 365</strong>.<br>
                     How can we help you today?
                 </p>
                 <p style="font-size:10px;color:#94a3b8;margin:6px 0 0;text-align:right;">{{ now()->format('h:i A') }}</p>
@@ -180,7 +180,7 @@
 
     window.startChat = function () {
         const msg = document.getElementById('wa-msg-input').value.trim()
-                    || 'Hello! I need help with Medikart.';
+                    || 'Hello! I need help with Rx Plus 365.';
         const url = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(msg);
         window.open(url, '_blank');
     };

@@ -2,125 +2,158 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Order Cancelled</title>
-<style>
-  body { margin:0; padding:0; background:#f0f4f8; font-family:'Segoe UI',Arial,sans-serif; color:#1e293b; }
-  .wrap { max-width:600px; margin:32px auto; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(30,58,138,.10); }
-  .header { background:linear-gradient(135deg,#991b1b 0%,#dc2626 100%); padding:36px 40px; text-align:center; }
-  .header h1 { margin:0; color:#fff; font-size:24px; font-weight:800; letter-spacing:-.5px; }
-  .header p  { margin:6px 0 0; color:rgba(255,255,255,.85); font-size:14px; }
-  .badge { display:inline-block; background:rgba(255,255,255,.2); color:#fff; border-radius:99px; padding:4px 16px; font-size:13px; font-weight:700; margin-top:12px; }
-  .body  { padding:36px 40px; }
-  .greeting { font-size:16px; font-weight:600; margin-bottom:8px; }
-  .msg { font-size:14px; color:#475569; line-height:1.7; margin-bottom:24px; }
-  .cancel-box { background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:20px 24px; margin-bottom:24px; }
-  .cancel-box h3 { margin:0 0 10px; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#b91c1c; }
-  .cancel-box p { margin:0; font-size:14px; color:#7f1d1d; line-height:1.6; }
-  .order-box { background:#f8faff; border:1px solid #bfdbfe; border-radius:12px; padding:20px 24px; margin-bottom:24px; }
-  .order-box h3 { margin:0 0 14px; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#64748b; }
-  .row { display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px solid #e2e8f0; }
-  .row:last-child { border-bottom:none; }
-  .row .label { color:#64748b; }
-  .row .val   { font-weight:600; color:#1e293b; }
-  .items-table { width:100%; border-collapse:collapse; margin-bottom:16px; }
-  .items-table th { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#64748b; padding:8px 10px; background:#f8fafc; border-bottom:2px solid #e2e8f0; text-align:left; }
-  .items-table td { padding:10px; font-size:13px; border-bottom:1px solid #f1f5f9; color:#94a3b8; text-decoration:line-through; }
-  .items-table tr:last-child td { border-bottom:none; }
-  .refund-box { background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:20px 24px; margin-bottom:24px; }
-  .refund-box h3 { margin:0 0 8px; font-size:13px; font-weight:700; color:#92400e; }
-  .refund-box p { margin:0; font-size:13px; color:#78350f; line-height:1.6; }
-  .cta { text-align:center; margin:28px 0 0; }
-  .cta a { display:inline-block; background:linear-gradient(135deg,#1e40af,#2563eb); color:#fff; text-decoration:none; padding:13px 32px; border-radius:12px; font-size:14px; font-weight:700; }
-  .footer { background:#f8fafc; border-top:1px solid #e2e8f0; padding:20px 40px; text-align:center; font-size:12px; color:#94a3b8; }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Cancelled - {{ $order->order_number }}</title>
+<style type="text/css">
+  body,table,td,p,a { -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+  table { border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; }
+  body { margin:0; padding:0; background-color:#f0f2f5; font-family:Arial,Helvetica,sans-serif; color:#1a202c; }
+  a { color:#1a56db; text-decoration:none; }
+  @media only screen and (max-width:600px) {
+    .outer { padding:12px 0 !important; }
+    .card  { width:100% !important; border-radius:0 !important; }
+    .hpad  { padding:28px 20px !important; }
+    .bpad  { padding:28px 20px !important; }
+    .fpad  { padding:16px 20px !important; }
+    .th, .td { padding:8px 10px !important; font-size:12px !important; }
+    .h1 { font-size:20px !important; }
+  }
 </style>
 </head>
-<body>
-<div class="wrap">
+<body style="margin:0;padding:0;background-color:#f0f2f5;">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+  <tr>
+    <td class="outer" align="center" style="padding:32px 16px;background-color:#f0f2f5;">
+      <table class="card" width="580" cellpadding="0" cellspacing="0" role="presentation"
+             style="background-color:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
 
-  {{-- Header --}}
-  <div class="header">
-    <h1>❌ Order Cancelled</h1>
-    <p>We're sorry to see this order go</p>
-    <span class="badge">{{ $order->order_number }}</span>
-  </div>
-
-  {{-- Body --}}
-  <div class="body">
-    <p class="greeting">Hi {{ $order->customer_name }},</p>
-    <p class="msg">
-      Your order <strong>{{ $order->order_number }}</strong> has been cancelled.
-      @if($order->cancelled_by === 'admin')
-        This order was cancelled by our team.
-      @else
-        Your cancellation request has been processed.
-      @endif
-    </p>
-
-    {{-- Cancellation reason --}}
-    @if($order->cancellation_reason)
-    <div class="cancel-box">
-      <h3>❗ Reason for Cancellation</h3>
-      <p>{{ $order->cancellation_reason }}</p>
-    </div>
-    @endif
-
-    {{-- Order details --}}
-    <div class="order-box">
-      <h3>Cancelled Order Details</h3>
-      <div class="row"><span class="label">Order Number</span><span class="val">{{ $order->order_number }}</span></div>
-      <div class="row"><span class="label">Order Date</span><span class="val">{{ $order->created_at->format('d M Y, h:i A') }}</span></div>
-      <div class="row"><span class="label">Cancelled On</span><span class="val">{{ $order->cancelled_at ? $order->cancelled_at->format('d M Y, h:i A') : now()->format('d M Y, h:i A') }}</span></div>
-      <div class="row"><span class="label">Payment Method</span><span class="val">{{ $order->payment_method === 'online' ? '💳 Online (Razorpay)' : '💵 Cash on Delivery' }}</span></div>
-      <div class="row"><span class="label">Order Total</span><span class="val">₹{{ number_format($order->totalRupees(), 2) }}</span></div>
-    </div>
-
-    {{-- Items (struck through) --}}
-    <table class="items-table">
-      <thead>
+        <!-- HEADER -->
         <tr>
-          <th>Medicine</th>
-          <th style="text-align:center">Qty</th>
-          <th style="text-align:right">Amount</th>
+          <td class="hpad" align="center" style="background-color:#c0392b;padding:36px 40px;">
+            <p style="margin:0 0 4px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.7);font-family:Arial,Helvetica,sans-serif;">Order Update</p>
+            <h1 class="h1" style="margin:0 0 8px 0;font-size:24px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">Order Cancelled</h1>
+            <p style="margin:0 0 16px 0;font-size:14px;color:rgba(255,255,255,0.8);font-family:Arial,Helvetica,sans-serif;">We are sorry to see this order go.</p>
+            <table cellpadding="0" cellspacing="0" role="presentation" align="center">
+              <tr><td style="background-color:rgba(255,255,255,0.15);border-radius:4px;padding:6px 18px;">
+                <span style="font-size:13px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">{{ $order->order_number }}</span>
+              </td></tr>
+            </table>
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        @foreach($order->items as $item)
+
+        <!-- BODY -->
         <tr>
-          <td>{{ $item->medicine_name_snapshot }}</td>
-          <td style="text-align:center">{{ $item->quantity }}</td>
-          <td style="text-align:right">₹{{ number_format($item->line_total_paise / 100, 2) }}</td>
+          <td class="bpad" style="padding:32px 40px;">
+
+            <p style="margin:0 0 6px 0;font-size:16px;font-weight:700;color:#1a202c;font-family:Arial,Helvetica,sans-serif;">Hi {{ $order->customer_name }},</p>
+            <p style="margin:0 0 24px 0;font-size:14px;color:#4a5568;line-height:1.7;font-family:Arial,Helvetica,sans-serif;">
+              Your order <strong style="color:#1a202c;">{{ $order->order_number }}</strong> has been cancelled.
+              @if($order->cancelled_by === 'admin')
+                This order was cancelled by our team.
+              @else
+                Your cancellation request has been processed.
+              @endif
+            </p>
+
+            @if($order->cancellation_reason)
+            <!-- REASON BOX -->
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:24px;">
+              <tr>
+                <td style="background-color:#fff5f5;border:1px solid #feb2b2;border-left:4px solid #c0392b;border-radius:4px;padding:14px 16px;">
+                  <p style="margin:0 0 4px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#c0392b;font-family:Arial,Helvetica,sans-serif;">Cancellation Reason</p>
+                  <p style="margin:0;font-size:13px;color:#742a2a;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">{{ $order->cancellation_reason }}</p>
+                </td>
+              </tr>
+            </table>
+            @endif
+
+            <!-- ORDER DETAILS -->
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+                   style="border:1px solid #e2e8f0;border-radius:6px;margin-bottom:24px;">
+              <tr><td style="background-color:#f7fafc;padding:10px 16px;border-bottom:1px solid #e2e8f0;">
+                <p style="margin:0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#718096;font-family:Arial,Helvetica,sans-serif;">Cancelled Order Details</p>
+              </td></tr>
+              <tr><td style="padding:0 16px;">
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                  <tr>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;color:#718096;font-family:Arial,Helvetica,sans-serif;">Order Number</td>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;font-weight:700;color:#1a202c;text-align:right;font-family:Arial,Helvetica,sans-serif;">{{ $order->order_number }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;color:#718096;font-family:Arial,Helvetica,sans-serif;">Order Date</td>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;font-weight:700;color:#1a202c;text-align:right;font-family:Arial,Helvetica,sans-serif;">{{ $order->created_at->format('d M Y, h:i A') }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;color:#718096;font-family:Arial,Helvetica,sans-serif;">Cancelled On</td>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;font-weight:700;color:#1a202c;text-align:right;font-family:Arial,Helvetica,sans-serif;">{{ $order->cancelled_at ? $order->cancelled_at->format('d M Y, h:i A') : now()->format('d M Y, h:i A') }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;color:#718096;font-family:Arial,Helvetica,sans-serif;">Payment</td>
+                    <td style="padding:9px 0;border-bottom:1px solid #edf2f7;font-size:13px;font-weight:700;color:#1a202c;text-align:right;font-family:Arial,Helvetica,sans-serif;">{{ $order->payment_method === 'online' ? 'Online (Razorpay)' : 'Cash on Delivery' }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:9px 0;font-size:13px;color:#718096;font-family:Arial,Helvetica,sans-serif;">Order Total</td>
+                    <td style="padding:9px 0;font-size:13px;font-weight:700;color:#1a202c;text-align:right;font-family:Arial,Helvetica,sans-serif;">Rs. {{ number_format($order->totalRupees(), 2) }}</td>
+                  </tr>
+                </table>
+              </td></tr>
+            </table>
+
+            <!-- ITEMS (struck through) -->
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+                   style="border:1px solid #e2e8f0;border-radius:6px;margin-bottom:24px;">
+              <tr style="background-color:#f7fafc;">
+                <th class="th" align="left" style="padding:9px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#718096;border-bottom:2px solid #e2e8f0;font-family:Arial,Helvetica,sans-serif;">Medicine</th>
+                <th class="th" align="center" style="padding:9px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#718096;border-bottom:2px solid #e2e8f0;font-family:Arial,Helvetica,sans-serif;width:50px;">Qty</th>
+                <th class="th" align="right" style="padding:9px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#718096;border-bottom:2px solid #e2e8f0;font-family:Arial,Helvetica,sans-serif;width:90px;">Amount</th>
+              </tr>
+              @foreach($order->items as $item)
+              <tr>
+                <td class="td" style="padding:10px 14px;font-size:13px;color:#a0aec0;text-decoration:line-through;border-bottom:1px solid #edf2f7;font-family:Arial,Helvetica,sans-serif;">{{ $item->medicine_name_snapshot }}</td>
+                <td class="td" align="center" style="padding:10px 14px;font-size:13px;color:#a0aec0;text-decoration:line-through;border-bottom:1px solid #edf2f7;font-family:Arial,Helvetica,sans-serif;">{{ $item->quantity }}</td>
+                <td class="td" align="right" style="padding:10px 14px;font-size:13px;color:#a0aec0;text-decoration:line-through;border-bottom:1px solid #edf2f7;font-family:Arial,Helvetica,sans-serif;">Rs. {{ number_format($item->line_total_paise / 100, 2) }}</td>
+              </tr>
+              @endforeach
+            </table>
+
+            @if($order->payment_status === 'paid' && $order->payment_method === 'online')
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:24px;">
+              <tr><td style="background-color:#fffbeb;border:1px solid #f6e05e;border-radius:6px;padding:14px 16px;">
+                <p style="margin:0 0 4px 0;font-size:12px;font-weight:700;color:#92400e;font-family:Arial,Helvetica,sans-serif;">Refund Information</p>
+                <p style="margin:0;font-size:13px;color:#78350f;line-height:1.65;font-family:Arial,Helvetica,sans-serif;">A refund of <strong>Rs. {{ number_format($order->totalRupees(), 2) }}</strong> will be initiated to your original payment method within 5-7 business days.</p>
+              </td></tr>
+            </table>
+            @elseif($order->payment_method === 'cod')
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:24px;">
+              <tr><td style="background-color:#f0fff4;border:1px solid #9ae6b4;border-radius:6px;padding:14px 16px;">
+                <p style="margin:0 0 4px 0;font-size:12px;font-weight:700;color:#276749;font-family:Arial,Helvetica,sans-serif;">No Payment to Refund</p>
+                <p style="margin:0;font-size:13px;color:#22543d;line-height:1.65;font-family:Arial,Helvetica,sans-serif;">This was a Cash on Delivery order. Since no payment was collected, no refund is required.</p>
+              </td></tr>
+            </table>
+            @endif
+
+            <!-- CTA -->
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+              <tr><td align="center" style="padding:8px 0 4px 0;">
+                <a href="{{ route('home') }}"
+                   style="display:inline-block;background-color:#1a56db;color:#ffffff;text-decoration:none;padding:13px 34px;border-radius:6px;font-size:14px;font-weight:700;font-family:Arial,Helvetica,sans-serif;">Continue Shopping</a>
+              </td></tr>
+            </table>
+
+          </td>
         </tr>
-        @endforeach
-      </tbody>
-    </table>
 
-    {{-- Refund info --}}
-    @if($order->payment_status === 'paid' && $order->payment_method === 'online')
-    <div class="refund-box">
-      <h3>💰 Refund Information</h3>
-      <p>
-        Since you paid online, a refund of <strong>₹{{ number_format($order->totalRupees(), 2) }}</strong>
-        will be initiated to your original payment method within <strong>5–7 business days</strong>.
-        You'll receive a separate email once the refund is processed.
-      </p>
-    </div>
-    @elseif($order->payment_method === 'cod')
-    <div class="refund-box">
-      <h3>ℹ️ No Payment to Refund</h3>
-      <p>This was a Cash on Delivery order. Since no payment was collected, no refund is needed.</p>
-    </div>
-    @endif
+        <!-- FOOTER -->
+        <tr>
+          <td class="fpad" align="center" style="background-color:#f7fafc;border-top:1px solid #e2e8f0;padding:20px 40px;">
+            <p style="margin:0 0 4px 0;font-size:12px;color:#a0aec0;font-family:Arial,Helvetica,sans-serif;">&copy; {{ date('Y') }} Rx Plus 365, Ahmedabad. This is an automated email, please do not reply.</p>
+            <p style="margin:0;font-size:12px;color:#a0aec0;font-family:Arial,Helvetica,sans-serif;">Questions? <a href="mailto:support@medikart.in" style="color:#718096;text-decoration:underline;">support@medikart.in</a></p>
+          </td>
+        </tr>
 
-    <div class="cta">
-      <a href="{{ route('home') }}">Continue Shopping →</a>
-    </div>
-  </div>
-
-  <div class="footer">
-    © {{ date('Y') }} Medikart, Ahmedabad · This is an automated email, please do not reply.<br>
-    <span style="color:#cbd5e1">Questions? Contact us at support@medikart.in</span>
-  </div>
-</div>
+      </table>
+    </td>
+  </tr>
+</table>
 </body>
 </html>

@@ -68,8 +68,8 @@
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
             <div style="width:60px;height:60px;border-radius:12px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:50px;flex-shrink:0;"><img src="{{ asset('Images/chatbot.gif') }}" alt="Loading" class="h-16 w-max"></div>
             <div>
-                <p style="font-size:13px;font-weight:700;color:#0f172a;margin:0;">Medikart Auto-Fill</p>
-                <p style="font-size:11px;color:#64748b;margin:2px 0 0;">Search any medicine, face wash, diaper, supplement — click a result to fill all form fields.</p>
+                <p style="font-size:13px;font-weight:700;color:#0f172a;margin:0;">Rx Plus 365 Auto-Fill</p>
+                <p style="font-size:11px;color:#64748b;margin:2px 0 0;">Search any medicine, face wash, diaper, supplement - click a result to fill all form fields.</p>
             </div>
         </div>
 
@@ -136,7 +136,7 @@
                         <select name="category_id"
                                 :required="!creating"
                                 class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20">
-                            <option value="">— Select a category —</option>
+                            <option value="">- Select a category -</option>
                             @foreach($categories as $cat)
                                 <option value="{{ $cat->id }}"
                                     {{ old('category_id', $medicine->category_id ?? '') == $cat->id ? 'selected' : '' }}>
@@ -285,7 +285,7 @@
                                     <svg class="h-4 w-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                                     </svg>
-                                    <span class="text-xs text-slate-500 file-label">Click to choose image (JPG, PNG, WEBP — max 4MB)</span>
+                                    <span class="text-xs text-slate-500 file-label">Click to choose image (JPG, PNG, WEBP - max 4MB)</span>
                                     <input type="file"
                                            name="{{ $slotIdx === 0 ? 'image_file' : 'extra_image_file[]' }}"
                                            accept="image/jpeg,image/png,image/webp,image/gif"
@@ -393,7 +393,7 @@ function addImageSlot() {
                         '<svg class="h-4 w-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
                             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>' +
                         '</svg>' +
-                        '<span class="text-xs text-slate-500 file-label">Click to choose image (JPG, PNG, WEBP — max 4MB)</span>' +
+                        '<span class="text-xs text-slate-500 file-label">Click to choose image (JPG, PNG, WEBP - max 4MB)</span>' +
                         '<input type="file" name="extra_image_file[]" accept="image/jpeg,image/png,image/webp,image/gif" class="sr-only" onchange="handleFileSelect(this)">' +
                     '</label>' +
                     '<p class="mt-1 text-[10px] text-slate-400">File takes priority over URL if both provided.</p>' +
@@ -689,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return str ? str.trim().replace(/\s+/g, ' ').split(' ').length : 0;
         }
 
-        // Always call AI — unless we already have a proper description of ≥50 words
+        // Always call AI - unless we already have a proper description of ≥50 words
         // (e.g. PharmEasy detail fetch already returned a full paragraph)
         var needsAI = wordCount(d.description || '') < 50;
 
@@ -721,11 +721,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         descEl.value = j.description;
                         showDescBadge('✨ AI description generated');
                     } else if (j.description) {
-                        // AI returned something but it's short — append to base context
+                        // AI returned something but it's short - append to base context
                         descEl.value = (baseDesc ? baseDesc + '\n\n' : '') + j.description;
                         showDescBadge('✨ AI description generated');
                     } else {
-                        // AI failed — use base context as fallback
+                        // AI failed - use base context as fallback
                         descEl.value = baseDesc;
                     }
                 })
@@ -735,13 +735,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     descEl.value       = baseDesc;
                 });
             } else {
-                // Already have ≥50 word description from pharmacy data — use it directly
+                // Already have ≥50 word description from pharmacy data - use it directly
                 descEl.value = baseDesc;
                 showDescBadge('📋 Description from ' + (d.source_platform || 'pharmacy'));
             }
         }
 
-        // ── Image — download to server first, then fill local path ────────────
+        // ── Image - download to server first, then fill local path ────────────
         if (d.image_url) {
             var imgInput = document.querySelector('input[name="image_url"]');
             if (imgInput) {
@@ -770,7 +770,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Toast
         var toast = document.createElement('div');
         toast.className = 'pe-toast';
-        toast.innerHTML = '✔ Form filled — ' + (needsAI ? '✨ generating description…' : 'description ready!');
+        toast.innerHTML = '✔ Form filled - ' + (needsAI ? '✨ generating description…' : 'description ready!');
         document.body.appendChild(toast);
         setTimeout(function () { toast.remove(); }, 4000);
     }

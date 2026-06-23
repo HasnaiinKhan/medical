@@ -46,7 +46,7 @@
         @include('medicines._summary', ['medicines' => $medicines, 'categories' => $categories, 'q' => $q])
     </div>
 
-    {{-- Filter icon button — mobile only --}}
+    {{-- Filter icon button - mobile only --}}
     <button id="mob-filter-toggle"
             class="lg:hidden flex-shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-xl border border-slate-200 bg-white shadow-sm text-blue-600 hover:bg-blue-50 transition-colors"
             aria-label="Open filters">
@@ -81,7 +81,7 @@
 {{-- ── Main layout: desktop sidebar + results ── --}}
 <div class="flex gap-6">
 
-    {{-- Desktop sidebar — hidden on mobile, shown on lg+ --}}
+    {{-- Desktop sidebar - hidden on mobile, shown on lg+ --}}
     <aside class="hidden lg:block w-72 max-w-[18rem] flex-shrink-0">
         <div id="medicines-filters-container"
              class="w-full rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden sticky top-36">

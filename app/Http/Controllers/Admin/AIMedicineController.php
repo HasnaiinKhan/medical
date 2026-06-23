@@ -32,7 +32,7 @@ class AIMedicineController extends Controller
     ];
 
     // ─────────────────────────────────────────────────────────────────────────
-    // ROUTE 1: Search — ALWAYS searches ALL sources simultaneously, returns
+    // ROUTE 1: Search - ALWAYS searches ALL sources simultaneously, returns
     //          only items whose name contains the keyword (exact match filter)
     // ─────────────────────────────────────────────────────────────────────────
     // ─────────────────────────────────────────────────────────────────────────
@@ -44,8 +44,8 @@ class AIMedicineController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // ROUTE 5: Bulk search — searches ALL sources, deduplicates by name slug,
-    //          no result cap — returns everything both sites return.
+    // ROUTE 5: Bulk search - searches ALL sources, deduplicates by name slug,
+    //          no result cap - returns everything both sites return.
     //          Descriptions are fetched from source sites for all items.
     // ─────────────────────────────────────────────────────────────────────────
     public function bulkSearch(Request $request): JsonResponse
@@ -57,7 +57,7 @@ class AIMedicineController extends Controller
         $allResults = [];
         $searchLog  = [];
 
-        // Search PharmEasy — all results, no cap
+        // Search PharmEasy - all results, no cap
         try {
             $pe = $this->searchPharmEasyBulk($name, 500);
             $pe = $this->filterByKeyword($pe, $keyword);
@@ -69,7 +69,7 @@ class AIMedicineController extends Controller
             Log::warning("MediBot Bulk PharmEasy failed [{$name}]: " . $e->getMessage());
         }
 
-        // Search NetMeds — all results, no cap
+        // Search NetMeds - all results, no cap
         try {
             $nm = $this->searchNetMedsBulk($name, 500);
             $nm = $this->filterByKeyword($nm, $keyword);
@@ -91,7 +91,7 @@ class AIMedicineController extends Controller
             $unique[] = $item;
         }
 
-        // No cap — return everything
+        // No cap - return everything
         Log::info("MediBot Bulk [{$name}] → " . count($unique) . " unique results | " . json_encode($searchLog));
 
         return response()->json([
@@ -101,7 +101,7 @@ class AIMedicineController extends Controller
         ]);
     }
 
-    // NetMeds bulk search — larger page size
+    // NetMeds bulk search - larger page size
     private function searchNetMedsBulk(string $name, int $limit): array
     {
         $ch = curl_init(
@@ -354,7 +354,7 @@ class AIMedicineController extends Controller
 
         // Also do the reverse: if user typed the compound word, expand it so
         // it can match either spelling stored in product names
-        // We handle this by replacing compound words with their spaced version too —
+        // We handle this by replacing compound words with their spaced version too -
         // actually the simpler approach: after merging all spaced → compound,
         // both the query and product text are normalised the same way, so they match.
 
@@ -409,7 +409,7 @@ class AIMedicineController extends Controller
             'apollo'          => 'https://www.apollopharmacy.in/',
         ];
 
-        // Platform-based referer (most reliable — frontend passes source_platform)
+        // Platform-based referer (most reliable - frontend passes source_platform)
         $referer = '';
         foreach ($refererMap as $key => $ref) {
             if (str_contains($platform, $key)) {
@@ -433,7 +433,7 @@ class AIMedicineController extends Controller
         // ── Download the image ──────────────────────────────────────────────
         $imageData = $this->httpGetImage($remoteUrl, $referer);
         if (! $imageData) {
-            // Some CDNs need the exact product-page URL as referer — try without referer
+            // Some CDNs need the exact product-page URL as referer - try without referer
             $imageData = $this->httpGetImage($remoteUrl, '');
         }
         if (! $imageData) {
@@ -463,7 +463,7 @@ class AIMedicineController extends Controller
             'image/tiff' => 'jpg',  'image/svg+xml' => 'jpg', // convert svg fallback
         ];
         if (!isset($mimeToExt[$mime])) {
-            // Some servers return application/octet-stream for images — trust extension instead
+            // Some servers return application/octet-stream for images - trust extension instead
             $extFallback = $ext ?? 'jpg';
             if (!in_array($extFallback, ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'])) {
                 Log::warning("MediBot downloadImage: unexpected MIME '{$mime}' for {$remoteUrl}");
@@ -548,7 +548,7 @@ class AIMedicineController extends Controller
     }
 
     // ═════════════════════════════════════════════════════════════════════════
-    // PharmEasy — search via __NEXT_DATA__ (productList key)
+    // PharmEasy - search via __NEXT_DATA__ (productList key)
     // ═════════════════════════════════════════════════════════════════════════
     private function searchPharmEasy(string $name): array
     {
@@ -572,7 +572,7 @@ class AIMedicineController extends Controller
         return $this->parsePharmEasyItems($raw);
     }
 
-    // PharmEasy bulk — fetches multiple pages to get all results
+    // PharmEasy bulk - fetches multiple pages to get all results
     private function searchPharmEasyBulk(string $name, int $limit): array
     {
         $allItems = [];
@@ -672,7 +672,7 @@ class AIMedicineController extends Controller
     }
 
     // ═════════════════════════════════════════════════════════════════════════
-    // NetMeds — real Fynd platform search API (confirmed working)
+    // NetMeds - real Fynd platform search API (confirmed working)
     // ═════════════════════════════════════════════════════════════════════════
     private function searchNetMeds(string $name): array
     {
@@ -713,7 +713,7 @@ class AIMedicineController extends Controller
             $pname = $p['name'] ?? '';
             if (empty($pname)) continue;
 
-            // Image — first media item
+            // Image - first media item
             $imageUrl = '';
             foreach ($p['medias'] ?? [] as $media) {
                 if (!empty($media['url'])) { $imageUrl = $media['url']; break; }
@@ -780,7 +780,7 @@ class AIMedicineController extends Controller
     }
 
     // ═════════════════════════════════════════════════════════════════════════
-    // Apollo Pharmacy — __NEXT_DATA__ HTML scraping
+    // Apollo Pharmacy - __NEXT_DATA__ HTML scraping
     // ═════════════════════════════════════════════════════════════════════════
     private function searchApolloPharmacy(string $name): array
     {
@@ -866,7 +866,7 @@ class AIMedicineController extends Controller
     }
 
     // ═════════════════════════════════════════════════════════════════════════
-    // PharmEasy — fetch full product page and extract description + uses
+    // PharmEasy - fetch full product page and extract description + uses
     // ═════════════════════════════════════════════════════════════════════════
     private function fetchProductDetail(string $slug): ?array
     {
@@ -1036,7 +1036,7 @@ class AIMedicineController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // ROUTE 4: Generate AI description — always ≥50 words guaranteed.
+    // ROUTE 4: Generate AI description - always ≥50 words guaranteed.
     //          Retries once with a stricter prompt if the first attempt is short.
     // ─────────────────────────────────────────────────────────────────────────
     public function generateDescription(Request $request): JsonResponse
@@ -1067,7 +1067,7 @@ class AIMedicineController extends Controller
         // ── Step 1: Try to get real description from source site ──────────────
         $scrapedDesc = null;
 
-        // PharmEasy — fetch full product page
+        // PharmEasy - fetch full product page
         if (str_contains($sourcePlatform, 'pharmeasy') && $slug) {
             try {
                 $detail = $this->fetchProductDetail($slug);
@@ -1080,7 +1080,7 @@ class AIMedicineController extends Controller
             }
         }
 
-        // NetMeds — description comes in via 'existing' field (already extracted at search time)
+        // NetMeds - description comes in via 'existing' field (already extracted at search time)
         if (!$scrapedDesc && str_contains($sourcePlatform, 'netmeds') && $existing && str_word_count($existing) >= 20) {
             $scrapedDesc = $existing;
             Log::info("MediBot descGen using NetMeds source desc ✓ [{$name}]");
@@ -1215,18 +1215,18 @@ Product: {$name}
 
 Requirements:
 - MUST be at least 60 words and no more than 150 words
-- Count every word carefully — do not stop before 60 words
+- Count every word carefully - do not stop before 60 words
 - Professional, informative tone suitable for a pharmacy website
 - Cover what the product is, its key benefits, active ingredients (if applicable), and who it is for
 - Do NOT include price, dosage instructions, or side effects
-- Return ONLY the plain description paragraph — no headings, no bullet points, no extra commentary
+- Return ONLY the plain description paragraph - no headings, no bullet points, no extra commentary
 PROMPT;
     }
 
     private function aiPrompt(string $name): string
     {
         return <<<PROMPT
-You are an expert product data assistant for an Indian online medical and healthcare store (sells medicines, baby care, face wash, diapers, supplements, devices, cosmetics — everything a physical pharmacy sells).
+You are an expert product data assistant for an Indian online medical and healthcare store (sells medicines, baby care, face wash, diapers, supplements, devices, cosmetics - everything a physical pharmacy sells).
 
 Generate structured product data for: "{$name}"
 

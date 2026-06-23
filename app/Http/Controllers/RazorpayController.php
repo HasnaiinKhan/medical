@@ -31,7 +31,7 @@ class RazorpayController extends Controller
     public function __construct(private CartService $cart) {}
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STEP 1 — Show checkout form (same as COD, payment_method selector added)
+    // STEP 1 - Show checkout form (same as COD, payment_method selector added)
     // ─────────────────────────────────────────────────────────────────────────
 
     public function create(): View|RedirectResponse
@@ -53,7 +53,7 @@ class RazorpayController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STEP 2 — Validate form + create Razorpay order → return JSON to JS
+    // STEP 2 - Validate form + create Razorpay order → return JSON to JS
     // ─────────────────────────────────────────────────────────────────────────
 
     public function createOrder(Request $request): JsonResponse
@@ -168,7 +168,7 @@ class RazorpayController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STEP 3 — Verify Razorpay signature after payment success
+    // STEP 3 - Verify Razorpay signature after payment success
     // ─────────────────────────────────────────────────────────────────────────
 
     public function verifyPayment(Request $request): JsonResponse
@@ -388,7 +388,7 @@ class RazorpayController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Private helper — write order + items to DB
+    // Private helper - write order + items to DB
     // ─────────────────────────────────────────────────────────────────────────
 
     // ── Save or update a user address ────────────────────────────────────────
@@ -397,7 +397,7 @@ class RazorpayController extends Controller
         $user  = Auth::user();
         $label = trim($data['address_label'] ?? 'Home') ?: 'Home';
 
-        // Check if an identical address already exists — avoid duplicates
+        // Check if an identical address already exists - avoid duplicates
         $existing = $user->addresses()
             ->where('address_line1', $data['address_line1'])
             ->where('delivery_pin',  $data['delivery_pin'])

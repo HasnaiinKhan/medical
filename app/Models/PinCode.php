@@ -12,6 +12,6 @@ class PinCode extends Model
     {
         $office = $this->post_office ? " ({$this->post_office})" : '';
 
-        return "{$this->area}{$office}, {$this->city} — {$this->code}";
+        return "{$this->area}{$office}, {$this->city} - {$this->code}";
     }
 }

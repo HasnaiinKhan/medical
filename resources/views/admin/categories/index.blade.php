@@ -89,7 +89,7 @@
                                     </form>
                                 @else
                                     <span class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-400 cursor-not-allowed"
-                                          title="Cannot delete — has medicines">
+                                          title="Cannot delete - has medicines">
                                         Delete
                                     </span>
                                 @endif

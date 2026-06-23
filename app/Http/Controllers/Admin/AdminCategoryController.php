@@ -40,7 +40,7 @@ class AdminCategoryController extends Controller
     public function destroy(Category $category): RedirectResponse
     {
         if ($category->medicines()->count() > 0) {
-            return back()->withErrors(['error' => "Cannot delete '{$category->name}' — it has {$category->medicines()->count()} medicines."]);
+            return back()->withErrors(['error' => "Cannot delete '{$category->name}' - it has {$category->medicines()->count()} medicines."]);
         }
 
         $name = $category->name;

@@ -203,7 +203,7 @@
 
     <div class="mt-5 rounded-2xl border border-green-200 bg-green-50 p-4">
         <p class="text-sm text-green-900">
-            <strong>Tip:</strong> Select your filters then click Export CSV. The file downloads directly — no page reload.
+            <strong>Tip:</strong> Select your filters then click Export CSV. The file downloads directly - no page reload.
             All filters are optional; leave them blank to export everything.
         </p>
     </div>
@@ -259,7 +259,7 @@
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    // Hide the global admin loader immediately — this page manages its own freeze
+    // Hide the global admin loader immediately - this page manages its own freeze
     var globalLoader = document.getElementById('admin-loader');
     if (globalLoader) globalLoader.style.display = 'none';
     const listFilter = document.getElementById('list-filter');
@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // (downloads don't unload the page, but just in case)
             e.stopImmediatePropagation();
         }
-    }, true); // capture phase — runs before the layout's listener
+    }, true); // capture phase - runs before the layout's listener
 
     if (form && btn) {
         form.addEventListener('submit', function (e) {

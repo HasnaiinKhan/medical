@@ -237,7 +237,7 @@
         <div class="reveal mb-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold text-white"
              style="background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25);">
             <span class="h-2 w-2 rounded-full flex-shrink-0" style="background:#ef4444;"></span>
-            Delivering across Ahmedabad — 32+ pincodes
+            Delivering across Ahmedabad - 32+ pincodes
         </div>
 
         {{-- Headline --}}
@@ -575,7 +575,7 @@
 
 
 {{-- ============================================================
-     INFO SECTIONS — Lung Research + Natural Medicine
+     INFO SECTIONS - Lung Research + Natural Medicine
      ============================================================ --}}
 <section class="mb-12 space-y-6">
 
@@ -658,7 +658,7 @@
 </section>
 
 {{-- ============================================================
-     SUCCESS NUMBERS — PREMIUM
+     SUCCESS NUMBERS - PREMIUM
      ============================================================ --}}
 <section class="mb-12 reveal">
 
@@ -999,7 +999,7 @@
 .stat-card:hover .stat-bar-track { background: rgba(255,255,255,0.25); }
 .stat-card:hover .stat-bar-fill  { background: rgba(255,255,255,0.9); }
 
-/* Number & accent colors — default */
+/* Number & accent colors - default */
 .stat-num-blue   { color: #1d4ed8; }
 .stat-plus-blue  { color: #93c5fd; }
 .stat-num-amber  { color: #d97706; }
@@ -1008,7 +1008,7 @@
 .stat-plus-green { color: #86efac; }
 .stat-star       { color: #f59e0b; }
 
-/* On hover — all numbers, accents and stars turn white */
+/* On hover - all numbers, accents and stars turn white */
 .stat-card:hover .stat-num-blue,
 .stat-card:hover .stat-plus-blue,
 .stat-card:hover .stat-num-amber,
@@ -1196,12 +1196,12 @@ $reviews = [
     ['name'=>'Tabreaz 786',         'initial'=>'T', 'color'=>'#e11d48', 'stars'=>5, 'text'=>'Good service provider near me. Really fast & free delivery. Good maintained stock.'],
     ['name'=>'Desai Sokat',         'initial'=>'D', 'color'=>'#7c3aed', 'stars'=>5, 'text'=>'Really good service provider in Vejalpur & Juhapura area. Very fast & free service. 100% answers calls & replies very fast.'],
     ['name'=>'SAHIL Rathod',        'initial'=>'S', 'color'=>'#0284c7', 'stars'=>5, 'text'=>'They have good medicine & cosmetics item stock. Really best medical in Vejalpur and Juhapura area.'],
-    ['name'=>'Matin Shaikh',        'initial'=>'M', 'color'=>'#1d4ed8', 'stars'=>5, 'text'=>'Super and good medical. Good price. Thank you Medikart and Desai bhai!'],
+    ['name'=>'Matin Shaikh',        'initial'=>'M', 'color'=>'#1d4ed8', 'stars'=>5, 'text'=>'Super and good medical. Good price. Thank you Rx Plus 365 and Desai bhai!'],
     ['name'=>'Nazima Kamal',        'initial'=>'N', 'color'=>'#db2777', 'stars'=>5, 'text'=>'Very nice door service with a reasonable price.'],
     ['name'=>'Sadiya Rathod',       'initial'=>'S', 'color'=>'#d97706', 'stars'=>5, 'text'=>'Best medical store near me in Vejalpur, Jivraj & Juhapura area. Well maintained stock, best discount, and free & fast delivery.'],
     ['name'=>'Avinash Kumar',       'initial'=>'A', 'color'=>'#16a34a', 'stars'=>5, 'text'=>'Great for faster delivery and great service 👍'],
     ['name'=>'Sikandar Desai',      'initial'=>'S', 'color'=>'#0d9488', 'stars'=>5, 'text'=>'Best medical store for monthly medicines. Best discount. Well maintained stock for cancer, diabetic, kidney, heart medicines. Special thanks to Mr. Sarfaraz Desai.'],
-    ['name'=>'Aakash Parikh',       'initial'=>'A', 'color'=>'#7c3aed', 'stars'=>5, 'text'=>'Medikart pharmacy delivered urgent medicines we needed late at night and delivery was also fast.'],
+    ['name'=>'Aakash Parikh',       'initial'=>'A', 'color'=>'#7c3aed', 'stars'=>5, 'text'=>'Rx Plus 365 delivered urgent medicines we needed late at night and delivery was also fast.'],
 ];
 @endphp
 
