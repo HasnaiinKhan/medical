@@ -17,7 +17,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin') - Rx Plus 365 Admin</title>
     <link rel="icon" type="image/png" href="{{ asset('Images/companylogo/favicon-96x96.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('Images/companylogo/Rxpluswithwhitebg.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('Images/companylogo/favicon-96x96.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W+A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -396,6 +396,11 @@
                class="sidebar-link {{ request()->routeIs('admin.settings.orders*') ? 'active' : '' }}">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 Order Settings
+            </a>
+            <a href="{{ route('admin.settings.payment') }}"
+               class="sidebar-link {{ request()->routeIs('admin.settings.payment*') ? 'active' : '' }}">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                Payment Settings
             </a>
             <a href="{{ route('home') }}" target="_blank" class="sidebar-link mt-1" data-no-loader>
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>

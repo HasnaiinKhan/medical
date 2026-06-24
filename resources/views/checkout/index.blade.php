@@ -186,9 +186,13 @@
 <div class="pt-2">
     <label class="block text-sm font-semibold text-slate-700 mb-3">Payment Method <span class="text-red-500">*</span></label>
     <div class="grid grid-cols-2 gap-3">
+
         {{-- Online --}}
-        <label id="label-online" class="payment-option relative flex cursor-pointer flex-col gap-2 rounded-xl border-2 border-blue-600 bg-blue-50 p-4 transition-all">
-            <input type="radio" name="payment_method" value="online" checked class="sr-only">
+        @if($onlineEnabled)
+        <label id="label-online" class="payment-option relative flex cursor-pointer flex-col gap-2 rounded-xl border-2 {{ $codEnabled ? 'border-blue-600 bg-blue-50' : 'border-blue-600 bg-blue-50' }} p-4 transition-all">
+            <input type="radio" name="payment_method" value="online"
+                   {{ ! $codEnabled || $onlineEnabled ? 'checked' : '' }}
+                   class="sr-only">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-700 text-white text-xs font-black">₹</div>
@@ -204,9 +208,14 @@
                 <span class="text-xs font-semibold text-slate-500">Powered by Razorpay</span>
             </div>
         </label>
+        @endif
+
         {{-- COD --}}
-        <label id="label-cod" class="payment-option relative flex cursor-pointer flex-col gap-2 rounded-xl border-2 border-slate-200 bg-white p-4 transition-all">
-            <input type="radio" name="payment_method" value="cod" class="sr-only">
+        @if($codEnabled)
+        <label id="label-cod" class="payment-option relative flex cursor-pointer flex-col gap-2 rounded-xl border-2 {{ $onlineEnabled ? 'border-slate-200 bg-white' : 'border-blue-600 bg-blue-50' }} p-4 transition-all">
+            <input type="radio" name="payment_method" value="cod"
+                   {{ ! $onlineEnabled ? 'checked' : '' }}
+                   class="sr-only">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 overflow-hidden">
@@ -214,12 +223,26 @@
                     </div>
                     <span class="text-sm font-bold text-slate-900">Cash on Delivery</span>
                 </div>
-                <div class="h-4 w-4 rounded-full border-2 border-slate-300 bg-white" id="dot-cod"></div>
+                <div class="h-4 w-4 rounded-full border-2 {{ $onlineEnabled ? 'border-slate-300 bg-white' : 'border-blue-700 bg-blue-700 flex items-center justify-center' }}" id="dot-cod">
+                    @unless($onlineEnabled)
+                        <div class="h-1.5 w-1.5 rounded-full bg-white"></div>
+                    @endunless
+                </div>
             </div>
             <p class="text-xs text-slate-600">Pay in cash when your order arrives</p>
             <p class="text-xs text-amber-600 font-medium mt-1">No extra charges</p>
         </label>
+        @endif
+
     </div>
+
+    {{-- Disabled-method notice --}}
+    @if(! $onlineEnabled)
+        <p class="mt-2 text-xs text-slate-500">Online payment is currently unavailable.</p>
+    @endif
+    @if(! $codEnabled)
+        <p class="mt-2 text-xs text-slate-500">Cash on Delivery is currently unavailable.</p>
+    @endif
 </div>
 
 {{-- General error --}}
@@ -445,25 +468,45 @@ function setAddrLabel(lbl) {
 
 
 // ── Payment method toggle ────────────────────────────────────────────────────
+const initialMethod = (document.querySelector('input[name="payment_method"]:checked') || {}).value || 'online';
+
+// Set initial button text and badge based on which method is pre-selected
+(function initPaymentUI() {
+    const isOnline = initialMethod === 'online';
+    document.getElementById('btn-text').textContent = isOnline ? 'Pay & Place Order' : 'Place Order (COD)';
+    const badge = document.getElementById('summary-payment-badge');
+    if (badge) {
+        badge.innerHTML = isOnline
+            ? '<span class="text-lg">💳</span><p class="text-xs font-medium text-slate-700">Secure online payment via Razorpay</p>'
+            : '<span class="text-lg">💵</span><p class="text-xs font-medium text-amber-800">Pay cash when your order arrives</p>';
+        badge.className = 'mt-4 rounded-xl border p-3 flex items-center gap-2 ' +
+            (isOnline ? 'bg-blue-50 border-blue-100' : 'bg-amber-50 border-amber-100');
+    }
+})();
+
 document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
     radio.addEventListener('change', function () {
         const isOnline = this.value === 'online';
-        document.getElementById('label-online').className =
+        const onlineLabel = document.getElementById('label-online');
+        const codLabel    = document.getElementById('label-cod');
+        if (onlineLabel) onlineLabel.className =
             'payment-option relative flex cursor-pointer flex-col gap-2 rounded-xl border-2 p-4 transition-all ' +
             (isOnline ? 'border-blue-600 bg-blue-50' : 'border-slate-200 bg-white');
-        document.getElementById('label-cod').className =
+        if (codLabel) codLabel.className =
             'payment-option relative flex cursor-pointer flex-col gap-2 rounded-xl border-2 p-4 transition-all ' +
             (!isOnline ? 'border-blue-600 bg-blue-50' : 'border-slate-200 bg-white');
-        document.getElementById('dot-online').className =
-            'h-4 w-4 rounded-full border-2 flex items-center justify-center ' +
-            (isOnline ? 'border-blue-700 bg-blue-700' : 'border-slate-300 bg-white');
-        document.getElementById('dot-online').innerHTML =
-            isOnline ? '<div class="h-1.5 w-1.5 rounded-full bg-white"></div>' : '';
-        document.getElementById('dot-cod').className =
-            'h-4 w-4 rounded-full border-2 flex items-center justify-center ' +
-            (!isOnline ? 'border-blue-700 bg-blue-700' : 'border-slate-300 bg-white');
-        document.getElementById('dot-cod').innerHTML =
-            !isOnline ? '<div class="h-1.5 w-1.5 rounded-full bg-white"></div>' : '';
+        const dotOnline = document.getElementById('dot-online');
+        const dotCod    = document.getElementById('dot-cod');
+        if (dotOnline) {
+            dotOnline.className = 'h-4 w-4 rounded-full border-2 flex items-center justify-center ' +
+                (isOnline ? 'border-blue-700 bg-blue-700' : 'border-slate-300 bg-white');
+            dotOnline.innerHTML = isOnline ? '<div class="h-1.5 w-1.5 rounded-full bg-white"></div>' : '';
+        }
+        if (dotCod) {
+            dotCod.className = 'h-4 w-4 rounded-full border-2 flex items-center justify-center ' +
+                (!isOnline ? 'border-blue-700 bg-blue-700' : 'border-slate-300 bg-white');
+            dotCod.innerHTML = !isOnline ? '<div class="h-1.5 w-1.5 rounded-full bg-white"></div>' : '';
+        }
         document.getElementById('btn-text').textContent =
             isOnline ? 'Pay & Place Order' : 'Place Order (COD)';
         const badge = document.getElementById('summary-payment-badge');

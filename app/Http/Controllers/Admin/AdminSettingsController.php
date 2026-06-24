@@ -10,6 +10,34 @@ use Illuminate\View\View;
 
 class AdminSettingsController extends Controller
 {
+    public function payment(): View
+    {
+        $settings = Setting::getMany([
+            'payment_cod_enabled',
+            'payment_online_enabled',
+        ]);
+
+        $settings['payment_cod_enabled']    = ($settings['payment_cod_enabled']    ?? '1') === '1';
+        $settings['payment_online_enabled'] = ($settings['payment_online_enabled'] ?? '1') === '1';
+
+        return view('admin.settings.payment', compact('settings'));
+    }
+
+    public function savePayment(Request $request): RedirectResponse
+    {
+        $cod    = $request->boolean('payment_cod_enabled');
+        $online = $request->boolean('payment_online_enabled');
+
+        if (! $cod && ! $online) {
+            return back()->withErrors(['payment' => 'At least one payment method must be enabled.'])->withInput();
+        }
+
+        Setting::set('payment_cod_enabled',    $cod    ? '1' : '0');
+        Setting::set('payment_online_enabled', $online ? '1' : '0');
+
+        return back()->with('status', 'Payment settings saved.');
+    }
+
     public function orders(): View
     {
         $settings = Setting::getMany([

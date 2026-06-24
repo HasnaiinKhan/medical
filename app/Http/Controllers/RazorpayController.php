@@ -47,8 +47,12 @@ class RazorpayController extends Controller
         $razorpayKeyId    = config('razorpay.key_id');
         $savedAddresses   = Auth::user()->addresses()->get();
 
+        $codEnabled    = \App\Models\Setting::get('payment_cod_enabled',    '1') === '1';
+        $onlineEnabled = \App\Models\Setting::get('payment_online_enabled', '1') === '1';
+
         return view('checkout.index', compact(
-            'lines', 'subtotalPaise', 'deliveryFeePaise', 'totalPaise', 'razorpayKeyId', 'savedAddresses'
+            'lines', 'subtotalPaise', 'deliveryFeePaise', 'totalPaise',
+            'razorpayKeyId', 'savedAddresses', 'codEnabled', 'onlineEnabled'
         ));
     }
 
@@ -60,6 +64,18 @@ class RazorpayController extends Controller
     {
         if ($this->cart->lines()->isEmpty()) {
             return response()->json(['error' => 'Cart is empty.'], 422);
+        }
+
+        // ── Enforce admin payment method settings ─────────────────────────────
+        $codEnabled    = \App\Models\Setting::get('payment_cod_enabled',    '1') === '1';
+        $onlineEnabled = \App\Models\Setting::get('payment_online_enabled', '1') === '1';
+
+        $requestedMethod = $request->input('payment_method');
+        if ($requestedMethod === 'cod' && ! $codEnabled) {
+            return response()->json(['error' => 'Cash on Delivery is not available at the moment.'], 422);
+        }
+        if ($requestedMethod === 'online' && ! $onlineEnabled) {
+            return response()->json(['error' => 'Online payment is not available at the moment.'], 422);
         }
 
         if (! $this->hasRazorpayCredentials()) {

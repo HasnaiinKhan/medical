@@ -113,6 +113,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('settings/notifications/test/{channel}', [AdminSettingsController::class, 'testNotification'])->name('settings.notifications.test');
     Route::get('settings/orders',                 [AdminSettingsController::class, 'orders'])->name('settings.orders');
     Route::post('settings/orders',                [AdminSettingsController::class, 'saveOrders'])->name('settings.orders.save');
+    Route::get('settings/payment',                [AdminSettingsController::class, 'payment'])->name('settings.payment');
+    Route::post('settings/payment',               [AdminSettingsController::class, 'savePayment'])->name('settings.payment.save');
 
     // AI Medicine Generator
     Route::post('ai/medicine-generate',     [\App\Http\Controllers\Admin\AIMedicineController::class, 'generate'])->name('ai.medicine.generate');
