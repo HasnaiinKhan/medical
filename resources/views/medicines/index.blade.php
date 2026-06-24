@@ -155,6 +155,10 @@
             }
 
             if (pushState) window.history.pushState({ url }, '', url);
+
+            // Scroll results into view smoothly after a page change
+            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
             closeDrawer();
         } catch {
             window.location.href = url;
@@ -285,7 +289,7 @@
 
     document.addEventListener('click', function (e) {
         const link = e.target.closest(
-            '.js-medicine-results-link, .js-medicine-filter-link, #medicines-results-container nav[aria-label="pagination"] a'
+            '.js-medicine-results-link, .js-medicine-filter-link, #medicines-results-container nav[role="navigation"] a'
         );
         if (!link) return;
         const url = link.getAttribute('href');

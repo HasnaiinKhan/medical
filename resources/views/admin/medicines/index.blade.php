@@ -208,7 +208,7 @@ function dismissMedicineAlert(alertId) {
                                 </div>
                             </div>
                         </td>
-                        <td>
+                        <td style="width:180px;">
                             <span class="badge bg-blue-50 text-blue-800 ring-1 ring-blue-200">{{ $m->category->name }}</span>
                         </td>
                         <td class="text-slate-500 text-xs line-through">₹{{ number_format($m->mrpRupees(), 2) }}</td>

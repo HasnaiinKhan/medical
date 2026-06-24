@@ -34,7 +34,10 @@
         <!-- HEADER -->
         <tr>
           <td class="hpad" align="center"
-              style="background-color:#1a56db;padding:36px 40px;">
+              style="background-color:#1a56db;padding:28px 40px 36px;">
+            <img src="{{ config('app.url') }}/Images/companylogo/Rxpluswithwhitebg.png"
+                 alt="Rx Plus 365"
+                 width="130" style="height:auto;display:block;margin:0 auto 14px;border-radius:6px;">
             <p style="margin:0 0 4px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.75);font-family:Arial,Helvetica,sans-serif;">Order Confirmed</p>
             <h1 class="h1" style="margin:0 0 8px 0;font-size:24px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">Thank You for Your Order!</h1>
             <p style="margin:0 0 16px 0;font-size:14px;color:rgba(255,255,255,0.8);font-family:Arial,Helvetica,sans-serif;">We have received your order and it is being processed.</p>

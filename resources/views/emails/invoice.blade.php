@@ -194,7 +194,9 @@
   <table>
     <tr>
       <td>
-        <div class="brand-name">Rx Plus 365</div>
+        <img src="{{ public_path('Images/company logo/RxPlus.png') }}"
+             alt="Rx Plus 365"
+             style="height:48px;width:auto;object-fit:contain;display:block;">
         <div class="brand-sub">Your Trusted Online Pharmacy, Ahmedabad</div>
       </td>
       <td style="text-align:right;">

@@ -3,7 +3,7 @@
 {{-- If this is an AJAX navigation request, return only the page fragment --}}
 @if(request()->ajax() || request()->header('X-Admin-Ajax'))
     <script>
-    window.__adminPageTitle    = @json(\Illuminate\Support\Facades\View::yieldContent('title', 'Admin') . ' - MediCart Admin');
+    window.__adminPageTitle    = @json(\Illuminate\Support\Facades\View::yieldContent('title', 'Admin') . ' - Rx Plus 365 Admin');
     window.__adminPageHeading  = @json(\Illuminate\Support\Facades\View::yieldContent('page-title', 'Dashboard'));
     window.__adminPageSubtitle = @json(\Illuminate\Support\Facades\View::yieldContent('page-subtitle', ''));
     </script>
@@ -15,7 +15,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin') - MediCart Admin</title>
+    <title>@yield('title', 'Admin') - Rx Plus 365 Admin</title>
+    <link rel="icon" type="image/png" href="{{ asset('Images/companylogo/favicon-96x96.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('Images/companylogo/Rxpluswithwhitebg.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W+A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -261,20 +263,18 @@
     justify-content: center;
 ">
     <div style="
-        background: #fff;
         border-radius: 16px;
         padding: 24px 32px;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 12px;
-        box-shadow: 0 16px 48px rgba(0,0,0,.18);
         min-width: 140px;
         text-align: center;
     ">
         <div style="
-            width: 36px; height: 36px;
-            border: 3px solid #dbeafe;
+            width: 40px; height: 40px;
+            border: 4px solid #dbeafe;
             border-top-color: #2563eb;
             border-radius: 50%;
             animation: adminSpin .65s linear infinite;
@@ -293,7 +293,7 @@
             <div class="flex items-center gap-2.5">
                 <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-white font-black text-sm">✚</div>
                 <div>
-                    <p class="text-white font-extrabold text-sm leading-none">MediCart</p>
+                    <p class="text-white font-extrabold text-sm leading-none">Rx Plus 365</p>
                     <p class="text-blue-300 text-[10px] font-semibold uppercase tracking-widest mt-0.5">Admin Panel</p>
                 </div>
             </div>
@@ -431,7 +431,7 @@
                 </button>
                 <div class="min-w-0">
                     <h1 class="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">@yield('page-title', 'Dashboard')</h1>
-                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 hidden sm:block truncate">@yield('page-subtitle', 'MediCart Admin Panel')</p>
+                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 hidden sm:block truncate">@yield('page-subtitle', 'Rx Plus 365 Admin Panel')</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
@@ -516,25 +516,15 @@
 <script>
 /* ── Screen freeze loader ─────────────────────────────────────────── */
 (function () {
-    var loader     = document.getElementById('admin-loader');
-    var loaderText = document.getElementById('admin-loader-text');
+    var loader = document.getElementById('admin-loader');
 
-    function show(msg) {
-        loaderText.textContent = msg || 'Loading…';
-        loader.style.display = 'flex';
-    }
-    function hide() {
-        loader.style.display = 'none';
-    }
+    function show() { loader.style.display = 'flex'; }
+    function hide() { loader.style.display = 'none'; }
 
     window.adminLoader = { show: show, hide: hide };
 
-    // ── Show on page unload (covers F5, Ctrl+R, browser back/forward) ────
-    window.addEventListener('beforeunload', function () {
-        show('Loading…');
-    });
+    window.addEventListener('beforeunload', show);
 
-    // ── Navigation links ──────────────────────────────────────────────────
     document.addEventListener('click', function (e) {
         var link = e.target.closest('a[href]');
         if (!link) return;
@@ -543,29 +533,20 @@
         var href = link.getAttribute('href');
         if (!href || href.startsWith('#') || href.startsWith('javascript') || href.startsWith('blob:')) return;
         if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-        try {
-            var url = new URL(href, window.location.origin);
-            if (url.origin !== window.location.origin) return;
-        } catch (err) { return; }
-        show('Loading…');
+        try { var url = new URL(href, window.location.origin); if (url.origin !== window.location.origin) return; }
+        catch (err) { return; }
+        show();
     });
 
-    // ── Form submits (skip data-no-loader, _blank, and download forms) ───
     document.addEventListener('submit', function (e) {
         var form = e.target;
         if (form.dataset.noLoader) return;
         if (form.target === '_blank') return;
-        var btn = form.querySelector('[type="submit"]');
-        var label = btn ? btn.textContent.trim() : '';
-        show(label ? label + '…' : 'Saving…');
+        show();
     });
 
-    // ── Hide as soon as new page is ready ─────────────────────────────────
-    // pageshow covers back/forward cache; load covers normal navigation
     window.addEventListener('pageshow', hide);
     window.addEventListener('load',     hide);
-
-    // Safety net - if something goes wrong, never leave frozen forever
     setTimeout(hide, 15000);
 })();
 

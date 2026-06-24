@@ -197,9 +197,9 @@
         {{-- Status --}}
         <select name="status" id="filter-status" class="order-filter-select">
             <option value="all" {{ request('status', 'all') === 'all' ? 'selected' : '' }}>All Statuses</option>
-            @foreach(['placed','confirmed','shipped','delivered','cancelled','payment_failed','payment_review'] as $s)
+            @foreach(\App\Models\Order::STATUSES as $s)
                 <option value="{{ $s }}" {{ request('status') === $s ? 'selected' : '' }}>
-                    {{ ucfirst($s) }}
+                    {{ ucwords(str_replace('_', ' ', $s)) }}
                 </option>
             @endforeach
         </select>
@@ -238,7 +238,7 @@
     <div class="order-filter-chips">
         <span class="order-filter-chips-label">Active filters:</span>
         @if(request('status') && request('status') !== 'all')
-            <span class="order-filter-chip chip-status">Status: {{ ucfirst(request('status')) }}</span>
+            <span class="order-filter-chip chip-status">Status: {{ ucwords(str_replace('_', ' ', request('status'))) }}</span>
         @endif
         @if(request('payment') && request('payment') !== 'all')
             <span class="order-filter-chip chip-payment">Payment: {{ ucfirst(request('payment')) }}</span>
@@ -261,24 +261,31 @@
 <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden mb-4">
 
     {{-- Bulk toolbar --}}
-    <div class="flex items-center justify-between gap-3 px-5 py-3 border-b border-slate-100 bg-slate-50">
-        <div class="flex items-center gap-3">
-            <label class="flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer">
-                <input type="checkbox" id="select-all" class="h-4 w-4 rounded border-slate-300 text-blue-600">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;border-bottom:1px solid #f1f5f9;background:#f8fafc;">
+        {{-- Left: select-all + count --}}
+        <div style="display:flex;align-items:center;gap:10px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#475569;cursor:pointer;">
+                <input type="checkbox" id="select-all" style="width:15px;height:15px;border-radius:4px;border:1px solid #cbd5e1;cursor:pointer;">
                 Select all
             </label>
-            <span class="text-xs text-slate-400" id="selected-count">0 selected</span>
+            <span style="font-size:11px;color:#94a3b8;" id="selected-count">0 selected</span>
         </div>
-        <div class="flex items-center gap-3">
+
+        {{-- Right: dropdown + apply + hint --}}
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+            <span id="bulk-hint" style="display:none;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;"></span>
             <select name="status" id="bulk-status"
-                    class="rounded-lg border border-slate-200 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none">
-                <option value="">Change status to</option>
-                @foreach(['placed','confirmed','shipped','delivered'] as $s)
-                    <option value="{{ $s }}"> {{ ucfirst($s) }}</option>
-                @endforeach
+                    style="border:1px solid #e2e8f0;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;color:#1e293b;background:#fff;outline:none;cursor:pointer;min-width:170px;transition:border-color .15s;"
+                    onmouseover="this.style.borderColor='#3b82f6'"
+                    onmouseout="this.style.borderColor='#e2e8f0'">
+                <option value="">— Change status to —</option>
+                <option value="placed">Placed</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
             </select>
             <button type="submit" id="bulk-apply"
-                    class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    style="border:none;border-radius:8px;background:#2563eb;color:#fff;padding:7px 18px;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s,opacity .15s;opacity:0.4;pointer-events:none;"
                     disabled>
                 Apply
             </button>
@@ -357,7 +364,9 @@
                     <tr class="group">
                         <td>
                             <input type="checkbox" name="order_ids[]" value="{{ $order->id }}"
-                                   class="order-checkbox h-4 w-4 rounded border-slate-300 text-blue-600">
+                                   data-status="{{ $order->status }}"
+                                   class="order-checkbox"
+                                   style="width:15px;height:15px;border-radius:4px;border:1px solid #cbd5e1;cursor:pointer;">
                         </td>
                         <td>
                             <a href="{{ route('admin.orders.show', $order) }}"
@@ -626,69 +635,183 @@ function showIndexStatusConfirm(status) {
 
 /* ── Bulk action ── */
 (function () {
-    const selectAll  = document.getElementById('select-all');
-    const checkboxes = document.querySelectorAll('.order-checkbox');
-    const countLabel = document.getElementById('selected-count');
-    const bulkApply  = document.getElementById('bulk-apply');
-    const bulkStatus = document.getElementById('bulk-status');
-    const bulkForm   = document.getElementById('bulk-form');
+    var FLOW       = ['placed', 'confirmed', 'shipped', 'delivered'];
+    var selectAll  = document.getElementById('select-all');
+    var checkboxes = document.querySelectorAll('.order-checkbox');
+    var countLabel = document.getElementById('selected-count');
+    var applyBtn   = document.getElementById('bulk-apply');
+    var dropdown   = document.getElementById('bulk-status');
+    var hintEl     = document.getElementById('bulk-hint');
+    var bulkForm   = document.getElementById('bulk-form');
 
-    function getCheckedCount() {
-        return document.querySelectorAll('.order-checkbox:checked').length;
+    /* Returns array of current statuses for all checked checkboxes */
+    function checkedStatuses() {
+        return Array.from(document.querySelectorAll('.order-checkbox:checked'))
+                    .map(function (cb) { return cb.dataset.status || ''; });
     }
 
-    function updateUI() {
-        const count  = getCheckedCount();
-        const ready  = count > 0 && bulkStatus.value !== '';
+    /* Compute which statuses can be bulk-applied given the current selection.
+       Rule: only forward steps that are valid for EVERY selected order. */
+    function allowedNextStatuses(statuses) {
+        if (!statuses.length) return [];
+
+        var allowed = null;
+
+        statuses.forEach(function (current) {
+            var idx = FLOW.indexOf(current);
+            /* Orders not in FLOW (cancelled, refunded, etc.) or already delivered → no steps */
+            var forward = (idx === -1 || idx === FLOW.length - 1) ? [] : FLOW.slice(idx + 1);
+
+            if (allowed === null) {
+                allowed = forward.slice();
+            } else {
+                /* Intersect */
+                allowed = allowed.filter(function (s) { return forward.indexOf(s) !== -1; });
+            }
+        });
+
+        return allowed || [];
+    }
+
+    /* Rebuild the dropdown to only show allowed options */
+    function rebuildDropdown(allowed) {
+        var prev = dropdown.value;
+        dropdown.innerHTML = '';
+
+        if (!allowed.length) {
+            dropdown.disabled = true;
+            var opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = 'No further steps available';
+            dropdown.appendChild(opt);
+            dropdown.style.color = '#94a3b8';
+            return;
+        }
+
+        dropdown.disabled = false;
+        dropdown.style.color = '#1e293b';
+
+        var placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = '— Change status to —';
+        dropdown.appendChild(placeholder);
+
+        var labels = { placed:'Placed', confirmed:'Confirmed', shipped:'Shipped', delivered:'Delivered' };
+        allowed.forEach(function (s) {
+            var opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = labels[s] || s;
+            if (s === prev) opt.selected = true;
+            dropdown.appendChild(opt);
+        });
+    }
+
+    /* Reset dropdown to full list (nothing selected) */
+    function resetDropdown() {
+        dropdown.disabled = false;
+        dropdown.style.color = '#94a3b8';
+        dropdown.innerHTML =
+            '<option value="">— Select orders first —</option>';
+    }
+
+    /* Show a hint pill under the toolbar */
+    function updateHint(count, allowed) {
+        if (!hintEl) return;
+
+        if (count === 0) {
+            hintEl.style.display = 'none';
+            return;
+        }
+
+        hintEl.style.display = 'inline-block';
+
+        if (!allowed.length) {
+            hintEl.textContent = 'Selected orders are at the final stage';
+            hintEl.style.background = '#fff7ed';
+            hintEl.style.color = '#c2410c';
+            hintEl.style.border = '1px solid #fed7aa';
+        } else {
+            var labels = { placed:'Placed', confirmed:'Confirmed', shipped:'Shipped', delivered:'Delivered' };
+            hintEl.textContent = 'Next: ' + allowed.map(function (s) { return labels[s]; }).join(' → ');
+            hintEl.style.background = '#eff6ff';
+            hintEl.style.color = '#1d4ed8';
+            hintEl.style.border = '1px solid #bfdbfe';
+        }
+    }
+
+    /* Toggle the Apply button */
+    function setApply(enabled) {
+        applyBtn.disabled = !enabled;
+        applyBtn.style.opacity = enabled ? '1' : '0.4';
+        applyBtn.style.pointerEvents = enabled ? 'auto' : 'none';
+        applyBtn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+    }
+
+    /* Master refresh — called whenever selection or dropdown changes */
+    function refresh() {
+        var statuses = checkedStatuses();
+        var count    = statuses.length;
+
         countLabel.textContent = count > 0 ? count + ' selected' : '0 selected';
-        bulkApply.disabled = !ready;
         selectAll.indeterminate = count > 0 && count < checkboxes.length;
-        selectAll.checked = count === checkboxes.length && checkboxes.length > 0;
+        selectAll.checked       = count > 0 && count === checkboxes.length;
+
+        if (count === 0) {
+            resetDropdown();
+            setApply(false);
+            updateHint(0, []);
+            return;
+        }
+
+        var allowed = allowedNextStatuses(statuses);
+        rebuildDropdown(allowed);
+        updateHint(count, allowed);
+        setApply(allowed.length > 0 && dropdown.value !== '');
     }
 
+    /* Events */
     selectAll.addEventListener('change', function () {
-        checkboxes.forEach(cb => cb.checked = this.checked);
-        updateUI();
+        checkboxes.forEach(function (cb) { cb.checked = selectAll.checked; });
+        refresh();
     });
 
-    checkboxes.forEach(cb => cb.addEventListener('change', updateUI));
-    bulkStatus.addEventListener('change', updateUI);
+    checkboxes.forEach(function (cb) {
+        cb.addEventListener('change', refresh);
+    });
+
+    dropdown.addEventListener('change', function () {
+        var statuses = checkedStatuses();
+        setApply(statuses.length > 0 && dropdown.value !== '' && !dropdown.disabled);
+    });
 
     bulkForm.addEventListener('submit', function (e) {
-        const count = getCheckedCount();
-        if (count === 0) {
-            e.preventDefault();
-            alert('Please select at least one order.');
-            return;
-        }
-        if (!bulkStatus.value) {
-            e.preventDefault();
-            alert('Please choose a status to apply.');
-            return;
-        }
-        // Use custom modal for bulk confirm too
         e.preventDefault();
-        const s = bulkStatus.value;
-        showBulkConfirm(count, s).then(ok => { if (ok) bulkForm.submit(); });
+        var statuses = checkedStatuses();
+        if (!statuses.length)  { alert('Please select at least one order.'); return; }
+        if (!dropdown.value)   { alert('Please choose a target status.'); return; }
+        showBulkConfirm(statuses.length, dropdown.value).then(function (ok) {
+            if (ok) bulkForm.submit();
+        });
     });
 
     function showBulkConfirm(count, status) {
         return new Promise(function (resolve) {
-            const labels = { placed:'Placed', confirmed:'Confirmed', shipped:'Shipped', delivered:'Delivered' };
+            var labels = { placed:'Placed', confirmed:'Confirmed', shipped:'Shipped', delivered:'Delivered' };
             document.getElementById('iscm-icon').textContent   = '📦';
             document.getElementById('iscm-status').textContent = labels[status] || status;
             document.getElementById('iscm-body').textContent   =
-                `Change ${count} order(s) to "${labels[status] || status}"? This cannot be undone.`;
-            const btn = document.getElementById('iscm-confirm-btn');
+                'Change ' + count + ' order(s) to "' + (labels[status] || status) + '"? This cannot be undone.';
+            var btn = document.getElementById('iscm-confirm-btn');
             btn.style.background = '#2563eb';
-
-            const modal = document.getElementById('index-status-modal');
+            var modal = document.getElementById('index-status-modal');
             modal.style.display = 'flex';
-
             btn.onclick = function () { modal.style.display = 'none'; resolve(true); };
             document.getElementById('iscm-cancel-btn').onclick = function () { modal.style.display = 'none'; resolve(false); };
         });
     }
+
+    /* Initialise */
+    refresh();
 })();
 </script>
 

@@ -1,7 +1,7 @@
 ﻿@extends('admin.layouts.admin')
 @section('title', 'Dashboard')
 @section('page-title', 'Dashboard')
-@section('page-subtitle', 'Overview of your MediCart store')
+@section('page-subtitle', 'Overview of your Rx Plus 365 store')
 
 @section('content')
 

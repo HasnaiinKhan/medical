@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Rx Plus 365')</title>
+    <link rel="icon" type="image/png" href="{{ asset('Images/companylogo/favicon-96x96.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('Images/companylogo/Rxpluswithwhitebg.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -893,13 +895,10 @@
             <div class="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
             
                 {{-- Logo --}}
-                <a href="{{ route('home') }}" class="flex items-center gap-2.5 group flex-shrink-0">
-                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-lg font-black text-white group-hover:bg-white/25 transition-all ring-1 ring-white/20">
-                        ✚
-                    </div>
-                    <div class="leading-none">
-                        <span class="logo-text text-xl font-extrabold tracking-tight">Rx Plus 365</span>
-                    </div>
+                <a href="{{ route('home') }}" class="flex items-center gap-2.5 group flex-shrink-0" style="text-decoration:none;">
+                    <img src="{{ asset('Images/companylogo/Rxpluswithwhitebg.png') }}"
+                         alt="Rx Plus 365"
+                         style="height:68px;width:auto;object-fit:contain;display:block;">
                 </a>
 
                  
@@ -1037,7 +1036,9 @@
 
                     {{-- Close row --}}
                     <div class="mob-menu-close-row">
-                        <span class="mob-menu-brand">✚ Rx Plus 365</span>
+                        <a href="{{ route('home') }}" class="mob-menu-brand" style="line-height:0;">
+                            <img src="{{ asset('Images/companylogo/Rxpluswithwhitebg.png') }}" alt="Rx Plus 365" style="height:30px;width:auto;object-fit:contain;border-radius:4px;vertical-align:middle;">
+                        </a>
                         <button @click="mobileMenuOpen = false" class="mob-menu-close-btn" aria-label="Close menu">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
@@ -1378,8 +1379,7 @@
             <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
                     <div class="flex items-center gap-2.5 mb-4">
-                        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-700 text-white font-black text-base shadow-md">✚</div>
-                        <span class="text-lg font-extrabold text-slate-900 tracking-tight">Rx Plus 365</span>
+                        <img src="{{ asset('Images/companylogo/RxPlus.png') }}" alt="Rx Plus 365" style="height:38px;width:auto;object-fit:contain;display:block;">
                     </div>
                     <p class="text-sm text-slate-500 leading-relaxed">Your trusted online pharmacy in Ahmedabad. Genuine medicines, fast delivery, cash on delivery.</p>
                     <div class="mt-4 flex gap-2">
