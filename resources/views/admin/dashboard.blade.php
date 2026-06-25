@@ -293,7 +293,7 @@
                             'placed'                 => ['bg-amber-100 text-amber-800',  asset('Images/hourglass.gif')],
                             'confirmed'              => ['bg-blue-100 text-blue-800',    asset('Images/check.png')],
                             'shipped'                => ['bg-purple-100 text-purple-800',asset('Images/package.png')],
-                            'delivered'              => ['bg-green-100 text-green-800',  asset('Images/confetti.png')],
+                            'delivered'              => ['bg-green-100 text-green-800',  asset('Images/Deliver.png')],
                             'cancelled'              => ['bg-red-100 text-red-800',      asset('Images/letter-x.png')],
                             'payment_failed'         => ['bg-red-100 text-red-800',      asset('Images/sad.png')],
                             'payment_review'         => ['bg-amber-100 text-amber-800',  asset('Images/credit-card.png')],

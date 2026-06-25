@@ -52,7 +52,6 @@
               @if($order->payment_method === 'cod')
                 Please keep <strong style="color:#1a202c;">Rs. {{ number_format($order->totalRupees(), 2) }}</strong> ready for cash on delivery.
               @endif
-              Your invoice is attached to this email for reference.
             </p>
 
             <!-- PROGRESS TRACKER -->

@@ -47,7 +47,7 @@
 
             <p style="margin:0 0 6px 0;font-size:16px;font-weight:700;color:#1a202c;font-family:Arial,Helvetica,sans-serif;">Hi {{ $order->customer_name }},</p>
             <p style="margin:0 0 24px 0;font-size:14px;color:#4a5568;line-height:1.7;font-family:Arial,Helvetica,sans-serif;">
-              Your order <strong style="color:#1a202c;">{{ $order->order_number }}</strong> has been delivered successfully. We hope you are satisfied with your purchase. Your invoice is attached for your records.
+              Your order <strong style="color:#1a202c;">{{ $order->order_number }}</strong> has been delivered successfully. We hope you are satisfied with your purchase.
             </p>
 
             <!-- DELIVERY CONFIRMATION BANNER -->

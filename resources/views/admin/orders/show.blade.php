@@ -15,7 +15,7 @@
         Back to Orders
     </a>
 
-    {{-- Status change form (non-cancel statuses only) --}}
+    {{-- Status change form — hide Move to + Update when delivered or cancelled --}}
     @if($order->status !== 'cancelled')
     @php
         $flow          = ['placed','confirmed','shipped','delivered'];
@@ -24,27 +24,31 @@
             ? array_slice($flow, $currentStep + 1)
             : $flow;
     @endphp
-    <form method="POST" action="{{ route('admin.orders.updateStatus', $order) }}"
-          id="status-top-form"
-          class="flex flex-wrap items-center gap-2">
-        @csrf @method('PATCH')
-        <select name="status" id="status-top-select"
-                class="flex-1 min-w-0 rounded-xl border border-slate-200 py-2 px-3 text-sm font-semibold focus:outline-none focus:border-blue-500 bg-white shadow-sm">
-            <option value="" disabled selected>Move to…</option>
-            @foreach($forwardSteps as $s)
-                <option value="{{ $s }}">{{ ucfirst($s) }}</option>
-            @endforeach
-        </select>
-        <button type="button"
-                onclick="openStatusModal(document.getElementById('status-top-select').value, 'status-top-form')"
-                class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 shadow-sm transition-colors whitespace-nowrap">
-            Update
-        </button>
+    <div class="flex flex-wrap items-center gap-2">
+        @if($order->status !== 'delivered')
+        <form method="POST" action="{{ route('admin.orders.updateStatus', $order) }}"
+              id="status-top-form"
+              class="flex flex-wrap items-center gap-2">
+            @csrf @method('PATCH')
+            <select name="status" id="status-top-select"
+                    class="flex-1 min-w-0 rounded-xl border border-slate-200 py-2 px-3 text-sm font-semibold focus:outline-none focus:border-blue-500 bg-white shadow-sm">
+                <option value="" disabled selected>Move to…</option>
+                @foreach($forwardSteps as $s)
+                    <option value="{{ $s }}">{{ ucfirst($s) }}</option>
+                @endforeach
+            </select>
+            <button type="button"
+                    onclick="openStatusModal(document.getElementById('status-top-select').value, 'status-top-form')"
+                    class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 shadow-sm transition-colors whitespace-nowrap">
+                Update
+            </button>
+        </form>
+        @endif
         <button type="button" onclick="document.getElementById('cancel-modal').classList.remove('hidden')"
                 class="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-sm font-bold text-red-700 hover:bg-red-100 transition-colors whitespace-nowrap">
             ❌ Cancel
         </button>
-    </form>
+    </div>
     @endif
 </div>
 
@@ -223,7 +227,7 @@
                             'placed'                 => ['bg-amber-100 text-amber-800',  asset('Images/hourglass.gif')],
                             'confirmed'              => ['bg-blue-100 text-blue-800',    asset('Images/check.png')],
                             'shipped'                => ['bg-purple-100 text-purple-800',asset('Images/package.png')],
-                            'delivered'              => ['bg-green-100 text-green-800',  asset('Images/confetti.png')],
+                            'delivered'              => ['bg-green-100 text-green-800',  asset('Images/Deliver.png')],
                             'cancelled'              => ['bg-red-100 text-red-800',      asset('Images/letter-x.png')],
                             'payment_failed'         => ['bg-red-100 text-red-800',      asset('Images/sad.png')],
                             'refunded'               => ['bg-orange-100 text-orange-800',asset('Images/refund.png')],
@@ -307,7 +311,7 @@
                 Current: <span class="font-bold">{{ ucfirst($order->status) }}</span>
             </p>
 
-            @if(count($forwardSteps))
+            @if($order->status !== 'delivered' && count($forwardSteps))
                 <form method="POST" action="{{ route('admin.orders.updateStatus', $order) }}" id="status-sidebar-form" class="space-y-2">
                     @csrf @method('PATCH')
                     <input type="hidden" name="status" id="status-sidebar-input">
@@ -321,11 +325,13 @@
                         </button>
                     @endforeach
                 </form>
+            @elseif($order->status === 'delivered')
+                <p class="text-xs text-slate-500 italic">Order has been delivered.</p>
             @else
                 <p class="text-xs text-slate-500 italic">Order has reached final status.</p>
             @endif
 
-            {{-- Cancel - separate, opens modal --}}
+            {{-- Cancel - always visible while not cancelled --}}
             <div class="mt-3 pt-3 border-t border-blue-200">
                 <button type="button"
                         onclick="document.getElementById('cancel-modal').classList.remove('hidden')"

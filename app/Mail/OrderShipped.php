@@ -31,20 +31,20 @@ class OrderShipped extends Mailable
         );
     }
 
-    public function attachments(): array
-    {
-        try {
-            $invoice  = app(InvoiceService::class);
-            $pdf      = $invoice->generate($this->order);
-            $filename = $invoice->filename($this->order);
+    // public function attachments(): array
+    // {
+    //     try {
+    //         $invoice  = app(InvoiceService::class);
+    //         $pdf      = $invoice->generate($this->order);
+    //         $filename = $invoice->filename($this->order);
 
-            return [
-                Attachment::fromData(fn () => $pdf, $filename)
-                    ->withMime('application/pdf'),
-            ];
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Invoice attachment failed for OrderShipped: ' . $e->getMessage());
-            return [];
-        }
-    }
+    //         return [
+    //             Attachment::fromData(fn () => $pdf, $filename)
+    //                 ->withMime('application/pdf'),
+    //         ];
+    //     } catch (\Throwable $e) {
+    //         \Illuminate\Support\Facades\Log::error('Invoice attachment failed for OrderShipped: ' . $e->getMessage());
+    //         return [];
+    //     }
+    // }
 }

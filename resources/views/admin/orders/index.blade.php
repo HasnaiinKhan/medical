@@ -150,8 +150,38 @@
 }
 .order-filter-btn-reset:hover { background: #f8fafc; }
 
-/* Active filter chips */
-.order-filter-chips {
+/* ── Per-row status loading overlay ── */
+.row-status-loading {
+    position: relative;
+    pointer-events: none;
+}
+.row-status-loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,.75);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+.row-status-spinner {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #2563eb;
+    white-space: nowrap;
+}
+.row-status-spinner.active { display: inline-flex; }
+@keyframes qs-spin { to { transform: rotate(360deg); } }
+.row-status-spinner svg {
+    width: 14px; height: 14px;
+    animation: qs-spin .7s linear infinite;
+    flex-shrink: 0;
+}
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -528,6 +558,9 @@ document.querySelectorAll('.quick-status').forEach(function (sel) {
             return;
         }
 
+        // Show full-page loader — confirmed, request in flight
+        if (window.adminLoader) window.adminLoader.show();
+
         try {
             const res = await fetch(url, {
                 method: 'POST',
@@ -558,7 +591,7 @@ document.querySelectorAll('.quick-status').forEach(function (sel) {
                     placed:                  '{{ asset('Images/hourglass.gif') }}',
                     confirmed:               '{{ asset('Images/check.png') }}',
                     shipped:                 '{{ asset('Images/package.png') }}',
-                    delivered:               '{{ asset('Images/confetti.png') }}',
+                    delivered:               '{{ asset('Images/Deliver.png') }}',
                     cancelled:               '{{ asset('Images/letter-x.png') }}',
                     payment_failed:          '{{ asset('Images/sad.png') }}',
                     refunded:                '{{ asset('Images/refund.png') }}',
@@ -599,13 +632,16 @@ document.querySelectorAll('.quick-status').forEach(function (sel) {
                 }
 
             } else {
+                if (window.adminLoader) window.adminLoader.hide();
                 alert('Failed to update status. Please try again.');
             }
         } catch (e) {
+            if (window.adminLoader) window.adminLoader.hide();
             alert('Network error. Please try again.');
         }
 
         this.disabled = false;
+        if (window.adminLoader) window.adminLoader.hide();
     });
 });
 

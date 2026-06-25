@@ -29,20 +29,20 @@ class OrderDelivered extends Mailable
         return new Content(view: 'emails.order-delivered');
     }
 
-    public function attachments(): array
-    {
-        try {
-            $invoice  = app(InvoiceService::class);
-            $pdf      = $invoice->generate($this->order);
-            $filename = $invoice->filename($this->order);
+    // public function attachments(): array
+    // {
+    //     try {
+    //         $invoice  = app(InvoiceService::class);
+    //         $pdf      = $invoice->generate($this->order);
+    //         $filename = $invoice->filename($this->order);
 
-            return [
-                Attachment::fromData(fn () => $pdf, $filename)
-                    ->withMime('application/pdf'),
-            ];
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Invoice attachment failed for OrderDelivered: ' . $e->getMessage());
-            return [];
-        }
-    }
+    //         return [
+    //             Attachment::fromData(fn () => $pdf, $filename)
+    //                 ->withMime('application/pdf'),
+    //         ];
+    //     } catch (\Throwable $e) {
+    //         \Illuminate\Support\Facades\Log::error('Invoice attachment failed for OrderDelivered: ' . $e->getMessage());
+    //         return [];
+    //     }
+    // }
 }

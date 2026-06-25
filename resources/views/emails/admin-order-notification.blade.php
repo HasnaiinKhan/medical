@@ -44,10 +44,6 @@
           <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
               <td style="vertical-align:middle;">
-                {{-- Logo --}}
-                <img src="{{ config('app.url') }}/Images/companylogo/Rxpluswithwhitebg.png"
-                     alt="Rx Plus 365"
-                     width="100" style="height:auto;display:block;margin-bottom:10px;border-radius:4px;">
                 {{-- Brand line --}}
                 <p style="margin:0 0 3px 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,0.4);font-family:Arial,Helvetica,sans-serif;">Admin Alert</p>
                 <p class="h-title" style="margin:0 0 10px 0;font-size:19px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">New Order Received</p>

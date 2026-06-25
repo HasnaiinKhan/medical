@@ -1465,13 +1465,14 @@
                         </iframe>
                     </div>
                     <p class="mt-4 text-xs text-slate-500 flex items-start gap-1 leading-relaxed">
-                        📍 Shop 54/04, opp. Unigold Hospital Main Gate, near Jivraj, Sarni kamdhar Society, Police Chowki, Jivraj Park, Ahmedabad, Gujarat 380051
+                        <i class="fa-solid fa-location-arrow" style="color: rgb(242, 22, 22);margin-top:5px;"></i> Medikart Pharmacy Shop 54/04, opp. Unigold Hospital Main Gate, near Jivraj, Sarni kamdhar Society, Police Chowki, Jivraj Park, Ahmedabad, Gujarat 380051
                     </p>
                 </div>
             </div>
-
+             
             <div class="mt-8 border-t border-slate-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <p class="text-xs text-slate-400">© {{ date('Y') }} Rx Plus 365 - Ahmedabad, Gujarat</p>
+                <p class="text-xs text-slate-400" style="text-align:center;">Service Provided by Medikart Pharmacy</p>
                 <p class="text-xs text-slate-400">Built by <a href="https://softgenixinfotech.com/" class="text-blue-500 hover:underline" style="margin-right:25px;">SoftGenix Infotech</a></p>
             </div>
         </div>
