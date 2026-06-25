@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessMedicineImageJob;
 use App\Models\Category;
 use App\Models\Medicine;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -52,8 +54,10 @@ class AdminMedicineController extends Controller
 
         $data       = $this->validated($request);
         $categoryId = $this->resolveCategory($request);
+        $primaryImage = $this->resolvePrimaryImage($request);
+        $extraImages  = $this->parseExtraImages($request);
 
-        Medicine::create([
+        $medicine = Medicine::create([
             'category_id'           => $categoryId,
             'name'                  => $data['name'],
             'slug'                  => Str::slug($data['name']),
@@ -63,9 +67,11 @@ class AdminMedicineController extends Controller
             'price_paise'           => (int) round($data['price'] * 100),
             'prescription_required' => (bool) ($data['prescription_required'] ?? false),
             'stock'                 => (int) $data['stock'],
-            'image_url'             => $this->resolvePrimaryImage($request),
-            'extra_images'          => $this->parseExtraImages($request),
+            'image_url'             => $primaryImage,
+            'extra_images'          => $extraImages,
         ]);
+
+        $this->queueRemoteImageJobs($medicine, $primaryImage, $extraImages);
 
         return redirect()->route('admin.medicines.index')
             ->with('status', "Medicine '{$data['name']}' created.");
@@ -89,6 +95,8 @@ class AdminMedicineController extends Controller
 
         $data       = $this->validated($request, $medicine->id);
         $categoryId = $this->resolveCategory($request);
+        $primaryImage = $this->resolvePrimaryImage($request, $medicine->image_url);
+        $extraImages  = $this->parseExtraImages($request);
 
         $medicine->update([
             'category_id'           => $categoryId,
@@ -100,9 +108,11 @@ class AdminMedicineController extends Controller
             'price_paise'           => (int) round($data['price'] * 100),
             'prescription_required' => (bool) ($data['prescription_required'] ?? false),
             'stock'                 => (int) $data['stock'],
-            'image_url'             => $this->resolvePrimaryImage($request, $medicine->image_url),
-            'extra_images'          => $this->parseExtraImages($request),
+            'image_url'             => $primaryImage,
+            'extra_images'          => $extraImages,
         ]);
+
+        $this->queueRemoteImageJobs($medicine, $primaryImage, $extraImages);
 
         return redirect()->route('admin.medicines.index')
             ->with('status', "Medicine '{$medicine->name}' updated.");
@@ -158,6 +168,123 @@ class AdminMedicineController extends Controller
         return $result;
     }
 
+    private function queueRemoteImageJobs(Medicine $medicine, ?string $primaryImageUrl, array $extraImages): void
+    {
+        $primaryImageUrl = trim((string) ($primaryImageUrl ?? ''));
+        if ($primaryImageUrl !== '' && filter_var($primaryImageUrl, FILTER_VALIDATE_URL) && ! str_starts_with($primaryImageUrl, 'blob:')) {
+            ProcessMedicineImageJob::dispatch($medicine->id, 'image_url', $primaryImageUrl);
+        }
+
+        foreach ($extraImages as $extraImageUrl) {
+            $extraImageUrl = trim((string) $extraImageUrl);
+            if ($extraImageUrl !== '' && filter_var($extraImageUrl, FILTER_VALIDATE_URL) && ! str_starts_with($extraImageUrl, 'blob:')) {
+                ProcessMedicineImageJob::dispatch($medicine->id, 'extra_images', $extraImageUrl);
+            }
+        }
+    }
+
+    private function downloadRemoteImage(string $remoteUrl): ?string
+    {
+        if ($this->isLocalMedicineImage($remoteUrl)) {
+            return $remoteUrl;
+        }
+
+        $scheme = strtolower(parse_url($remoteUrl, PHP_URL_SCHEME) ?? '');
+        $host   = strtolower(parse_url($remoteUrl, PHP_URL_HOST) ?? '');
+
+        if ($scheme !== 'https' || !str_contains($host, '.')) {
+            return null;
+        }
+
+        foreach (['localhost', '127.', '192.168.', '10.', '172.16.', '0.0.0.0', '::1'] as $blocked) {
+            if (str_starts_with($host, $blocked) || $host === $blocked) {
+                return null;
+            }
+        }
+
+        $referer = '';
+        if (str_contains($host, 'pharmeasy')) {
+            $referer = 'https://pharmeasy.in/';
+        } elseif (str_contains($host, 'netmeds') || str_contains($host, 'pixelbin')) {
+            $referer = 'https://www.netmeds.com/';
+        } elseif (str_contains($host, 'apollo') || str_contains($host, 'cloudinary')) {
+            $referer = 'https://www.apollopharmacy.in/';
+        } elseif (str_contains($host, '1mg') || str_contains($host, 'onemg')) {
+            $referer = 'https://www.1mg.com/';
+        }
+
+        $imageData = $this->httpGetImage($remoteUrl, $referer) ?: $this->httpGetImage($remoteUrl, '');
+        if (! $imageData) {
+            return null;
+        }
+
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($imageData);
+        $mimeToExt = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            'image/avif' => 'avif',
+        ];
+
+        if (! isset($mimeToExt[$mime])) {
+            Log::warning("Admin medicine image download skipped: unexpected MIME '{$mime}' for {$remoteUrl}");
+            return null;
+        }
+
+        $dir = public_path('Images/medicines');
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $filename = 'med_' . Str::random(24) . '.' . $mimeToExt[$mime];
+        $fullPath = $dir . DIRECTORY_SEPARATOR . $filename;
+
+        if (file_put_contents($fullPath, $imageData) === false) {
+            return null;
+        }
+
+        return asset('Images/medicines/' . $filename);
+    }
+
+    private function httpGetImage(string $url, string $referer): ?string
+    {
+        $headers = [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124',
+            'Accept: image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+            'Accept-Language: en-IN,en;q=0.9',
+        ];
+        if ($referer !== '') {
+            $headers[] = 'Referer: ' . $referer;
+        }
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 20,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_ENCODING => '',
+            CURLOPT_HTTPHEADER => $headers,
+        ]);
+
+        $body = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($status >= 200 && $status < 300 && is_string($body) && strlen($body) > 100) {
+            return $body;
+        }
+
+        return null;
+    }
+
+    private function isLocalMedicineImage(string $url): bool
+    {
+        return str_contains($url, '/Images/medicines/')
+            || str_contains($url, '/storage/medicines/');
+    }
+
     private function resolveCategory(Request $request): int
     {
         $newName = trim((string) $request->input('new_category_name', ''));
@@ -189,9 +316,9 @@ class AdminMedicineController extends Controller
             'prescription_required' => ['nullable', 'boolean'],
             'stock'                 => ['required', 'integer', 'min:0'],
             'category_id'           => $categoryIdRule,
-            'image_url'             => ['nullable', 'string', 'max:500'],
+            'image_url'             => ['nullable', 'string', 'max:2000'],
             'image_file'            => ['nullable', 'image', 'max:4096'],
-            'extra_image_url.*'     => ['nullable', 'string', 'max:500'],
+            'extra_image_url.*'     => ['nullable', 'string', 'max:2000'],
             'extra_image_file.*'    => ['nullable', 'image', 'max:4096'],
         ], [
             'category_id.required' => 'Please select a category, or create a new one.',

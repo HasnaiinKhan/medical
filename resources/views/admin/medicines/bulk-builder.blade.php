@@ -1,13 +1,15 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 @section('title', 'Bulk Import Builder')
 @section('page-title', 'Bulk Import Builder')
 @section('page-subtitle', 'Search any brand, select products, download CSV, then import')
 
 @php
-    $bulkUrl   = route('admin.ai.medicine.bulk-search');
-    $imgUrl    = route('admin.ai.medicine.image');
-    $descUrl   = route('admin.ai.medicine.description');
-    $importUrl = route('admin.medicines.import.form');
+    $bulkUrl         = route('admin.ai.medicine.bulk-search');
+    $imgUrl          = route('admin.ai.medicine.image');
+    $galleryUrl      = route('admin.ai.medicine.gallery');
+    $batchImagesUrl  = route('admin.ai.medicine.batch-images');
+    $descUrl         = route('admin.ai.medicine.description');
+    $importUrl       = route('admin.medicines.import.form');
     $quickTags = ['Himalaya', 'Dabur', 'Cipla', 'Dolo', 'Pampers', 'Cetaphil'];
 @endphp
 
@@ -229,13 +231,13 @@
 
         <div class="bb-actionbar-right">
             <button @click="downloadCsv"
-                    :disabled="selectedCount === 0"
+                    :disabled="selectedCount === 0 || downloading_all"
                     class="bb-btn bb-btn-success">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
-                <span x-text="selectedCount === 0 ? 'Download CSV' : 'Download CSV (' + selectedCount + ')'"></span>
+                <span x-text="downloading_all ? 'Downloading…' : (selectedCount === 0 ? 'Download CSV' : 'Download CSV (' + selectedCount + ')')"></span>
             </button>
 
             <a href="{{ $importUrl }}" data-no-loader class="bb-btn bb-btn-outline">
@@ -358,22 +360,24 @@
 </div>{{-- end x-data --}}
 @endsection
 
+
 @push('scripts')
 <script>
 (function () {
-    var BULK_URL = {{ Js::from($bulkUrl) }};
-    var IMG_URL  = {{ Js::from($imgUrl) }};
-    var DESC_URL = {{ Js::from($descUrl) }};
-    var CSRF     = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+    var BULK_URL         = {{ Js::from($bulkUrl) }};
+    var BATCH_IMAGES_URL = {{ Js::from($batchImagesUrl) }};
+    var DESC_URL         = {{ Js::from($descUrl) }};
+    var CSRF             = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
 
     function bulkBuilder() {
         return {
-            query:      '',
-            loading:    false,
-            searched:   false,
-            results:    [],
-            searchLog:  {},
-            error:      '',
+            query:           '',
+            loading:         false,
+            searched:        false,
+            results:         [],
+            searchLog:       {},
+            error:           '',
+            downloading_all: false,
 
             get selectedCount() { return this.results.filter(function(r) { return r.selected; }).length; },
             get allSelected()   { return this.results.length > 0 && this.results.every(function(r) { return r.selected; }); },
@@ -381,117 +385,79 @@
 
             init: function () {},
 
+            /* ── All unique image URLs for one item ────────────────────── */
+            imageUrlsForItem: function (item) {
+                var seen = {};
+                return [item.image_url].concat(item.gallery_image_urls || []).filter(Boolean).filter(function(u) {
+                    var k = String(u).split('?')[0];
+                    if (seen[k]) return false;
+                    seen[k] = true;
+                    return true;
+                }).slice(0, 8);
+            },
+
+            /* ── Search ─────────────────────────────────────────────────── */
             doSearch: async function () {
                 var q = this.query.trim();
                 if (q.length < 2 || this.loading) return;
-                this.loading  = true;
-                this.error    = '';
-                this.results  = [];
-                this.searched = false;
-
+                this.loading = true; this.error = ''; this.results = []; this.searched = false;
                 try {
                     var res  = await fetch(BULK_URL, {
-                        method:  'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept':       'application/json',
-                            'X-CSRF-TOKEN': CSRF,
-                        },
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
                         body: JSON.stringify({ name: q }),
                     });
                     var data = await res.json();
-
                     if (!res.ok || data.error) {
                         this.error = data.error || 'No results found. Try a different search.';
                     } else {
                         this.searchLog = data.search_log || {};
-                        this.results   = (data.results || []).map(function(item) {
+                        this.results = (data.results || []).map(function(item) {
                             return Object.assign({}, item, {
-                                selected:        false,
-                                local_image_url: null,
-                                downloading_img: false,
-                                ai_description:  null,
-                                generating_desc: false,
+                                selected: false, local_image_url: null,
+                                local_gallery_images: [], downloading_img: false,
+                                ai_description: null, generating_desc: false,
                             });
-                        });
-
-                        var self = this;
-                        this.results.forEach(function(item, idx) {
-                            if (item.image_url) self.downloadImage(idx);
                         });
                         this.runDescriptionQueue();
                     }
                 } catch (e) {
                     this.error = 'Network error. Please check your connection.';
                 } finally {
-                    this.loading  = false;
-                    this.searched = true;
+                    this.loading = false; this.searched = true;
                 }
             },
 
-            downloadImage: async function (idx) {
-                var item = this.results[idx];
-                if (!item || !item.image_url) return;
-                this.results[idx].downloading_img = true;
-                try {
-                    var res  = await fetch(IMG_URL, {
-                        method:  'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
-                        body:    JSON.stringify({ url: item.image_url, platform: item.source_platform || '' }),
-                    });
-                    var data = await res.json();
-                    if (data.url) {
-                        this.results[idx].local_image_url = data.url;
-                    }
-                } catch (_) {}
-                this.results[idx].downloading_img = false;
-            },
-
+            /* ── AI descriptions — 3 concurrent workers ─────────────────── */
             generateDescription: async function (idx) {
                 var item = this.results[idx];
                 if (!item) return;
                 this.results[idx].generating_desc = true;
                 try {
                     var res  = await fetch(DESC_URL, {
-                        method:  'POST',
+                        method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
-                        body:    JSON.stringify({
-                            name:            item.name            || '',
-                            manufacturer:    item.manufacturer    || '',
-                            composition:     item.composition     || '',
-                            uses:            item.uses            || [],
-                            dosage_form:     item.dosage_form     || '',
-                            category:        item.category        || '',
-                            existing:        item.description     || '',
-                            slug:            item.slug            || '',
-                            source_platform: item.source_platform || '',
+                        body: JSON.stringify({
+                            name: item.name||'', manufacturer: item.manufacturer||'',
+                            composition: item.composition||'', uses: item.uses||[],
+                            dosage_form: item.dosage_form||'', category: item.category||'',
+                            existing: item.description||'', slug: item.slug||'',
+                            source_platform: item.source_platform||'',
                         }),
                     });
                     var data = await res.json();
-                    if (data.description) {
-                        this.results[idx].ai_description = data.description;
-                    }
+                    if (data.description) this.results[idx].ai_description = data.description;
                 } catch (_) {}
                 this.results[idx].generating_desc = false;
             },
 
             runDescriptionQueue: async function () {
-                var CONCURRENCY = 3;
-                var idx   = 0;
-                var total = this.results.length;
-                var self  = this;
-
+                var CONCURRENCY = 3, idx = 0, total = this.results.length, self = this;
                 var worker = async function () {
-                    while (idx < total) {
-                        var i = idx++;
-                        await self.generateDescription(i);
-                    }
+                    while (idx < total) { var i = idx++; await self.generateDescription(i); }
                 };
-
                 var workers = [];
-                for (var w = 0; w < Math.min(CONCURRENCY, total); w++) {
-                    workers.push(worker());
-                }
+                for (var w = 0; w < Math.min(CONCURRENCY, total); w++) workers.push(worker());
                 await Promise.all(workers);
             },
 
@@ -499,107 +465,128 @@
                 this.results.forEach(function(item) { item.selected = checked; });
             },
 
-            downloadCsv: function () {
-                var selected = this.results.filter(function(r) { return r.selected; });
-                if (!selected.length) return;
+            /* ── Download CSV ─────────────────────────────────────────────
+               Single POST to batchImages → PHP curl_multi downloads
+               everything in parallel (one Apache thread, not N×M).      */
+            downloadCsv: async function () {
+                var selectedItems = this.results.filter(function(r) { return r.selected; });
+                if (!selectedItems.length) return;
+                this.downloading_all = true;
 
-                var cols = ['name','manufacturer','category','mrp','price','prescription_required','stock','description','image_url'];
+                /* 1. Batch-download all images — max 4 per product */
+                var batchPayload = selectedItems.map(function(item) {
+                    var seen = {};
+                    var urls = [item.image_url].concat(item.gallery_image_urls||[]).filter(Boolean).filter(function(u) {
+                        var k = String(u).split('?')[0]; if (seen[k]) return false; seen[k]=true; return true;
+                    }).slice(0, 4);   // ← hard cap: 4 images max per product
+                    return { urls: urls, platform: item.source_platform||'' };
+                });
 
-                var esc = function (v) {
-                    var s = String(v == null ? '' : v).replace(/\r?\n|\r/g, ' ');
-                    return (s.indexOf(',') !== -1 || s.indexOf('"') !== -1)
-                        ? '"' + s.replace(/"/g, '""') + '"'
-                        : s;
-                };
+                var batchResults = {};
+                try {
+                    var res  = await fetch(BATCH_IMAGES_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
+                        body: JSON.stringify({ items: batchPayload }),
+                    });
+                    var data = await res.json();
+                    (data.results || []).forEach(function(r) { batchResults[r.index] = r.images || []; });
+                } catch (_) {}
 
+                /* 2. Build CSV — separate column per image (image_url, image_url_2, image_url_3, image_url_4) */
                 var catMap = {
                     'fever-pain':'Fever & Pain','vitamins':'Vitamins','digestive':'Digestive',
                     'diabetes':'Diabetes','heart-bp':'Heart & BP','skin':'Skin Care',
                     'cold-allergy':'Cold & Allergy','eye-ear':'Eye & Ear',
-                    'bone-joint':'Bone & Joint','immunity':'Immunity'
+                    'bone-joint':'Bone & Joint','immunity':'Immunity',
+                };
+                var esc = function(v) {
+                    var s = String(v==null?'':v).replace(/\r?\n|\r/g,' ');
+                    return (s.indexOf(',')!==-1||s.indexOf('"')!==-1) ? '"'+s.replace(/"/g,'""')+'"' : s;
+                };
+                var autoDesc = function(item) {
+                    var cat = catMap[item.category]||item.category||'healthcare';
+                    var p = [(item.name||'')+(item.manufacturer?' by '+item.manufacturer:'')+
+                             ' is a trusted '+cat.toLowerCase()+' product available at your online pharmacy.'];
+                    if (item.composition)
+                        p.push('It contains '+item.composition+' as the key active ingredient'+(item.dosage_form?', available as a '+item.dosage_form.toLowerCase():'')+' .');
+                    else if (item.dosage_form) p.push('Available in '+item.dosage_form.toLowerCase()+' form for convenient use.');
+                    p.push(item.prescription_required
+                        ? 'This product requires a valid prescription from a licensed healthcare professional.'
+                        : 'Available over the counter without a prescription.');
+                    p.push('Order now for fast delivery across India.');
+                    return p.join(' ');
                 };
 
-                // Build a description from product fields - used when AI hasn't generated one
-                var autoDesc = function (item) {
-                    var name = item.name        || '';
-                    var mfr  = item.manufacturer || '';
-                    var comp = item.composition  || '';
-                    var form = item.dosage_form  || '';
-                    var cat  = catMap[item.category] || item.category || 'healthcare';
-                    var parts = [];
+                // Header: fixed columns + 4 separate image columns
+                var rows = [['name','manufacturer','category','mrp','price',
+                             'prescription_required','stock','description',
+                             'image_url','image_url_2','image_url_3','image_url_4'].join(',')];
 
-                    parts.push(name + (mfr ? ' by ' + mfr : '') + ' is a trusted ' + cat.toLowerCase() + ' product available at your online pharmacy.');
+                selectedItems.forEach(function(item, selIdx) {
+                    var catName = catMap[item.category]||item.category||'General';
+                    var desc    = (item.ai_description&&item.ai_description.trim()) ? item.ai_description
+                                : (item.description&&item.description.trim())       ? item.description
+                                : autoDesc(item);
 
-                    if (comp) {
-                        parts.push('It contains ' + comp + ' as the key active ingredient' + (form ? ', available as a ' + form.toLowerCase() : '') + '.');
-                    } else if (form) {
-                        parts.push('Available in ' + form.toLowerCase() + ' form for convenient use.');
-                    }
-
-                    if (item.prescription_required) {
-                        parts.push('This product requires a valid prescription from a licensed healthcare professional.');
+                    // Get up to 4 locally-downloaded images, fall back to remote URLs
+                    var localImages = batchResults[selIdx]||[];
+                    var allImages;
+                    if (localImages.length) {
+                        allImages = localImages.slice(0, 4);
                     } else {
-                        parts.push('Available over the counter without a prescription.');
+                        // Fallback: use remote URLs (no batch result)
+                        var seen = {};
+                        allImages = [item.image_url].concat(item.gallery_image_urls||[])
+                            .filter(Boolean)
+                            .filter(function(u){
+                                var k = String(u).split('?')[0];
+                                if (seen[k]) return false; seen[k]=true; return true;
+                            })
+                            .slice(0, 4);
                     }
 
-                    parts.push('Order now for fast delivery across India.');
-                    return parts.join(' ');
-                };
-
-                var rows = [cols.join(',')];
-
-                selected.forEach(function (item) {
-                    var catName = catMap[item.category] || item.category || 'General';
-                    // Priority: AI description → source description → auto-generated
-                    var desc    = (item.ai_description && item.ai_description.trim())
-                                    ? item.ai_description
-                                    : (item.description && item.description.trim())
-                                        ? item.description
-                                        : autoDesc(item);
-                    var imgPath = item.local_image_url || item.image_url || '';
+                    // Pad to exactly 4 slots (empty string if fewer images available)
+                    while (allImages.length < 4) allImages.push('');
 
                     rows.push([
                         esc(item.name),
-                        esc(item.manufacturer || ''),
+                        esc(item.manufacturer||''),
                         esc(catName),
-                        esc(item.mrp_suggestion   || ''),
-                        esc(item.price_suggestion || ''),
-                        esc(item.prescription_required ? 'true' : 'false'),
+                        esc(item.mrp_suggestion||''),
+                        esc(item.price_suggestion||''),
+                        esc(item.prescription_required?'true':'false'),
                         esc('100'),
                         esc(desc),
-                        esc(imgPath),
+                        esc(allImages[0]),
+                        esc(allImages[1]),
+                        esc(allImages[2]),
+                        esc(allImages[3]),
                     ].join(','));
                 });
 
-                var bom  = '\uFEFF';
-                var blob = new Blob([bom + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
-                var url  = URL.createObjectURL(blob);
+                var blob = new Blob(['\uFEFF'+rows.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+                var bUrl = URL.createObjectURL(blob);
                 var a    = document.createElement('a');
-                a.href     = url;
-                var brandSlug = this.query.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-                a.download = brandSlug + '_' + new Date().toISOString().slice(0, 10) + '.csv';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-                showToast('CSV downloaded successfully! (' + selected.length + ' medicines)');
+                a.href   = bUrl;
+                a.download = this.query.trim().toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')
+                           + '_' + new Date().toISOString().slice(0,10) + '.csv';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                URL.revokeObjectURL(bUrl);
+                this.downloading_all = false;
+                showToast('CSV downloaded! ('+selectedItems.length+' medicines, images saved locally)');
             },
         };
     }
 
-    // ── Toast helper ─────────────────────────────────────────────────────────
+    /* ── Toast ───────────────────────────────────────────────────────── */
     function showToast(msg) {
-        var toast = document.getElementById('bb-toast');
-        var label = document.getElementById('bb-toast-msg');
-        if (!toast) return;
-        if (label) label.textContent = msg;
-        // Clear any running timer
-        if (showToast._timer) clearTimeout(showToast._timer);
-        toast.classList.add('bb-toast-show');
-        showToast._timer = setTimeout(function () {
-            toast.classList.remove('bb-toast-show');
-        }, 3500);
+        var t = document.getElementById('bb-toast'), l = document.getElementById('bb-toast-msg');
+        if (!t) return;
+        if (l) l.textContent = msg;
+        if (showToast._t) clearTimeout(showToast._t);
+        t.classList.add('bb-toast-show');
+        showToast._t = setTimeout(function(){ t.classList.remove('bb-toast-show'); }, 3500);
     }
 
     window.bulkBuilder = bulkBuilder;

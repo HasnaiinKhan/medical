@@ -120,6 +120,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('ai/medicine-generate',     [\App\Http\Controllers\Admin\AIMedicineController::class, 'generate'])->name('ai.medicine.generate');
     Route::post('ai/medicine-detail',       [\App\Http\Controllers\Admin\AIMedicineController::class, 'detail'])->name('ai.medicine.detail');
     Route::post('ai/medicine-image',        [\App\Http\Controllers\Admin\AIMedicineController::class, 'downloadImage'])->name('ai.medicine.image');
+    Route::post('ai/medicine-gallery',      [\App\Http\Controllers\Admin\AIMedicineController::class, 'downloadGallery'])->name('ai.medicine.gallery');
+    Route::post('ai/medicine-batch-images', [\App\Http\Controllers\Admin\AIMedicineController::class, 'batchImages'])->name('ai.medicine.batch-images');
     Route::post('ai/medicine-description',  [\App\Http\Controllers\Admin\AIMedicineController::class, 'generateDescription'])->name('ai.medicine.description');
     Route::post('ai/medicine-bulk-search',  [\App\Http\Controllers\Admin\AIMedicineController::class, 'bulkSearch'])->name('ai.medicine.bulk-search');
 

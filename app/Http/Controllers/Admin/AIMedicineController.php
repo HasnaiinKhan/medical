@@ -141,10 +141,12 @@ class AIMedicineController extends Controller
             $pname = $p['name'] ?? '';
             if (empty($pname)) continue;
 
-            $imageUrl = '';
+            $galleryUrls = [];
             foreach ($p['medias'] ?? [] as $media) {
-                if (!empty($media['url'])) { $imageUrl = $media['url']; break; }
+                if (!empty($media['url'])) $galleryUrls[] = $media['url'];
             }
+            $galleryUrls = $this->cleanTrustedProductImageUrls($galleryUrls);
+            $imageUrl = $galleryUrls[0] ?? '';
 
             $mrp   = (float) ($p['price']['marked']['min']    ?? 0);
             $price = (float) ($p['price']['effective']['min'] ?? 0);
@@ -193,6 +195,7 @@ class AIMedicineController extends Controller
                 'mrp_suggestion'        => $mrp   > 0 ? round($mrp, 2)   : null,
                 'price_suggestion'      => $price > 0 ? round($price, 2) : null,
                 'image_url'             => $imageUrl ?: null,
+                'gallery_image_urls'    => $galleryUrls,
                 'source_url'            => $p['slug'] ? "https://www.netmeds.com/products/" . $p['slug'] : "https://www.netmeds.com",
                 'source_platform'       => 'NetMeds',
             ];
@@ -493,6 +496,159 @@ class AIMedicineController extends Controller
         return response()->json(['url' => $localUrl, 'filename' => $filename]);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // ROUTE 3c: batchImages — download ALL images for ALL selected products
+    //           in a single PHP request using curl_multi (true parallel).
+    //
+    // Input:  { items: [ { urls: ["https://..."], platform: "PharmEasy" }, ... ] }
+    // Output: { results: [ { index: 0, images: ["local_url", ...] }, ... ] }
+    //
+    // This replaces N×M individual HTTP requests (one per image per product)
+    // with a single request that downloads everything in parallel cURL.
+    // The site stays responsive because only ONE PHP worker thread is used.
+    // ─────────────────────────────────────────────────────────────────────────
+    public function batchImages(Request $request): JsonResponse
+    {
+        $request->validate([
+            'items'              => ['required', 'array', 'min:1', 'max:100'],
+            'items.*.urls'       => ['required', 'array', 'min:1', 'max:4'],
+            'items.*.urls.*'     => ['required', 'url', 'max:2000'],
+            'items.*.platform'   => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $dir = public_path('Images/medicines');
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+
+        // ── Build a flat list of all (itemIdx, urlIdx, url, referer) jobs ────
+        $jobs = [];
+        foreach ($request->input('items') as $itemIdx => $item) {
+            $platform = strtolower(trim((string) ($item['platform'] ?? '')));
+            foreach ($item['urls'] as $urlIdx => $remoteUrl) {
+                if (!$remoteUrl || strtolower(parse_url($remoteUrl, PHP_URL_SCHEME) ?? '') !== 'https') continue;
+                $host = strtolower(parse_url($remoteUrl, PHP_URL_HOST) ?? '');
+                if (!str_contains($host, '.')) continue;
+                $blocked = ['localhost', '127.', '192.168.', '10.', '172.16.'];
+                $skip = false;
+                foreach ($blocked as $b) { if (str_starts_with($host, $b)) { $skip = true; break; } }
+                if ($skip) continue;
+
+                $referer = '';
+                if (str_contains($platform, 'pharmeasy'))   $referer = 'https://pharmeasy.in/';
+                elseif (str_contains($platform, 'netmeds')) $referer = 'https://www.netmeds.com/';
+                elseif (str_contains($platform, 'apollo'))  $referer = 'https://www.apollopharmacy.in/';
+                if (!$referer) {
+                    if (str_contains($host, 'pharmeasy'))   $referer = 'https://pharmeasy.in/';
+                    elseif (str_contains($host, 'netmeds')) $referer = 'https://www.netmeds.com/';
+                    elseif (str_contains($host, 'pixelbin'))   $referer = 'https://www.netmeds.com/';
+                    elseif (str_contains($host, 'apollo'))  $referer = 'https://www.apollopharmacy.in/';
+                    elseif (str_contains($host, 'cloudinary')) $referer = 'https://www.apollopharmacy.in/';
+                }
+
+                $jobs[] = [
+                    'item_idx' => (int) $itemIdx,
+                    'url_idx'  => (int) $urlIdx,
+                    'url'      => $remoteUrl,
+                    'referer'  => $referer,
+                ];
+            }
+        }
+
+        if (empty($jobs)) {
+            return response()->json(['results' => []]);
+        }
+
+        // ── Build headers shared by all image requests ────────────────────
+        $sharedHeaders = [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124',
+            'Accept: image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+            'Accept-Language: en-IN,en;q=0.9',
+            'Sec-Fetch-Dest: image',
+            'Sec-Fetch-Mode: no-cors',
+            'Sec-Fetch-Site: cross-site',
+        ];
+
+        // ── Spin up curl_multi with all jobs in parallel ──────────────────
+        $mh       = curl_multi_init();
+        $handles  = [];
+
+        foreach ($jobs as $i => $job) {
+            $ch = curl_init($job['url']);
+            $hdrs = $sharedHeaders;
+            if ($job['referer']) $hdrs[] = 'Referer: ' . $job['referer'];
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_MAXREDIRS      => 4,
+                CURLOPT_TIMEOUT        => 15,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_ENCODING       => '',
+                CURLOPT_HTTPHEADER     => $hdrs,
+            ]);
+            curl_multi_add_handle($mh, $ch);
+            $handles[$i] = $ch;
+        }
+
+        // Execute all in parallel
+        $active = null;
+        do {
+            $status = curl_multi_exec($mh, $active);
+            if ($active) curl_multi_select($mh, 1.0);
+        } while ($active && $status === CURLM_OK);
+
+        // ── Collect results, save files ───────────────────────────────────
+        $finfo      = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeToExt  = [
+            'image/jpeg' => 'jpg', 'image/png'  => 'png', 'image/webp' => 'webp',
+            'image/gif'  => 'gif', 'image/avif' => 'avif', 'image/bmp' => 'jpg',
+        ];
+
+        // results[itemIdx][urlIdx] = localUrl
+        $savedByItem = [];
+
+        foreach ($handles as $i => $ch) {
+            $body   = curl_multi_getcontent($ch);
+            $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_multi_remove_handle($mh, $ch);
+            curl_close($ch);
+
+            $job = $jobs[$i];
+            if ($status !== 200 || !$body || strlen($body) < 100) continue;
+
+            // Detect extension
+            $ext      = 'jpg';
+            $urlPath  = parse_url($job['url'], PHP_URL_PATH) ?? '';
+            $candidate = strtolower(pathinfo($urlPath, PATHINFO_EXTENSION));
+            $candidate = preg_replace('/[^a-z].*/', '', $candidate);
+            if (in_array($candidate, ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'])) {
+                $ext = $candidate === 'jpeg' ? 'jpg' : $candidate;
+            }
+            $mime = $finfo->buffer($body);
+            if (isset($mimeToExt[$mime])) $ext = $mimeToExt[$mime];
+            elseif (!in_array($ext, ['jpg', 'png', 'webp', 'gif', 'avif'])) continue;
+
+            $filename = 'med_' . uniqid() . '.' . $ext;
+            if (file_put_contents($dir . DIRECTORY_SEPARATOR . $filename, $body) === false) continue;
+
+            $localUrl = asset('Images/medicines/' . $filename);
+            $savedByItem[$job['item_idx']][] = $localUrl;
+        }
+
+        curl_multi_close($mh);
+
+        // ── Format output: one entry per input item ───────────────────────
+        $results = [];
+        foreach ($request->input('items') as $itemIdx => $item) {
+            $results[] = [
+                'index'  => (int) $itemIdx,
+                'images' => $savedByItem[$itemIdx] ?? [],
+            ];
+        }
+
+        Log::info('MediBot batchImages: ' . count($jobs) . ' URLs → ' . array_sum(array_map('count', $savedByItem)) . ' saved');
+
+        return response()->json(['results' => $results]);
+    }
+
     // Dedicated image-download helper with image-specific headers
     private function httpGetImage(string $url, string $referer): ?string
     {
@@ -528,15 +684,26 @@ class AIMedicineController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // ROUTE 2: Fetch full detail (with description) for a specific product slug
+    // ROUTE 2: Fetch full detail for a product slug.
+    // Accepts: { slug: "...", platform: "PharmEasy"|"NetMeds" }
+    // Returns full data including gallery_image_urls (all images from page).
     // ─────────────────────────────────────────────────────────────────────────
     public function detail(Request $request): JsonResponse
     {
-        $request->validate(['slug' => ['required', 'string', 'max:300']]);
-        $slug = trim($request->input('slug'), '/');
+        $request->validate([
+            'slug'     => ['required', 'string', 'max:300'],
+            'platform' => ['nullable', 'string', 'max:50'],
+        ]);
+        $slug     = trim($request->input('slug'), '/');
+        $platform = strtolower(trim((string) $request->input('platform', 'pharmeasy')));
 
         try {
-            $data = $this->fetchProductDetail($slug);
+            if (str_contains($platform, 'netmeds')) {
+                $data = $this->fetchNetMedsDetail($slug);
+            } else {
+                $data = $this->fetchProductDetail($slug);
+            }
+
             if ($data) {
                 return response()->json(['data' => $data]);
             }
@@ -545,6 +712,273 @@ class AIMedicineController extends Controller
             Log::error("MediBot detail failed [{$slug}]: " . $e->getMessage());
             return response()->json(['error' => 'Something went wrong.'], 503);
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Shared image-deduplication helper
+    // Accepts raw URL strings (or null). Strips query strings for comparison.
+    // Returns ordered, unique, non-empty HTTPS URLs.
+    // ─────────────────────────────────────────────────────────────────────────
+    private function deduplicateImageUrls(array $urls): array
+    {
+        $seen   = [];
+        $result = [];
+        foreach ($urls as $u) {
+            if (!is_string($u) || !$u) continue;
+            if (!str_starts_with($u, 'http')) continue;
+            $key = strtok($u, '?'); // base URL without query string
+            if (!isset($seen[$key])) {
+                $seen[$key] = true;
+                $result[]   = $u;
+            }
+        }
+        return $result;
+    }
+
+    private function cleanTrustedProductImageUrls(array $urls): array
+    {
+        return $this->deduplicateImageUrls(array_values(array_filter(
+            $urls,
+            fn ($url) => is_string($url) && ! $this->isBlockedProductImageUrl($url)
+        )));
+    }
+
+    private function buildProductGallery(array $trustedUrls, array $scrapedUrls, string $productName): array
+    {
+        $trusted = $this->cleanTrustedProductImageUrls($trustedUrls);
+        $scraped = array_values(array_filter($scrapedUrls, function ($url) use ($productName) {
+            return is_string($url)
+                && ! $this->isBlockedProductImageUrl($url)
+                && $this->imageUrlMatchesProductName($url, $productName);
+        }));
+
+        return $this->deduplicateImageUrls(array_merge($trusted, $scraped));
+    }
+
+    private function isBlockedProductImageUrl(string $url): bool
+    {
+        $haystack = strtolower(rawurldecode($url));
+        $blocked = [
+            'logo', 'placeholder', 'default', 'blank', 'no-image', 'noimage',
+            'avatar', 'profile', 'user', 'founder', 'ceo', 'team', 'doctor',
+            'banner', 'icon', 'sprite', 'loader', 'loading', 'app-store',
+            'play-store', 'whatsapp', 'facebook', 'instagram', 'linkedin',
+            'twitter', 'youtube',
+        ];
+
+        foreach ($blocked as $term) {
+            if (str_contains($haystack, $term)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function imageUrlMatchesProductName(string $url, string $productName): bool
+    {
+        $tokens = $this->productNameImageTokens($productName);
+        if (empty($tokens)) {
+            return false;
+        }
+
+        $haystack = $this->normaliseImageText(rawurldecode($url));
+        foreach ($tokens as $token) {
+            if (str_contains($haystack, $token)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function productNameImageTokens(string $productName): array
+    {
+        $text = $this->normaliseImageText($productName);
+        $tokens = array_filter(explode(' ', $text), function ($token) {
+            if (strlen($token) < 4) return false;
+            return ! in_array($token, [
+                'tablet', 'tablets', 'capsule', 'capsules', 'strip', 'strips',
+                'bottle', 'cream', 'syrup', 'drops', 'drop', 'pack', 'packs',
+                'combo', 'with', 'plus', 'oral', 'solution', 'powder', 'soap',
+                'lotion', 'wash', 'gel', 'spray',
+            ], true);
+        });
+
+        return array_values(array_unique($tokens));
+    }
+
+    private function normaliseImageText(string $text): string
+    {
+        $text = strtolower($text);
+        $text = preg_replace('/[^a-z0-9]+/', ' ', $text) ?? '';
+        return trim(preg_replace('/\s+/', ' ', $text) ?? '');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Shared: extract all image URLs from a page HTML using every method:
+    //   1. JSON-LD  (application/ld+json)
+    //   2. og:image meta tags
+    //   3. twitter:image meta tags
+    //   4. Embedded product JSON blobs in <script> tags
+    // Returns raw unsanitised array — caller deduplicates.
+    // ─────────────────────────────────────────────────────────────────────────
+    private function extractImagesFromHtml(string $html): array
+    {
+        $urls = [];
+
+        // 1. JSON-LD
+        if (preg_match_all('/<script[^>]+type=["\']application\/ld\+json["\'][^>]*>(.*?)<\/script>/si', $html, $m)) {
+            foreach ($m[1] as $blob) {
+                $ld = json_decode(trim($blob), true);
+                if (!is_array($ld)) continue;
+                // Handle @graph arrays
+                $nodes = isset($ld['@graph']) ? $ld['@graph'] : [$ld];
+                foreach ($nodes as $node) {
+                    foreach (['image', 'thumbnailUrl'] as $key) {
+                        foreach ((array) ($node[$key] ?? []) as $val) {
+                            if (is_string($val) && str_starts_with($val, 'http')) $urls[] = $val;
+                            if (is_array($val) && !empty($val['url']))             $urls[] = $val['url'];
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. og:image meta
+        if (preg_match_all('/<meta[^>]+property=["\']og:image(?::secure_url)?["\'][^>]+content=["\'](https?:[^"\']+)["\']/i', $html, $m)) {
+            foreach ($m[1] as $u) $urls[] = $u;
+        }
+
+        // 3. twitter:image meta
+        if (preg_match_all('/<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\'](https?:[^"\']+)["\']/i', $html, $m)) {
+            foreach ($m[1] as $u) $urls[] = $u;
+        }
+
+        // 4. Img src attributes pointing to CDN image hosts (pharmacy product images)
+        $cdnPatterns = [
+            'cdn\.pharmeasy\.in',
+            'images\.pharmeasy\.in',
+            'pixelbin\.io',          // NetMeds CDN
+            'cloudinary\.com',       // Apollo CDN
+            '1mg-logos\.1mg\.com',
+            'onemg-image\.s3',
+            'apollopharmacy\.in.*?\.(jpg|jpeg|png|webp)',
+        ];
+        $cdnRegex = '/https?:\/\/(?:' . implode('|', $cdnPatterns) . ')[^\s"\'<>]+\.(?:jpg|jpeg|png|webp|gif|avif)/i';
+        if (preg_match_all($cdnRegex, $html, $m)) {
+            foreach ($m[0] as $u) $urls[] = $u;
+        }
+
+        return $urls;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // NetMeds – fetch full product detail and collect ALL images
+    // ─────────────────────────────────────────────────────────────────────────
+    private function fetchNetMedsDetail(string $slug): ?array
+    {
+        $pageUrl = "https://www.netmeds.com/products/{$slug}";
+        $page    = $this->httpGet($pageUrl, 'https://www.netmeds.com/');
+
+        $htmlUrls = [];
+        $allUrls = [];
+        $pd      = null;
+
+        if ($page) {
+            // Extract images from raw HTML (CDN, og:image, JSON-LD)
+            $htmlUrls = $this->extractImagesFromHtml($page);
+
+            // __NEXT_DATA__ structured data
+            if (preg_match('/<script id="__NEXT_DATA__"[^>]*>(.*?)<\/script>/s', $page, $nm)) {
+                $nd = json_decode($nm[1], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $pd = $nd['props']['pageProps']['productData']
+                       ?? $nd['props']['pageProps']['product']
+                       ?? $nd['props']['pageProps']['pdpData']
+                       ?? null;
+                }
+            }
+
+            // window.__INITIAL_STATE__
+            if (!$pd && preg_match('/window\.__INITIAL_STATE__\s*=\s*(\{.+?\});\s*(?:window|<\/script>)/s', $page, $nm)) {
+                $state = json_decode($nm[1], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $pd = $state['productDetails']['product'] ?? $state['product'] ?? null;
+                }
+            }
+        }
+
+        // Fynd product API fallback
+        if (!$pd) {
+            $apiUrl = 'https://www.netmeds.com/ext/product/application/api/v1.0/products/' . urlencode($slug);
+            $ch = curl_init($apiUrl);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_TIMEOUT => 15, CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_ENCODING => 'gzip',
+                CURLOPT_HTTPHEADER => [
+                    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124',
+                    'Accept: application/json',
+                    'Referer: https://www.netmeds.com/',
+                    'x-application-token: _U-ohI4Iy',
+                ],
+            ]);
+            $body   = curl_exec($ch);
+            $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            if ($status === 200 && $body) {
+                $apiData = json_decode($body, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $pd = $apiData['product'] ?? $apiData['data'] ?? (isset($apiData['name']) ? $apiData : null);
+                }
+            }
+        }
+
+        if (!$pd && empty($allUrls)) return null;
+
+        // Collect structured image URLs from product data
+        if ($pd) {
+            foreach ($pd['medias']   ?? [] as $m) { if (!empty($m['url']))       $allUrls[] = $m['url']; }
+            foreach ($pd['images']   ?? [] as $m) {
+                $u = is_array($m) ? ($m['url'] ?? $m['secure_url'] ?? '') : (string) $m;
+                if ($u) $allUrls[] = $u;
+            }
+            foreach ($pd['galleries'] ?? [] as $m) {
+                $u = is_array($m) ? ($m['url'] ?? '') : (string) $m;
+                if ($u) $allUrls[] = $u;
+            }
+        }
+
+        $attrs      = $pd['attributes'] ?? [];
+        $brand      = $pd['brand']['name'] ?? null;
+        $manufacturer = $brand ?? $attrs['marketername'] ?? $attrs['brandfilter'] ?? null;
+        $composition  = $attrs['genericname'] ?? null;
+        $mrp   = (float) ($pd['price']['marked']['min']    ?? $pd['mrp']   ?? 0);
+        $price = (float) ($pd['price']['effective']['min'] ?? $mrp);
+        $name  = $pd['name'] ?? $slug;
+        $uniqueUrls = $this->buildProductGallery($allUrls, $htmlUrls, $name);
+        if (empty($uniqueUrls) && !$pd) return null;
+
+        $haystack = strtoupper($name . ' ' . ($manufacturer ?? '') . ' ' . ($composition ?? ''));
+
+        return [
+            'slug'                  => $pd['slug'] ?? $slug,
+            'name'                  => $name,
+            'manufacturer'          => $manufacturer ? $this->titleCase(strtolower($manufacturer)) : null,
+            'category'              => $this->guessCategory($haystack),
+            'description'           => null,
+            'composition'           => $composition ? $this->titleCase(strtolower($composition)) : null,
+            'dosage_form'           => 'Unit',
+            'uses'                  => [],
+            'prescription_required' => false,
+            'mrp_suggestion'        => $mrp   > 0 ? round($mrp, 2) : null,
+            'price_suggestion'      => $price > 0 ? round($price, 2) : null,
+            'image_url'             => $uniqueUrls[0] ?? null,
+            'gallery_image_urls'    => $uniqueUrls,
+            'source_url'            => $pageUrl,
+            'source_platform'       => 'NetMeds',
+        ];
     }
 
     // ═════════════════════════════════════════════════════════════════════════
@@ -615,12 +1049,21 @@ class AIMedicineController extends Controller
             if (empty($p['name'])) continue;
 
             // Best image: prefer 'front' face, fall back to first
+            $galleryUrls = [];
+            foreach ($p['damImages'] ?? [] as $img) {
+                if (!empty($img['url'])) $galleryUrls[] = $img['url'];
+            }
+            if (!empty($p['image'])) $galleryUrls[] = $p['image'];
+            $galleryUrls = $this->cleanTrustedProductImageUrls($galleryUrls);
+
             $imageUrl = '';
             foreach ($p['damImages'] ?? [] as $img) {
-                if (($img['face'] ?? '') === 'front') { $imageUrl = $img['url'] ?? ''; break; }
+                if (($img['face'] ?? '') === 'front' && !empty($img['url']) && in_array($img['url'], $galleryUrls, true)) {
+                    $imageUrl = $img['url'];
+                    break;
+                }
             }
-            if (!$imageUrl) $imageUrl = $p['damImages'][0]['url'] ?? '';
-            if (!$imageUrl && !empty($p['image'])) $imageUrl = $p['image'];
+            if (!$imageUrl && !empty($galleryUrls)) $imageUrl = $galleryUrls[0];
 
             $pf = strtoupper($p['packform'] ?? '');
             $dosageForm = match(true) {
@@ -662,6 +1105,7 @@ class AIMedicineController extends Controller
                 'mrp_suggestion'        => $mrp   > 0 ? round($mrp, 2)   : null,
                 'price_suggestion'      => $price > 0 ? round($price, 2) : null,
                 'image_url'             => $imageUrl ?: null,
+                'gallery_image_urls'    => $galleryUrls,
                 'source_url'            => $slug
                     ? "https://pharmeasy.in/online-medicine-order/{$slug}"
                     : null,
@@ -713,11 +1157,12 @@ class AIMedicineController extends Controller
             $pname = $p['name'] ?? '';
             if (empty($pname)) continue;
 
-            // Image - first media item
-            $imageUrl = '';
+            $galleryUrls = [];
             foreach ($p['medias'] ?? [] as $media) {
-                if (!empty($media['url'])) { $imageUrl = $media['url']; break; }
+                if (!empty($media['url'])) $galleryUrls[] = $media['url'];
             }
+            $galleryUrls = $this->cleanTrustedProductImageUrls($galleryUrls);
+            $imageUrl = $galleryUrls[0] ?? '';
 
             // Price
             $mrp   = (float) ($p['price']['marked']['min']    ?? 0);
@@ -769,6 +1214,7 @@ class AIMedicineController extends Controller
                 'mrp_suggestion'        => $mrp   > 0 ? round($mrp, 2)   : null,
                 'price_suggestion'      => $price > 0 ? round($price, 2) : null,
                 'image_url'             => $imageUrl ?: null,
+                'gallery_image_urls'    => $galleryUrls,
                 'source_url'            => $p['slug']
                     ? "https://www.netmeds.com/products/" . $p['slug']
                     : "https://www.netmeds.com",
@@ -936,12 +1382,64 @@ class AIMedicineController extends Controller
         }
 
         // ── Other fields ──────────────────────────────────────────────────────
-        $images = $pd['damImages'] ?? [];
-        $imageUrl = '';
-        foreach ($images as $img) {
-            if (($img['face'] ?? '') === 'front') { $imageUrl = $img['url'] ?? ''; break; }
+        // Collect ALL images from the detail page using every available source
+        $allImageUrls = [];
+        $htmlImageUrls = [];
+
+        // 1. damImages — face variants (front / back / left / right / top)
+        $damImages = $pd['damImages'] ?? [];
+        foreach ($damImages as $img) {
+            if (!empty($img['url'])) $allImageUrls[] = $img['url'];
         }
-        if (! $imageUrl) $imageUrl = $images[0]['url'] ?? '';
+
+        // 2. productImages — higher-res gallery array used in newer API
+        foreach ($pd['productImages'] ?? [] as $img) {
+            $u = is_array($img) ? ($img['url'] ?? $img['imageUrl'] ?? '') : (string) $img;
+            if ($u) $allImageUrls[] = $u;
+        }
+
+        // 3. images[] — older PharmEasy API fallback
+        foreach ($pd['images'] ?? [] as $img) {
+            $u = is_array($img) ? ($img['url'] ?? '') : (string) $img;
+            if ($u) $allImageUrls[] = $u;
+        }
+
+        // 4. productSpecifications → identifier = "product-images"
+        foreach ($specs as $spec) {
+            if (($spec['identifier'] ?? '') === 'product-images') {
+                foreach ($spec['images'] ?? $spec['imageList'] ?? [] as $img) {
+                    $u = is_array($img) ? ($img['url'] ?? '') : (string) $img;
+                    if ($u) $allImageUrls[] = $u;
+                }
+                break;
+            }
+        }
+
+        // 5. JSON-LD, og:image, twitter:image, CDN img src from raw HTML
+        $htmlImageUrls = array_merge($htmlImageUrls, $this->extractImagesFromHtml($page));
+
+        // 6. seoData / metaData image arrays in __NEXT_DATA__
+        $seoImages = $nextData['props']['pageProps']['seoData']['images']
+                  ?? $nextData['props']['pageProps']['metaData']['images']
+                  ?? [];
+        foreach ((array) $seoImages as $img) {
+            $u = is_array($img) ? ($img['url'] ?? '') : (string) $img;
+            if ($u && str_starts_with($u, 'http')) $htmlImageUrls[] = $u;
+        }
+
+        // Deduplicate preserving order
+        $productName = $pd['name'] ?? $slug;
+        $uniqueUrls = $this->buildProductGallery($allImageUrls, $htmlImageUrls, $productName);
+
+        // Primary image: prefer face=front from damImages, else first unique URL
+        $imageUrl = '';
+        foreach ($damImages as $img) {
+            if (($img['face'] ?? '') === 'front' && !empty($img['url']) && in_array($img['url'], $uniqueUrls, true)) {
+                $imageUrl = $img['url'];
+                break;
+            }
+        }
+        if (!$imageUrl && !empty($uniqueUrls)) $imageUrl = $uniqueUrls[0];
 
         $composition = implode(', ', array_column($pd['compositions'] ?? [], 'name'))
             ?: ($pd['molecule'] ?? null);
@@ -976,7 +1474,9 @@ class AIMedicineController extends Controller
             'mrp_suggestion'        => $mrp   > 0 ? round($mrp, 2)   : null,
             'price_suggestion'      => $price > 0 ? round($price, 2) : null,
             'image_url'             => $imageUrl ?: null,
+            'gallery_image_urls'    => $uniqueUrls,
             'source_url'            => "https://pharmeasy.in/online-medicine-order/{$slug}",
+            'source_platform'       => 'PharmEasy',
         ];
     }
 

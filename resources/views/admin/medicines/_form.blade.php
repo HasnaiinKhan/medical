@@ -349,9 +349,9 @@ var _slotCount = document.querySelectorAll('.image-slot').length;
 
 function addImageSlot() {
     var container = document.getElementById('image-slots');
-    if (!container) return;
+    if (!container) return null;
     var total = container.querySelectorAll('.image-slot').length;
-    if (total >= 8) { alert('Maximum 8 images allowed.'); return; }
+    if (total >= 8) { alert('Maximum 8 images allowed.'); return null; }
 
     var idx = _slotCount++;          // unique index for name attrs
     var isExtra = (idx > 0);         // slot 0 is always primary; new dynamic slots are extra
@@ -402,6 +402,7 @@ function addImageSlot() {
         '</div>';
 
     container.appendChild(slot);
+    return slot;
 }
 
 function removeImageSlot(btn) {
@@ -625,12 +626,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var data = currentResults[idx];
 
-        // Always fetch full PharmEasy detail when slug is available (fixes combined source)
-        if (data.slug && (data.source_platform === 'PharmEasy' || currentSource === 'pharmeasy')) {
+        // Always fetch full pharmacy detail when slug is available so gallery images are included.
+        if (data.slug && (data.source_platform === 'PharmEasy' || data.source_platform === 'NetMeds' || currentSource === 'pharmeasy')) {
             fetch(DETAIL_URL, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
-                body:    JSON.stringify({ slug: data.slug })
+                body:    JSON.stringify({ slug: data.slug, platform: data.source_platform || '' })
             })
             .then(function (res) { return res.json().then(function (j) { return { ok: res.ok, j: j }; }); })
             .then(function (r) {
@@ -741,31 +742,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // ── Image - download to server first, then fill local path ────────────
-        if (d.image_url) {
-            var imgInput = document.querySelector('input[name="image_url"]');
-            if (imgInput) {
-                imgInput.value = '';
-                imgInput.placeholder = '⏳ Downloading image…';
-
-                fetch('{{ route('admin.ai.medicine.image') }}', {
-                    method:  'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
-                    body:    JSON.stringify({ url: d.image_url, platform: d.source_platform || '' })
-                })
-                .then(function (res) { return res.json(); })
-                .then(function (j) {
-                    imgInput.placeholder = '';
-                    imgInput.value = j.url || d.image_url;
-                    imgInput.dispatchEvent(new Event('input'));
-                })
-                .catch(function () {
-                    imgInput.placeholder = '';
-                    imgInput.value = d.image_url;
-                    imgInput.dispatchEvent(new Event('input'));
-                });
-            }
-        }
+        fillProductImages(d);
 
         // Toast
         var toast = document.createElement('div');
@@ -784,6 +761,71 @@ document.addEventListener('DOMContentLoaded', function() {
         badge.textContent = msg;
         descEl.parentNode.appendChild(badge);
         setTimeout(function () { badge.remove(); }, 4000);
+    }
+
+    function uniqueImageUrls(urls) {
+        var seen = {};
+        var result = [];
+        (urls || []).forEach(function (url) {
+            if (!url) return;
+            var key = String(url).split('?')[0];
+            if (!seen[key]) {
+                seen[key] = true;
+                result.push(url);
+            }
+        });
+        return result.slice(0, 8);
+    }
+
+    function resetImageSlots() {
+        var container = document.getElementById('image-slots');
+        if (!container) return;
+
+        var slots = container.querySelectorAll('.image-slot');
+        slots.forEach(function (slot, idx) {
+            if (idx > 0) slot.remove();
+        });
+
+        var primaryInput = document.querySelector('input[name="image_url"]');
+        if (primaryInput) {
+            primaryInput.value = '';
+            primaryInput.placeholder = 'https://example.com/image.jpg';
+            primaryInput.dispatchEvent(new Event('input'));
+        }
+    }
+
+    function ensureImageSlot(idx) {
+        var container = document.getElementById('image-slots');
+        if (!container) return null;
+
+        while (container.querySelectorAll('.image-slot').length <= idx) {
+            if (!addImageSlot()) break;
+        }
+
+        return container.querySelectorAll('.image-slot')[idx] || null;
+    }
+
+    function setSlotImage(idx, url) {
+        var slot = ensureImageSlot(idx);
+        if (!slot) return;
+
+        var input = idx === 0
+            ? slot.querySelector('input[name="image_url"]')
+            : slot.querySelector('input[name="extra_image_url[]"]');
+
+        if (!input) return;
+        input.value = url;
+        input.dispatchEvent(new Event('input'));
+    }
+
+    function fillProductImages(d) {
+        var urls = uniqueImageUrls([d.image_url].concat(d.gallery_image_urls || []));
+        if (!urls.length) return;
+
+        resetImageSlots();
+        urls.forEach(function (url, idx) {
+            setSlotImage(idx, url);
+        });
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

@@ -214,7 +214,7 @@
     {{-- ── Server-side error ── --}}
     @error('payment')
         <div class="ps-error-banner">
-            <span class="ps-error-icon"><i class="fa-solid fa-circle-exclamation" style="color: rgb(230, 179, 0);"></i></span>
+            <span class="ps-error-icon"><i class="fa-solid fa-circle-exclamation" style="color: rgba(230, 0, 0, 1);"></i></span>
             <p>{{ $message }}</p>
         </div>
     @enderror
