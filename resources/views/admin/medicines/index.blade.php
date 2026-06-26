@@ -232,9 +232,11 @@ function dismissMedicineAlert(alertId) {
                                     Edit
                                 </a>
                                 <form method="post" action="{{ route('admin.medicines.destroy', $m) }}"
-                                      onsubmit="return confirm('Delete {{ addslashes($m->name) }}?')" class="w-full sm:w-auto">
+                                      id="delete-form-{{ $m->id }}" class="w-full sm:w-auto">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn-sm bg-red-50 text-red-600 hover:bg-red-100 w-full">
+                                    <button type="button"
+                                            onclick="openDeleteModal({{ $m->id }}, '{{ addslashes($m->name) }}')"
+                                            class="btn-sm bg-red-50 text-red-600 hover:bg-red-100 w-full">
                                         Delete
                                     </button>
                                 </form>
@@ -261,3 +263,95 @@ function dismissMedicineAlert(alertId) {
 </div>
 
 @endsection
+
+{{-- ── DELETE CONFIRM MODAL ── --}}
+<div id="delete-medicine-modal"
+     style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(15,23,42,0.55); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#fff; border-radius:20px; box-shadow:0 25px 50px rgba(0,0,0,.25); padding:28px 24px; width:100%; max-width:400px;">
+        {{-- Icon + title --}}
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+            <div style="width:48px; height:48px; border-radius:50%; background:#fee2e2; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg style="width:22px;height:22px;color:#dc2626;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+            </div>
+            <div>
+                <p style="margin:0; font-size:16px; font-weight:700; color:#0f172a;">Delete Medicine</p>
+                <p style="margin:3px 0 0; font-size:12px; color:#64748b;">This action cannot be undone</p>
+            </div>
+        </div>
+
+        {{-- Body --}}
+        <p style="font-size:13px; color:#475569; line-height:1.6; margin:0 0 6px;">
+            Are you sure you want to permanently delete:
+        </p>
+        <p id="delete-medicine-name"
+           style="font-size:14px; font-weight:700; color:#dc2626; background:#fff5f5; border:1px solid #fecaca; border-radius:8px; padding:10px 14px; margin:0 0 22px; word-break:break-word;">
+        </p>
+        <p style="font-size:12px; color:#94a3b8; margin:0 0 22px;">
+            All associated data (images, order history references) will be unlinked.
+        </p>
+
+        {{-- Buttons --}}
+        <div style="display:flex; gap:10px;">
+            <button type="button"
+                    id="delete-modal-cancel"
+                    style="flex:1; border:1px solid #e2e8f0; background:#fff; border-radius:12px; padding:11px; font-size:13px; font-weight:600; color:#475569; cursor:pointer; transition:background .15s;"
+                    onmouseover="this.style.background='#f8fafc'"
+                    onmouseout="this.style.background='#fff'">
+                Cancel
+            </button>
+            <button type="button"
+                    id="delete-modal-confirm"
+                    style="flex:1; border:none; border-radius:12px; padding:11px; font-size:13px; font-weight:700; color:#fff; background:#dc2626; cursor:pointer; transition:background .15s;"
+                    onmouseover="this.style.background='#b91c1c'"
+                    onmouseout="this.style.background='#dc2626'">
+                Yes, Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const modal      = document.getElementById('delete-medicine-modal');
+    const nameEl     = document.getElementById('delete-medicine-name');
+    const cancelBtn  = document.getElementById('delete-modal-cancel');
+    const confirmBtn = document.getElementById('delete-modal-confirm');
+    let   pendingFormId = null;
+
+    window.openDeleteModal = function (id, name) {
+        pendingFormId = 'delete-form-' + id;
+        nameEl.textContent = name;
+        modal.style.display = 'flex';
+    };
+
+    function closeModal() {
+        modal.style.display = 'none';
+        pendingFormId = null;
+    }
+
+    cancelBtn.addEventListener('click', closeModal);
+
+    confirmBtn.addEventListener('click', function () {
+        if (pendingFormId) {
+            // Show full-page loader if available
+            if (window.adminLoader && typeof window.adminLoader.show === 'function') {
+                window.adminLoader.show();
+            }
+            document.getElementById(pendingFormId).submit();
+        }
+        closeModal();
+    });
+
+    // Close on backdrop click
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.style.display === 'flex') closeModal();
+    });
+})();
+</script>

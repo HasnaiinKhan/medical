@@ -39,7 +39,7 @@ class Order extends Model
     // Valid status transitions
     public const STATUSES = [
         'placed', 'confirmed', 'shipped', 'delivered',
-        'Refund_requested', 'refund_initiated', 'refunded', 'cancelled',
+        'refund_requested', 'refund_initiated', 'refunded', 'refund_rejected', 'cancelled',
         'payment_failed', 'payment_review',
     ];
 

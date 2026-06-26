@@ -1188,7 +1188,7 @@
         {{-- Track --}}
         <div class="review-track flex gap-4" style="width: max-content;">
 
-            @php
+        @php
 $reviews = [
     ['name'=>'Sabir Shaikh',        'initial'=>'S', 'color'=>'#2563eb', 'stars'=>5, 'text'=>'You will get all the medicines here and the service here is very good and the nature of the owner, Sarfaraz Desai, is even better than that.'],
     ['name'=>'Muttalib Khokhar',    'initial'=>'M', 'color'=>'#4f46e5', 'stars'=>5, 'text'=>'Good service & free and fast delivery is superb. Really best stock medical in Vejalpur area. Specially thanks to Mr. Sarfaraz Desai.'],

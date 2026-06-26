@@ -299,7 +299,8 @@
                             'payment_review'         => ['bg-amber-100 text-amber-800',  asset('Images/credit-card.png')],
                             'refunded'               => ['bg-orange-100 text-orange-800',asset('Images/refund.png')],
                             'refund_initiated'       => ['bg-yellow-100 text-yellow-800',asset('Images/dollars.png')],
-                            'Refund_requested' => ['bg-amber-100 text-amber-800',  asset('Images/hourglass.gif')],
+                            'refund_requested'       => ['bg-amber-100 text-amber-800',  asset('Images/hourglass.gif')],
+                            'refund_rejected'        => ['bg-red-100 text-red-800',       asset('Images/prohibition.png')],
                         ];
                         [$sc, $sImg] = $statusCfg[$order->status] ?? ['bg-slate-100 text-slate-700', asset('Images/box.png')];
                     @endphp
@@ -526,7 +527,8 @@
             cancelled:               '#ef4444',
             payment_failed:          '#f97316',
             payment_review:          '#f59e0b',
-            Refund_requested:  '#f59e0b',
+            refund_requested:        '#f59e0b',
+            refund_rejected:         '#ef4444',
             refund_initiated:        '#06b6d4',
             refunded:                '#14b8a6',
         };
@@ -539,7 +541,8 @@
             cancelled:               'Cancelled',
             payment_failed:          'Pay Failed',
             payment_review:          'Pay Review',
-            Refund_requested:  'Cancel Req',
+            refund_requested:  'Refund Req',
+            refund_rejected:   'Refund Rej',
             refund_initiated:        'Refund Init',
             refunded:                'Refunded',
         };
@@ -608,6 +611,58 @@
     };
 
     // ── Initial render (month by default) ─────────────────────────────
+    renderCharts(currentFilter);
+})();
+</script>
+@endpush
+
+@endsection
+                responsive: true,
+                cutout: '68%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ' ' + ctx.label + ': ' + ctx.parsed + ' order' + (ctx.parsed !== 1 ? 's' : '')
+                        }
+                    }
+                }
+            }
+        });
+
+        // Build custom legend
+        const legendEl = document.getElementById('status-legend');
+        legendEl.innerHTML = '';
+        statusLabels.forEach((s, i) => {
+            const label = statusLabelMap[s] || s.replace(/_/g, ' ');
+            const color = pieColors[i];
+            const count = statusCounts[i];
+            legendEl.insertAdjacentHTML('beforeend',
+                `<div class="flex items-center gap-1.5 text-xs text-slate-600">
+                    <span class="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0" style="background:${color}"></span>
+                    <span class="font-medium truncate">${label}</span>
+                    <span class="ml-auto font-bold text-slate-800">${count}</span>
+                </div>`
+            );
+        });
+    }
+
+    // ── Filter button switching ────────────────────────────────────────
+    window.setChartFilter = function (key) {
+        currentFilter = key;
+        document.querySelectorAll('.chart-filter-btn').forEach(btn => {
+            btn.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
+            btn.classList.add('text-slate-500');
+        });
+        const activeBtn = document.getElementById('filter-btn-' + key);
+        if (activeBtn) {
+            activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
+            activeBtn.classList.remove('text-slate-500');
+        }
+        renderCharts(key);
+    };
+
+    // ── Initial render ─────────────────────────────────────────────────
     renderCharts(currentFilter);
 })();
 </script>

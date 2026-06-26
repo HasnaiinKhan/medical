@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PinCode;
+use App\Services\DeliveryFeeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -25,14 +26,21 @@ class PincodeController extends Controller
             ]);
         }
 
+        // Pass current cart subtotal so fee can be calculated correctly
+        $subtotalPaise    = (int) $request->get('subtotal_paise', 0);
+        $deliveryFeePaise = DeliveryFeeService::calculate($pin, $subtotalPaise);
+
         return response()->json([
-            'ok' => true,
-            'pin' => $row->code,
-            'area' => $row->area,
-            'post_office' => $row->post_office,
-            'city' => $row->city,
-            'state' => $row->state,
-            'label' => $row->fullLabel(),
+            'ok'                => true,
+            'pin'               => $row->code,
+            'area'              => $row->area,
+            'post_office'       => $row->post_office,
+            'city'              => $row->city,
+            'state'             => $row->state,
+            'label'             => $row->fullLabel(),
+            'delivery_zone'     => DeliveryFeeService::zone($pin),
+            'delivery_fee_paise'=> $deliveryFeePaise,
+            'delivery_label'    => DeliveryFeeService::label($pin, $subtotalPaise),
         ]);
     }
 
@@ -55,7 +63,7 @@ class PincodeController extends Controller
         $request->session()->put('delivery_city', $row->city);
 
         return response()->json([
-            'ok' => true,
+            'ok'   => true,
             'label' => $row->fullLabel(),
         ]);
     }

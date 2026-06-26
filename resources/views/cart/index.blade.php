@@ -163,29 +163,19 @@
                     @php $deliveryFee = $subtotalPaise >= 50000 ? 0 : 4000; @endphp
                     <div class="flex justify-between text-slate-600">
                         <span>Delivery fee</span>
-                        @if ($deliveryFee === 0)
-                            <span id="cart-summary-delivery-fee" class="font-semibold text-blue-700">FREE</span>
-                        @else
-                            <span id="cart-summary-delivery-fee" class="font-medium text-slate-900">₹{{ number_format($deliveryFee / 100, 2) }}</span>
-                        @endif
+                        <span id="cart-summary-delivery-fee" class="text-xs font-medium text-slate-500 italic">Calculated at checkout</span>
                     </div>
-                    @if ($deliveryFee > 0)
-                        <p id="cart-delivery-text" class="text-xs text-slate-500 bg-amber-50 rounded-lg px-3 py-2 border border-amber-100">
-                            Add ₹{{ number_format((50000 - $subtotalPaise) / 100, 2) }} more for free delivery!
-                        </p>
-                    @else
-                        <p id="cart-delivery-text" class="text-xs text-blue-800 bg-blue-50 rounded-lg px-3 py-2 border border-blue-100">
-                            🎉 You qualify for free delivery!
-                        </p>
-                    @endif
+                    <p id="cart-delivery-text" class="text-xs text-slate-500 bg-blue-50 rounded-lg px-3 py-2 border border-blue-100">
+                        🚚 Delivery: Free (≤5km, ≥₹500) · ₹40 (5–10km) · ₹50 (10km+)
+                    </p>
                 </div>
 
                 <div class="mt-4 border-t border-slate-200 pt-4">
                     <div class="flex justify-between text-base font-bold text-slate-900">
-                        <span>Total</span>
-                        <span id="cart-total-amount">₹{{ number_format(($subtotalPaise + $deliveryFee) / 100, 2) }}</span>
+                        <span>Subtotal</span>
+                        <span id="cart-total-amount">₹{{ number_format($subtotalPaise / 100, 2) }}</span>
                     </div>
-                    <p class="mt-1 text-xs text-slate-500">Payment: Cash on Delivery</p>
+                    <p class="mt-1 text-xs text-slate-500">+ delivery fee based on your pincode</p>
                 </div>
 
                 <a href="{{ route('checkout.create') }}"
@@ -194,14 +184,16 @@
                 </a>
 
                 <div class="mt-4 space-y-2">
-                    <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <div class="flex items-center gap-1 text-xs text-slate-500">
                         <svg class="h-3.5 w-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                         Secure checkout
-                    </div>
-                    <div class="flex items-center gap-2 text-xs text-slate-500">
-                        <svg class="h-3.5 w-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+
+                        <svg class="h-3.5 w-3.5 text-blue-600" style="margin-left:70px;"fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
                         Ahmedabad delivery only
                     </div>
+                    <!-- <div class="flex items-center gap-2 text-xs text-slate-500">
+                        
+                    </div> -->
                 </div>
             </div>
         </div>

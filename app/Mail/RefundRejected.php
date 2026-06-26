@@ -2,31 +2,28 @@
 
 namespace App\Mail;
 
-use App\Models\Order;
-use App\Services\InvoiceService;
+use App\Models\Refund;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OrderDelivered extends Mailable
+class RefundRejected extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Order $order) {}
+    public function __construct(public Refund $refund) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Delivered - ' . $this->order->order_number . ' | Rx Plus 365',
+            subject: 'Refund Request Rejected - ' . $this->refund->refund_number . ' | Rx Plus 365'
         );
     }
 
     public function content(): Content
     {
-        return new Content(view: 'emails.order-delivered');
+        return new Content(view: 'emails.refund-rejected');
     }
-
 }

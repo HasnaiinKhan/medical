@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\PinCode;
 use App\Models\UserAddress;
 use App\Services\CartService;
+use App\Services\DeliveryFeeService;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -25,9 +26,6 @@ use Razorpay\Api\Errors\SignatureVerificationError;
 
 class RazorpayController extends Controller
 {
-    private const FREE_DELIVERY_ABOVE_PAISE = 500_00;
-    private const DELIVERY_FEE_PAISE        = 40_00;
-
     public function __construct(private CartService $cart) {}
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -42,7 +40,10 @@ class RazorpayController extends Controller
 
         $lines            = $this->cart->lines();
         $subtotalPaise    = $this->cart->subtotalPaise();
-        $deliveryFeePaise = $subtotalPaise >= self::FREE_DELIVERY_ABOVE_PAISE ? 0 : self::DELIVERY_FEE_PAISE;
+
+        // Use the session pin if available, otherwise default to a near zone for display
+        $sessionPin       = session('delivery_pin', '380015');
+        $deliveryFeePaise = DeliveryFeeService::calculate($sessionPin, $subtotalPaise);
         $totalPaise       = $subtotalPaise + $deliveryFeePaise;
         $razorpayKeyId    = config('razorpay.key_id');
         $savedAddresses   = Auth::user()->addresses()->get();
@@ -103,7 +104,7 @@ class RazorpayController extends Controller
         }
 
         $subtotalPaise    = $this->cart->subtotalPaise();
-        $deliveryFeePaise = $subtotalPaise >= self::FREE_DELIVERY_ABOVE_PAISE ? 0 : self::DELIVERY_FEE_PAISE;
+        $deliveryFeePaise = DeliveryFeeService::calculate($data['delivery_pin'], $subtotalPaise);
         $totalPaise       = $subtotalPaise + $deliveryFeePaise;
 
         // ── Stock validation before placing order ─────────────────────────────

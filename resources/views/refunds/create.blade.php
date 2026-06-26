@@ -52,6 +52,7 @@
         </p>
 
         <form method="POST" action="{{ route('refunds.store', $order) }}"
+              id="refund-form"
               enctype="multipart/form-data" class="space-y-5">
             @csrf
 
@@ -227,7 +228,7 @@
             </div>
 
             <div class="flex gap-3 pt-2">
-                <button type="submit"
+                <button type="submit" id="refund-submit-btn"
                         class="btn-primary flex-1 rounded-xl py-3 text-sm font-bold text-white shadow-md">
                     Submit Refund Request
                 </button>
@@ -253,3 +254,55 @@
     </a>
 </div>
 @endsection
+
+@push('scripts')
+<style>
+    @keyframes rfl-spin { to { transform: rotate(360deg); } }
+    #refund-page-loader {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background: rgba(15,23,42,0.92);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 18px;
+    }
+    #refund-page-loader.active { display: flex; }
+    .rfl-ring {
+        width: 56px; height: 56px;
+        border: 5px solid #dbeafe;
+        border-top-color: #2563eb;
+        border-radius: 50%;
+        animation: rfl-spin .75s linear infinite;
+    }
+    .rfl-title { font-size: 15px; font-weight: 700; color: #1e40af; }
+    .rfl-sub   { font-size: 12px; color: #64748b; margin-top: -10px; }
+</style>
+
+{{-- Full-page overlay --}}
+<div id="refund-page-loader" role="status" aria-label="Submitting">
+    <div class="rfl-ring"></div>
+    <p class="rfl-title">Submitting your request…</p>
+    <p class="rfl-sub">Please don't close or refresh this page</p>
+</div>
+
+<script>
+(function () {
+    var form   = document.getElementById('refund-form');
+    var btn    = document.getElementById('refund-submit-btn');
+    var loader = document.getElementById('refund-page-loader');
+    if (!form || !btn) return;
+
+    form.addEventListener('submit', function () {
+        if (loader) loader.classList.add('active');
+        btn.disabled      = true;
+        btn.style.opacity = '0.75';
+        btn.textContent   = 'Submitting...';
+    });
+})();
+</script>
+@endpush

@@ -394,7 +394,7 @@ class ChatbotController extends Controller
             'delivered'              => '🎉',
             'cancelled'              => '❌',
             'payment_failed'         => '⚠️',
-            'Refund_requested' => '🔄',
+            'refund_requested' => '🔄',
             'refund_initiated'       => '💸',
             'refunded'               => '✅',
         ][$order->status] ?? '📦';

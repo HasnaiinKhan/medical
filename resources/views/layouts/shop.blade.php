@@ -2640,7 +2640,8 @@ flashTimer = setTimeout(() => {
                     'delivered': '🎉',
                     'cancelled': '❌',
                     'payment_failed': '⚠️',
-                    'Refund_requested': '🔄',
+                    'refund_requested': '🔄',
+                    'refund_rejected': '🚫',
                     'refund_initiated': '💸',
                     'refunded': '✅',
                 }[order.status] || '📦';

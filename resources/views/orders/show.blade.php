@@ -147,10 +147,14 @@
            class="flex-1 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
             ← Back to Orders
         </a>
-        <a href="{{ route('medicines.index') }}"
-           class="btn-primary flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white shadow-md">
-            🛍️ Order Again
-        </a>
+        {{-- Order Again: POST reorder → fills cart then redirects to /cart --}}
+        <form method="POST" action="{{ route('orders.reorder', $order) }}" id="reorder-form">
+            @csrf
+            <button type="submit" id="reorder-btn"
+                    class="btn-primary flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white shadow-md" style="width:400px;">
+                <i class="fa-solid fa-rotate-right" style="color: rgba(255, 255, 255, 1);"></i> Order Again
+            </button>
+        </form>
         @if($order->canRequestRefund())
             <a href="{{ route('refunds.create', $order) }}"
                class="flex-1 flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 py-3 text-sm font-semibold text-red-700 hover:bg-red-100 transition-colors shadow-sm">
@@ -194,6 +198,9 @@
                     <div class="mt-3 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-xs text-red-800">
                         🚫 Your refund request was rejected.
                         @if($latestRefund->admin_notes) Reason: {{ $latestRefund->admin_notes }} @endif
+                        <br><br>
+                        If you think we made a mistake you can contact this number:   <a href="tel:+917600264090">+917600264090</a> 
+
                     </div>
                 @elseif($latestRefund->status === 'failed')
                     <div class="mt-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-800">
@@ -210,3 +217,77 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<style>
+    @keyframes ors-spin { to { transform: rotate(360deg); } }
+    #order-nav-loader {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background: rgba(15,23,42,0.92);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 18px;
+    }
+    #order-nav-loader.active { display: flex; }
+    .ors-ring {
+        width: 56px; height: 56px;
+        border: 5px solid #dbeafe;
+        border-top-color: #2563eb;
+        border-radius: 50%;
+        animation: ors-spin .75s linear infinite;
+    }
+    .ors-title { font-size: 15px; font-weight: 700; color: #1e40af; }
+    .ors-sub   { font-size: 12px; color: #64748b; margin-top: -10px; }
+</style>
+
+<div id="order-nav-loader" role="status" aria-label="Loading">
+    <div class="ors-ring"></div>
+    <p class="ors-title" id="order-nav-loader-title">Just a moment...</p>
+    <p class="ors-sub"   id="order-nav-loader-sub">Please wait</p>
+</div>
+
+<script>
+(function () {
+    var loader      = document.getElementById('order-nav-loader');
+    var loaderTitle = document.getElementById('order-nav-loader-title');
+    var loaderSub   = document.getElementById('order-nav-loader-sub');
+
+    function showLoader(title, sub) {
+        if (!loader) return;
+        if (loaderTitle) loaderTitle.textContent = title;
+        if (loaderSub)   loaderSub.textContent   = sub;
+        loader.classList.add('active');
+    }
+
+    // Request Refund link
+    var refundLink = document.getElementById('refund-request-link');
+    if (refundLink) {
+        refundLink.addEventListener('click', function (e) {
+            if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+            showLoader('Opening refund request...', 'Just a moment');
+            refundLink.style.pointerEvents = 'none';
+            refundLink.style.opacity = '0.7';
+        });
+    }
+
+    // Order Again form
+    var reorderForm = document.getElementById('reorder-form');
+    var reorderBtn  = document.getElementById('reorder-btn');
+    if (reorderForm) {
+        reorderForm.addEventListener('submit', function () {
+            showLoader('Adding items to your cart...', 'Please wait');
+            if (reorderBtn) {
+                reorderBtn.disabled      = true;
+                reorderBtn.style.opacity = '0.75';
+            }
+        });
+    }
+})();
+</script>
+@endpush

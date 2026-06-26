@@ -15,17 +15,16 @@
         Back to Orders
     </a>
 
-    {{-- Status change form — hide Move to + Update when delivered or cancelled --}}
-    @if($order->status !== 'cancelled')
+    {{-- Status change form — hide Move to + Update when delivered, cancelled, or in any refund stage --}}
+    @if(!in_array($order->status, ['cancelled', 'delivered', 'refunded', 'refund_requested', 'refund_initiated', 'refund_rejected']))
     @php
-        $flow          = ['placed','confirmed','shipped','delivered'];
-        $currentStep   = array_search($order->status, $flow);
+        $allSteps = ['placed', 'confirmed', 'shipped', 'delivered'];
+        $currentStep   = array_search($order->status, $allSteps);
         $forwardSteps  = $currentStep !== false
-            ? array_slice($flow, $currentStep + 1)
-            : $flow;
+            ? array_slice($allSteps, $currentStep + 1)
+            : $allSteps;
     @endphp
     <div class="flex flex-wrap items-center gap-2">
-        @if($order->status !== 'delivered')
         <form method="POST" action="{{ route('admin.orders.updateStatus', $order) }}"
               id="status-top-form"
               class="flex flex-wrap items-center gap-2">
@@ -43,7 +42,6 @@
                 Update
             </button>
         </form>
-        @endif
         <button type="button" onclick="document.getElementById('cancel-modal').classList.remove('hidden')"
                 class="rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-sm font-bold text-red-700 hover:bg-red-100 transition-colors whitespace-nowrap">
             ❌ Cancel
@@ -54,9 +52,31 @@
 
 {{-- ── STATUS TIMELINE ── --}}
 @php
-    $allStatuses = ['placed','confirmed','shipped','delivered'];
-    $currentIdx  = array_search($order->status, $allStatuses);
+    // Build path based on order status
+    $allStatuses = ['placed', 'confirmed', 'shipped', 'delivered'];
+    $isRefunding = in_array($order->status, ['refund_requested','refund_initiated', 'refunded', 'refund_rejected']);
     $isCancelled = $order->status === 'cancelled';
+    
+    if ($isRefunding) {
+        $allStatuses = ['placed', 'confirmed', 'shipped', 'delivered', 'refund_requested', 'refund_initiated', 'refunded'];
+        // For rejected path, fork at refund_requested
+        if ($order->status === 'refund_rejected') {
+            $allStatuses = ['placed', 'confirmed', 'shipped', 'delivered', 'refund_requested', 'refund_rejected'];
+        }
+    }
+    
+    $currentIdx = array_search($order->status, $allStatuses);
+    
+    $icons = [
+        'placed' => '📋',
+        'confirmed' => '✅', 
+        'shipped' => '🚚',
+        'delivered' => '🎉',
+        'refund_initiated' => '💸',
+        'refund_requested' => '↩️',
+        'refunded' => '💰',
+        'refund_rejected' => '🚫',
+    ];
 @endphp
 <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Order Progress</h3>
@@ -75,6 +95,28 @@
                 @endif
             </div>
         </div>
+    @elseif($isRefunding)
+        <div class="overflow-x-auto">
+            <div class="flex items-center gap-0 min-w-[400px]">
+                @foreach($allStatuses as $i => $step)
+                    @php
+                        $done    = $currentIdx !== false && $i <= $currentIdx;
+                        $current = $currentIdx !== false && $i === $currentIdx;
+                    @endphp
+                    <div class="flex flex-1 flex-col items-center mt-4">
+                        <div class="flex h-9 w-9 items-center justify-center rounded-full text-base
+                                    {{ $current ? ($order->status === 'refund_rejected' ? 'bg-red-500 ring-4 ring-red-100' : 'bg-amber-500 ring-4 ring-amber-100') : ($done ? 'bg-green-500' : 'bg-slate-200') }}">
+                            @if($done)<span>{{ $icons[$step] }}</span>
+                            @else<span class="h-2.5 w-2.5 rounded-full bg-slate-400"></span>@endif
+                        </div>
+                        <p class="mt-1.5 text-[10px] sm:text-[11px] font-semibold {{ $done ? ($current ? ($order->status === 'refund_rejected' ? 'text-red-700' : 'text-amber-700') : 'text-green-700') : 'text-slate-400' }}">{{ ucfirst(str_replace('_', ' ', $step)) }}</p>
+                    </div>
+                    @if(!$loop->last)
+                        <div class="flex-1 h-0.5 mb-5 {{ $currentIdx !== false && $i < $currentIdx ? ($currentIdx === $i && $order->status === 'refund_requested' ? 'bg-amber-400' : 'bg-green-500') : 'bg-slate-200' }}"></div>
+                    @endif
+                @endforeach
+            </div>
+        </div>
     @else
         <div class="overflow-x-auto">
             <div class="flex items-center gap-0 min-w-[320px]">
@@ -82,7 +124,6 @@
                     @php
                         $done    = $currentIdx !== false && $i <= $currentIdx;
                         $current = $currentIdx !== false && $i === $currentIdx;
-                        $icons   = ['placed'=>'📋','confirmed'=>'✅','shipped'=>'🚚','delivered'=>'🎉'];
                     @endphp
                     <div class="flex flex-1 flex-col items-center">
                         <div class="flex h-9 w-9 items-center justify-center rounded-full text-base
@@ -232,7 +273,8 @@
                             'payment_failed'         => ['bg-red-100 text-red-800',      asset('Images/sad.png')],
                             'refunded'               => ['bg-orange-100 text-orange-800',asset('Images/refund.png')],
                             'refund_initiated'       => ['bg-yellow-100 text-yellow-800',asset('Images/dollars.png')],
-                            'Refund_requested' => ['bg-amber-100 text-amber-800',  asset('Images/hourglass.gif')],
+                            'refund_requested'       => ['bg-amber-100 text-amber-800',  asset('Images/hourglass.gif')],
+                            'refund_rejected'        => ['bg-red-100 text-red-800',       asset('Images/letter-x.png')],
                         ];
                         [$showSc, $showImg] = $statusCfgShow[$order->status] ?? ['bg-slate-100 text-slate-700', asset('Images/box.png')];
                     @endphp
@@ -294,24 +336,24 @@
         </div>
 
         {{-- Quick status change (sidebar) --}}
-        @if($order->status !== 'cancelled')
+        @if(!in_array($order->status, ['cancelled', 'delivered', 'refunded', 'refund_requested', 'refund_initiated', 'refund_rejected']))
         @php
-            $flow         = ['placed','confirmed','shipped','delivered'];
-            $currentStep  = array_search($order->status, $flow);
+            $allSteps = ['placed', 'confirmed', 'shipped', 'delivered'];
+            $currentStep  = array_search($order->status, $allSteps);
             $forwardSteps = $currentStep !== false
-                ? array_slice($flow, $currentStep + 1)
-                : $flow;
+                ? array_slice($allSteps, $currentStep + 1)
+                : $allSteps;
         @endphp
         <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5">
             <h3 class="text-sm font-bold text-blue-900 mb-1">Quick Status Update</h3>
-            @php $icons = ['placed'=>'📋','confirmed'=>'✅','shipped'=>'🚚','delivered'=>'🎉']; @endphp
+            @php $icons = ['placed'=>'📋','confirmed'=>'✅','shipped'=>'🚚','delivered'=>'🎉','refund_requested'=>'↩️','refund_initiated'=>'💸','refunded'=>'💰']; @endphp
 
             {{-- Current status indicator --}}
             <p class="text-xs text-blue-700 mb-3">
-                Current: <span class="font-bold">{{ ucfirst($order->status) }}</span>
+                Current: <span class="font-bold">{{ ucfirst(str_replace('_', ' ', $order->status)) }}</span>
             </p>
 
-            @if($order->status !== 'delivered' && count($forwardSteps))
+            @if(count($forwardSteps))
                 <form method="POST" action="{{ route('admin.orders.updateStatus', $order) }}" id="status-sidebar-form" class="space-y-2">
                     @csrf @method('PATCH')
                     <input type="hidden" name="status" id="status-sidebar-input">
@@ -340,8 +382,8 @@
                 </button>
             </div>
         </div>
-        @else
-        {{-- Cancellation details card --}}
+        @elseif($order->status === 'cancelled')
+        {{-- Cancellation details card — only shown for cancelled orders --}}
         <div class="rounded-2xl border border-red-200 bg-red-50 p-5">
             <h3 class="text-sm font-bold text-red-900 mb-3">Cancellation Details</h3>
             <div class="space-y-2 text-sm">
@@ -367,6 +409,44 @@
                 @endif
             </div>
         </div>
+        @elseif(in_array($order->status, ['refund_requested', 'refund_initiated', 'refunded', 'refund_rejected']))
+        {{-- Refund info card — shown for all refund-stage orders --}}
+        @php
+            $refundStageColors = [
+                'refund_requested' => ['border-amber-200', 'bg-amber-50', 'text-amber-900', 'text-amber-700', 'bg-amber-100 border-amber-200', 'text-amber-800'],
+                'refund_initiated'  => ['border-yellow-200', 'bg-yellow-50', 'text-yellow-900', 'text-yellow-700', 'bg-yellow-100 border-yellow-200', 'text-yellow-800'],
+                'refunded'          => ['border-green-200', 'bg-green-50', 'text-green-900', 'text-green-700', 'bg-green-100 border-green-200', 'text-green-800'],
+                'refund_rejected'   => ['border-red-200', 'bg-red-50', 'text-red-900', 'text-red-700', 'bg-red-100 border-red-200', 'text-red-800'],
+            ];
+            [$rBorder, $rBg, $rTitle, $rSub, $rBadgeBg, $rBadgeText] = $refundStageColors[$order->status];
+            $refundLabels = [
+                'refund_requested' => ['↩️', 'Refund Requested', 'The customer has requested a refund. Review and initiate the refund process.'],
+                'refund_initiated'  => ['💸', 'Refund Initiated', 'The refund has been initiated and is being processed by the payment gateway.'],
+                'refunded'          => ['💰', 'Refund Completed', 'The refund has been successfully processed and credited to the customer.'],
+                'refund_rejected'   => ['🚫', 'Refund Rejected', 'The refund request was reviewed and rejected by the admin. The order remains delivered.'],
+            ];
+            [$rIcon, $rLabel, $rDesc] = $refundLabels[$order->status];
+        @endphp
+        <div class="rounded-2xl border {{ $rBorder }} {{ $rBg }} p-5">
+            <h3 class="text-sm font-bold {{ $rTitle }} mb-3 flex items-center gap-2">
+                <span>{{ $rIcon }}</span> {{ $rLabel }}
+            </h3>
+            <p class="text-xs {{ $rSub }} mb-3">{{ $rDesc }}</p>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-xs {{ $rSub }}">Order Total</span>
+                    <span class="font-bold {{ $rTitle }}">₹{{ number_format($order->totalRupees(), 2) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-xs {{ $rSub }}">Payment Method</span>
+                    <span class="font-semibold {{ $rTitle }} capitalize">{{ $order->payment_method }}</span>
+                </div>
+                <div class="mt-2 rounded-lg {{ $rBadgeBg }} border px-3 py-2">
+                    <p class="text-xs font-bold {{ $rBadgeText }}">Status: {{ ucwords(str_replace('_', ' ', $order->status)) }}</p>
+                    <p class="text-xs {{ $rSub }} mt-0.5">This order is in a final stage. No further status changes are allowed.</p>
+                </div>
+            </div>
+        </div>
         @endif
     </div>
 </div>
@@ -374,7 +454,7 @@
 @endsection
 
 {{-- ── STATUS CONFIRM MODAL ── --}}
-@if($order->status !== 'cancelled')
+@if(!in_array($order->status, ['cancelled', 'delivered', 'refunded', 'refund_requested', 'refund_initiated', 'refund_rejected']))
 <div id="status-confirm-modal"
      class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
      style="background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);">
@@ -402,8 +482,8 @@
 </div>
 
 <script>
-const statusIcons  = { placed:'📋', confirmed:'✅', shipped:'🚚', delivered:'🎉' };
-const statusColors = { placed:'#d97706', confirmed:'#2563eb', shipped:'#7c3aed', delivered:'#16a34a' };
+const statusIcons  = { placed:'📋', confirmed:'✅', shipped:'🚚', delivered:'🎉', refund_requested:'↩️', refunded:'💰' };
+const statusColors = { placed:'#d97706', confirmed:'#2563eb', shipped:'#7c3aed', delivered:'#16a34a', refund_requested:'#f59e0b', refunded:'#ea580c' };
 
 function openStatusModal(newStatus, formId) {
     if (!newStatus) { alert('Please select a status first.'); return; }
@@ -445,7 +525,7 @@ document.addEventListener('keydown', function(e) {
 @endif
 
 {{-- ── CANCEL ORDER MODAL ── --}}
-@if($order->status !== 'cancelled')
+@if(!in_array($order->status, ['cancelled', 'delivered', 'refunded', 'refund_requested', 'refund_initiated', 'refund_rejected']))
 <div id="cancel-modal"
      class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
      style="background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);">

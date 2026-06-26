@@ -377,9 +377,13 @@
                 'class' => 'bg-yellow-100 text-yellow-800',
                 'image' => asset('Images/dollars.png')
             ],
-            'Refund_requested' => [
+            'refund_requested' => [
                 'class' => 'bg-amber-100 text-amber-800',
                 'image' => asset('Images/hourglass.gif')
+            ],
+            'refund_rejected' => [
+                'class' => 'bg-red-100 text-red-800',
+                'image' => asset('Images/prohibition.png')
             ],
         ];
 
@@ -584,7 +588,8 @@ document.querySelectorAll('.quick-status').forEach(function (sel) {
                     payment_failed:          'bg-red-100 text-red-800',
                     refunded:                'bg-orange-100 text-orange-800',
                     refund_initiated:        'bg-yellow-100 text-yellow-800',
-                    Refund_requested:  'bg-amber-100 text-amber-800',
+                    refund_requested:  'bg-amber-100 text-amber-800',
+                    refund_rejected:   'bg-red-100 text-red-800',
                     payment_review:          'bg-amber-100 text-amber-800',
                 };
                 const images = {
@@ -596,7 +601,8 @@ document.querySelectorAll('.quick-status').forEach(function (sel) {
                     payment_failed:          '{{ asset('Images/sad.png') }}',
                     refunded:                '{{ asset('Images/refund.png') }}',
                     refund_initiated:        '{{ asset('Images/dollars.png') }}',
-                    Refund_requested:        '{{ asset('Images/hourglass.gif') }}',
+                    refund_requested:        '{{ asset('Images/hourglass.gif') }}',
+                    refund_rejected:         '{{ asset('Images/prohibition.png') }}',
                     payment_review:          '{{ asset('Images/credit-card.png') }}',
                 };
 

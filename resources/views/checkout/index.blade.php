@@ -230,7 +230,17 @@
                 </div>
             </div>
             <p class="text-xs text-slate-600">Pay in cash when your order arrives</p>
-            <p class="text-xs text-amber-600 font-medium mt-1">No extra charges</p>
+            {{-- "No extra charges" only shown for near zones (≤5km, ≥₹500) at page load --}}
+            @php
+                $sessionPin = session('delivery_pin', '');
+                $zone = $sessionPin ? \App\Services\DeliveryFeeService::zone($sessionPin) : 'unknown';
+                $showNoExtraCharges = $zone === '0_5' && $subtotalPaise >= \App\Services\DeliveryFeeService::FREE_DELIVERY_MIN_PAISE;
+            @endphp
+            @if($showNoExtraCharges)
+            <p class="text-xs text-amber-600 font-medium mt-1" id="cod-no-charges-badge">No extra charges</p>
+            @else
+            <p class="text-xs text-amber-600 font-medium mt-1" id="cod-no-charges-badge" style="display:none">No extra charges</p>
+            @endif
         </label>
         @endif
 
@@ -328,17 +338,22 @@
         </div>
         <div class="flex justify-between text-slate-600">
             <span>Delivery</span>
-            @if ($deliveryFeePaise === 0)
-                <span class="font-semibold text-blue-700">FREE</span>
-            @else
-                <span class="font-medium text-slate-900">₹{{ number_format($deliveryFeePaise / 100, 2) }}</span>
-            @endif
+            <span id="summary-delivery-fee" class="font-medium">
+                @if ($deliveryFeePaise === 0)
+                    <span class="font-semibold text-blue-700">FREE</span>
+                @else
+                    <span class="text-slate-900">₹{{ number_format($deliveryFeePaise / 100, 2) }}</span>
+                @endif
+            </span>
         </div>
+        <p id="summary-delivery-label" class="text-xs text-slate-500 italic">
+            {{ \App\Services\DeliveryFeeService::label(session('delivery_pin', ''), $subtotalPaise) }}
+        </p>
     </div>
     <div class="mt-3 border-t border-slate-200 pt-3">
         <div class="flex justify-between text-base font-bold text-slate-900">
             <span>Total</span>
-            <span>₹{{ number_format($totalPaise / 100, 2) }}</span>
+            <span id="summary-total">₹{{ number_format($totalPaise / 100, 2) }}</span>
         </div>
     </div>
     <div id="summary-payment-badge" class="mt-4 rounded-xl bg-blue-50 border border-blue-100 p-3 flex items-center gap-2">
@@ -518,21 +533,53 @@ document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
     });
 });
 
-// ── Pincode inline check ─────────────────────────────────────────────────────
+// ── Pincode inline check + live delivery fee update ─────────────────────────
+const SUBTOTAL_PAISE = {{ $subtotalPaise }};
+
 async function checkoutPinLookup() {
     const input  = document.getElementById('delivery_pin');
     const status = document.getElementById('checkout-pin-status');
     const pin    = (input.value || '').replace(/\D/g, '');
     if (pin.length !== 6) return;
-    status.innerHTML = '<span class="text-slate-400 text-xs">Checking…</span>';
+    status.innerHTML = '<span class="text-slate-400 text-xs">Checking...</span>';
     try {
         const url = new URL(@json(route('pincode.lookup', [], false)), window.location.origin);
         url.searchParams.set('pin', pin);
+        url.searchParams.set('subtotal_paise', SUBTOTAL_PAISE);
         const res  = await fetch(url.toString(), { headers: { Accept: 'application/json' } });
         const data = await res.json();
-        status.innerHTML = data.ok
-            ? `<span class="text-blue-700 text-xs font-semibold">✓ ${data.area}</span>`
-            : `<span class="text-red-500 text-xs">✗ Not serviceable</span>`;
+
+        if (data.ok) {
+            status.innerHTML = `<span class="text-blue-700 text-xs font-semibold">✓ ${data.area}</span>`;
+
+            // ── Update delivery fee in summary ────────────────────────────
+            const feeEl   = document.getElementById('summary-delivery-fee');
+            const labelEl = document.getElementById('summary-delivery-label');
+            const totalEl = document.getElementById('summary-total');
+            const noChargesBadge = document.getElementById('cod-no-charges-badge');
+
+            const feePaise = data.delivery_fee_paise || 0;
+            const totalPaise = SUBTOTAL_PAISE + feePaise;
+
+            if (feeEl) {
+                feeEl.innerHTML = feePaise === 0
+                    ? '<span class="font-semibold text-blue-700">FREE</span>'
+                    : `<span class="text-slate-900">₹${(feePaise / 100).toFixed(2)}</span>`;
+            }
+            if (labelEl) {
+                labelEl.textContent = data.delivery_label || '';
+            }
+            if (totalEl) {
+                totalEl.textContent = '₹' + (totalPaise / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            }
+
+            // Show "No extra charges" on COD only if free delivery (zone 0_5 + ≥₹500)
+            if (noChargesBadge) {
+                noChargesBadge.style.display = feePaise === 0 ? 'block' : 'none';
+            }
+        } else {
+            status.innerHTML = `<span class="text-red-500 text-xs">✗ Not serviceable</span>`;
+        }
     } catch { status.innerHTML = ''; }
 }
 function fillPin(pin) {

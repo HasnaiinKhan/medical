@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\RefundController;
 use App\Mail\RefundProcessed;
+use App\Mail\RefundRejected;
 use App\Models\Order;
 use App\Models\Refund;
 use Illuminate\Http\RedirectResponse;
@@ -157,7 +158,18 @@ class AdminRefundController extends Controller
             ]
         );
 
-        $refund->order->update(['status' => 'delivered']);
+        // Mark order as refund_rejected — a distinct terminal state
+        $refund->order->update(['status' => 'refund_rejected']);
+
+        // Notify customer of rejection
+        try {
+            $refund->load('order');
+            if ($refund->order->user) {
+                Mail::to($refund->order->user->email)->send(new RefundRejected($refund));
+            }
+        } catch (\Throwable $e) {
+            Log::error('RefundRejected mail failed: ' . $e->getMessage());
+        }
 
         return back()->with('status', "Refund #{$refund->refund_number} rejected.");
     }

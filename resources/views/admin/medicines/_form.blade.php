@@ -832,6 +832,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function setLoading(on) {
         searchBtn.disabled = on;
         btnText.textContent = on ? 'Searching…' : 'Search';
+        var spin = document.getElementById('pe-search-spinner');
+        if (spin) spin.style.display = on ? 'inline-block' : 'none';
+        // Full-page loader (admin layout provides window.adminLoader)
+        if (window.adminLoader) {
+            if (on) window.adminLoader.show();
+            else    window.adminLoader.hide();
+        }
     }
 
     function showError(msg) {
