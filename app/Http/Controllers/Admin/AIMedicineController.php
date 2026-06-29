@@ -10,25 +10,333 @@ use Illuminate\Support\Facades\Log;
 class AIMedicineController extends Controller
 {
     private const CATEGORY_MAP = [
-        'ANALGESIC'=>'fever-pain','ANTIPYRETIC'=>'fever-pain','NSAID'=>'fever-pain',
-        'PAIN'=>'fever-pain','PARACETAMOL'=>'fever-pain','IBUPROFEN'=>'fever-pain',
-        'VITAMIN'=>'vitamins','SUPPLEMENT'=>'vitamins','MINERAL'=>'vitamins',
-        'NUTRACEUTICAL'=>'vitamins','PROTEIN'=>'vitamins','OMEGA'=>'vitamins',
-        'ANTACID'=>'digestive','PROTON'=>'digestive','GASTR'=>'digestive',
-        'PROBIOTIC'=>'digestive','LAXATIVE'=>'digestive','ANTIDIARRH'=>'digestive',
-        'DIABETES'=>'diabetes','ANTIDIABETIC'=>'diabetes','GLUCOSE'=>'diabetes','INSULIN'=>'diabetes',
-        'CARDIAC'=>'heart-bp','CARDIOVASCULAR'=>'heart-bp','ANTIHYPERTENSIVE'=>'heart-bp','STATIN'=>'heart-bp',
-        'DERMA'=>'skin','SKIN'=>'skin','ANTIFUNGAL'=>'skin','ACNE'=>'skin',
-        'FACE WASH'=>'skin','MOISTURIZ'=>'skin','SUNSCREEN'=>'skin','LOTION'=>'skin',
-        'ANTI-ACNE'=>'skin','SCRUB'=>'skin',
-        'ANTIALLERGIC'=>'cold-allergy','ANTIHISTAMINE'=>'cold-allergy',
-        'ALLERG'=>'cold-allergy','COLD'=>'cold-allergy','COUGH'=>'cold-allergy',
-        'RESPIRATORY'=>'cold-allergy','SINUS'=>'cold-allergy','NASAL'=>'cold-allergy',
-        'OPHTHALM'=>'eye-ear','EYE DROP'=>'eye-ear','EAR DROP'=>'eye-ear',
-        'BONE'=>'bone-joint','JOINT'=>'bone-joint','ARTHRIT'=>'bone-joint',
-        'OSTEO'=>'bone-joint','CALCIUM'=>'bone-joint',
-        'IMMUNE'=>'immunity','IMMUNITY'=>'immunity','AYURVEDIC'=>'immunity',
-        'HERBAL'=>'immunity','ASHWAGANDHA'=>'immunity',
+        // ── Fever & Pain (slug: fever-pain) ──────────────────────────────────
+        'ANALGESIC'        => 'fever-pain',
+        'ANTIPYRETIC'      => 'fever-pain',
+        'NSAID'            => 'fever-pain',
+        'PARACETAMOL'      => 'fever-pain',
+        'IBUPROFEN'        => 'fever-pain',
+        'DICLOFENAC'       => 'fever-pain',
+        'NIMESULIDE'       => 'fever-pain',
+        'MEFENAMIC'        => 'fever-pain',
+        'PAIN RELIEF'      => 'fever-pain',
+        'MUSCLE RELAXANT'  => 'fever-pain',
+        'MIGRAINE'         => 'fever-pain',
+        'HEADACHE'         => 'fever-pain',
+
+        // ── Nutrition & Health Drinks (slug: nutrition-health-drinks) ─────────
+        // (brand-specific first so they don't get grabbed by 'PROTEIN POWDER' → vitamins)
+        'PEDIASURE'        => 'nutrition-health-drinks',
+        'ENSURE'           => 'nutrition-health-drinks',
+        'HORLICKS'         => 'nutrition-health-drinks',
+        'COMPLAN'          => 'nutrition-health-drinks',
+        'BOOST'            => 'nutrition-health-drinks',
+        'ENERGY DRINK'     => 'nutrition-health-drinks',
+        'HEALTH DRINK'     => 'nutrition-health-drinks',
+        'ELECTROLYTE'      => 'nutrition-health-drinks',
+        'PROTEIN DRINK'    => 'nutrition-health-drinks',
+        'PROTEIN SHAKE'    => 'nutrition-health-drinks',
+        'ORS DRINK'        => 'nutrition-health-drinks',
+
+        // ── Vitamins & Supplements (slug: vitamins) ───────────────────────────
+        'MULTIVITAMIN'     => 'vitamins',
+        'VITAMIN B'        => 'vitamins',
+        'VITAMIN A'        => 'vitamins',
+        'VITAMIN E'        => 'vitamins',
+        'VITAMIN K'        => 'vitamins',
+        'FISH OIL'         => 'vitamins',
+        'IRON SUPPLEMENT'  => 'vitamins',
+        'MAGNESIUM'        => 'vitamins',
+        'NUTRACEUTICAL'    => 'vitamins',
+        'FOLIC ACID'       => 'vitamins',
+        'BIOTIN'           => 'vitamins',
+        'COLLAGEN'         => 'vitamins',
+        'WHEY PROTEIN'     => 'vitamins',
+        'CASEIN PROTEIN'   => 'vitamins',
+        'PROTEIN POWDER'   => 'vitamins',
+
+        // ── Immunity Boosters (slug: immunity) ───────────────────────────────
+        'VITAMIN C'        => 'immunity',
+        'ZINC'             => 'immunity',
+        'IMMUNITY'         => 'immunity',
+        'CHYAWANPRASH'     => 'immunity',
+        'GILOY'            => 'immunity',
+        'TULSI'            => 'immunity',
+        'ECHINACEA'        => 'immunity',
+
+        // ── Bone & Joint (slug: bone-joint) ──────────────────────────────────
+        'CALCIUM'          => 'bone-joint',
+        'VITAMIN D'        => 'bone-joint',
+        'GLUCOSAMINE'      => 'bone-joint',
+        'CHONDROITIN'      => 'bone-joint',
+        'BONE'             => 'bone-joint',
+        'JOINT'            => 'bone-joint',
+        'ARTHRITIS'        => 'bone-joint',
+        'ARTHRIT'          => 'bone-joint',
+        'OSTEOPOROSIS'     => 'bone-joint',
+        'OSTEO'            => 'bone-joint',
+        'KNEE SUPPORT'     => 'bone-joint',
+
+        // ── Digestive Care (slug: digestive) ─────────────────────────────────
+        'ANTACID'          => 'digestive',
+        'PANTOPRAZOLE'     => 'digestive',
+        'OMEPRAZOLE'       => 'digestive',
+        'PROTON PUMP'      => 'digestive',
+        'GASTR'            => 'digestive',
+        'PROBIOTIC'        => 'digestive',
+        'LAXATIVE'         => 'digestive',
+        'ANTIDIARRH'       => 'digestive',
+        'ORS'              => 'digestive',
+        'DIGESTIVE ENZYME' => 'digestive',
+        'CONSTIPATION'     => 'digestive',
+        'DIARRHOEA'        => 'digestive',
+        'ACIDITY'          => 'digestive',
+        'LACTULOSE'        => 'digestive',
+        'ISABGOL'          => 'digestive',
+        'PILES'            => 'digestive',
+
+        // ── Diabetes Care (slug: diabetes) ───────────────────────────────────
+        'DIABETES'         => 'diabetes',
+        'DIABETIC'         => 'diabetes',
+        'GLUCOMETER'       => 'diabetes',
+        'TEST STRIP'       => 'diabetes',
+        'LANCET'           => 'diabetes',
+        'INSULIN'          => 'diabetes',
+        'METFORMIN'        => 'diabetes',
+        'GLIPIZIDE'        => 'diabetes',
+        'GLYCEMIC'         => 'diabetes',
+
+        // ── Heart & BP (slug: heart-bp) ──────────────────────────────────────
+        'CARDIAC'          => 'heart-bp',
+        'CARDIOVASCULAR'   => 'heart-bp',
+        'ANTIHYPERTENSIVE' => 'heart-bp',
+        'STATIN'           => 'heart-bp',
+        'CHOLESTEROL'      => 'heart-bp',
+        'OMEGA-3'          => 'heart-bp',
+        'OMEGA 3'          => 'heart-bp',
+        'BP MONITOR'       => 'heart-bp',
+        'BLOOD PRESSURE'   => 'heart-bp',
+        'AMLODIPINE'       => 'heart-bp',
+        'ATORVASTATIN'     => 'heart-bp',
+
+        // ── Cold & Allergy (slug: cold-allergy) ──────────────────────────────
+        'ANTIALLERGIC'     => 'cold-allergy',
+        'ANTIHISTAMINE'    => 'cold-allergy',
+        'CETIRIZINE'       => 'cold-allergy',
+        'LORATADINE'       => 'cold-allergy',
+        'ALLERG'           => 'cold-allergy',
+        'COUGH SYRUP'      => 'cold-allergy',
+        'NASAL SPRAY'      => 'cold-allergy',
+        'NASAL'            => 'cold-allergy',
+        'SINUS'            => 'cold-allergy',
+        'STEAM INHALER'    => 'cold-allergy',
+        'LOZENGE'          => 'cold-allergy',
+        'COLD'             => 'cold-allergy',
+
+        // ── Respiratory Care (slug: respiratory-care) ────────────────────────
+        'NEBULIZER'        => 'respiratory-care',
+        'INHALER'          => 'respiratory-care',
+        'ASTHMA'           => 'respiratory-care',
+        'BRONCHODILATOR'   => 'respiratory-care',
+        'SALBUTAMOL'       => 'respiratory-care',
+        'BUDESONIDE'       => 'respiratory-care',
+        'RESPIRATORY'      => 'respiratory-care',
+        'PULSE OXIMETER'   => 'respiratory-care',
+        'OXYGEN'           => 'respiratory-care',
+
+        // ── Eye & Ear Care (slug: eye-ear) ───────────────────────────────────
+        'EYE DROP'         => 'eye-ear',
+        'EAR DROP'         => 'eye-ear',
+        'OPHTHALM'         => 'eye-ear',
+        'EYE WASH'         => 'eye-ear',
+        'ARTIFICIAL TEAR'  => 'eye-ear',
+        'EYE VITAMIN'      => 'eye-ear',
+        'CONJUNCTIV'       => 'eye-ear',
+
+        // ── Skin Care (slug: skin-care) ──────────────────────────────────────
+        'DERMA'            => 'skin-care',
+        'MOISTURIZER'      => 'skin-care',
+        'MOISTURIZ'        => 'skin-care',
+        'SUNSCREEN'        => 'skin-care',
+        'SPF'              => 'skin-care',
+        'ACNE'             => 'skin-care',
+        'ANTI-ACNE'        => 'skin-care',
+        'ANTIFUNGAL CREAM' => 'skin-care',
+        'ECZEMA'           => 'skin-care',
+        'PSORIASIS'        => 'skin-care',
+        'CLOTRIMAZOLE'     => 'skin-care',
+        'HYDROCORTISONE'   => 'skin-care',
+        'SCRUB'            => 'skin-care',
+        'LOTION'           => 'skin-care',
+
+        // ── Personal Care (slug: personal-care) ──────────────────────────────
+        'FACE WASH'        => 'personal-care',
+        'BODY WASH'        => 'personal-care',
+        'SOAP'             => 'personal-care',
+        'SHAMPOO'          => 'personal-care',
+        'CONDITIONER'      => 'personal-care',
+        'DEODORANT'        => 'personal-care',
+        'FEMININE HYGIENE' => 'personal-care',
+        'SANITARY'         => 'personal-care',
+        'INTIMATE WASH'    => 'personal-care',
+
+        // ── Hair Care (slug: hair-care) ──────────────────────────────────────
+        'HAIR OIL'         => 'hair-care',
+        'HAIR SERUM'       => 'hair-care',
+        'HAIR GROWTH'      => 'hair-care',
+        'ANTI-DANDRUFF'    => 'hair-care',
+        'HAIR LOSS'        => 'hair-care',
+        'MINOXIDIL'        => 'hair-care',
+        'HAIR VITAMIN'     => 'hair-care',
+        'SCALP'            => 'hair-care',
+
+        // ── Oral Care (slug: oral-care) ──────────────────────────────────────
+        'TOOTHPASTE'       => 'oral-care',
+        'TOOTHBRUSH'       => 'oral-care',
+        'TOOTH POWDER'     => 'oral-care',
+        'TOOTH GEL'        => 'oral-care',
+        'TOOTH WHITENING'  => 'oral-care',
+        'TOOTH'            => 'oral-care',
+        'MOUTHWASH'        => 'oral-care',
+        'MOUTH RINSE'      => 'oral-care',
+        'MOUTH FRESHENER'  => 'oral-care',
+        'ORAL CARE'        => 'oral-care',
+        'ORAL HYGIENE'     => 'oral-care',
+        'DENTAL'           => 'oral-care',
+        'DENTURE'          => 'oral-care',
+        'FLOSS'            => 'oral-care',
+        'TONGUE CLEANER'   => 'oral-care',
+        'GUM CARE'         => 'oral-care',
+        'CHARCOAL POWDER'  => 'oral-care',
+
+        // ── Home Healthcare (slug: home-healthcare) ───────────────────────────
+        'ADULT DIAPER'     => 'home-healthcare',
+        'UNDERPAD'         => 'home-healthcare',
+        'WHEELCHAIR'       => 'home-healthcare',
+        'WALKER'           => 'home-healthcare',
+        'CERVICAL COLLAR'  => 'home-healthcare',
+        'BACK SUPPORT'     => 'home-healthcare',
+        'KNEE BRACE'       => 'home-healthcare',
+        'COMMODE'          => 'home-healthcare',
+
+        // ── Baby Care (slug: baby-care) ──────────────────────────────────────
+        'BABY FOOD'        => 'baby-care',
+        'BABY DIAPER'      => 'baby-care',
+        'DIAPER'           => 'baby-care',
+        'BABY WIPE'        => 'baby-care',
+        'BABY LOTION'      => 'baby-care',
+        'BABY POWDER'      => 'baby-care',
+        'BABY SHAMPOO'     => 'baby-care',
+        'FEEDING BOTTLE'   => 'baby-care',
+        'BABY THERMOMETER' => 'baby-care',
+        'INFANT'           => 'baby-care',
+        'PEDIATRIC'        => 'baby-care',
+
+        // ── Women's Health (slug: womens-health) ─────────────────────────────
+        'PREGNANCY TEST'   => 'womens-health',
+        'PRENATAL'         => 'womens-health',
+        'MENSTRUAL'        => 'womens-health',
+        'PCOS'             => 'womens-health',
+        'MENOPAUSE'        => 'womens-health',
+        'PROGESTERONE'     => 'womens-health',
+        'ESTROGEN'         => 'womens-health',
+        "WOMEN'S HEALTH"   => 'womens-health',
+        'FEMININE CARE'    => 'womens-health',
+
+        // ── Men's Health (slug: mens-health) ─────────────────────────────────
+        "MEN'S MULTIVIT"   => 'mens-health',
+        'PROSTATE'         => 'mens-health',
+        'TESTOSTERONE'     => 'mens-health',
+        'BEARD CARE'       => 'mens-health',
+
+        // ── Sexual Wellness (slug: sexual-wellness) ───────────────────────────
+        'CONDOM'           => 'sexual-wellness',
+        'LUBRICANT'        => 'sexual-wellness',
+        'FERTILITY'        => 'sexual-wellness',
+        'SEXUAL WELLNESS'  => 'sexual-wellness',
+
+        // ── Mother Care (slug: mother-care) ──────────────────────────────────
+        'BREAST PUMP'      => 'mother-care',
+        'NURSING PAD'      => 'mother-care',
+        'STRETCH MARK'     => 'mother-care',
+        'MATERNITY'        => 'mother-care',
+        'LACTATION'        => 'mother-care',
+
+        // ── Liver Care (slug: liver-care) ─────────────────────────────────────
+        'LIVER'            => 'liver-care',
+        'HEPATO'           => 'liver-care',
+        'SILYMARIN'        => 'liver-care',
+        'UDILIV'           => 'liver-care',
+
+        // ── Kidney Care (slug: kidney-care) ──────────────────────────────────
+        'KIDNEY'           => 'kidney-care',
+        'RENAL'            => 'kidney-care',
+        'UTI RELIEF'       => 'kidney-care',
+        'UTI INFECTION'    => 'kidney-care',
+        'URINARY'          => 'kidney-care',
+        'CRANBERRY'        => 'kidney-care',
+
+        // ── Mental Wellness (slug: mental-wellness) ───────────────────────────
+        'STRESS RELIEF'    => 'mental-wellness',
+        'SLEEP AID'        => 'mental-wellness',
+        'MELATONIN'        => 'mental-wellness',
+        'MEMORY BOOSTER'   => 'mental-wellness',
+        'ANXIETY'          => 'mental-wellness',
+        'ASHWAGANDHA'      => 'mental-wellness',
+        'BRAHMI'           => 'mental-wellness',
+        'VALERIAN'         => 'mental-wellness',
+
+        // ── Weight Management (slug: weight-management) ──────────────────────
+        'WEIGHT LOSS'      => 'weight-management',
+        'SLIMMING'         => 'weight-management',
+        'MEAL REPLACEMENT' => 'weight-management',
+        'FAT BURNER'       => 'weight-management',
+        'WEIGHT GAIN'      => 'weight-management',
+        'GARCINIA'         => 'weight-management',
+
+        // ── Medical Devices (slug: medical-devices) ───────────────────────────
+        'BP MONITOR'       => 'medical-devices',
+        'BLOOD PRESSURE MONITOR' => 'medical-devices',
+        'THERMOMETER'      => 'medical-devices',
+        'WEIGHING SCALE'   => 'medical-devices',
+        'HEATING PAD'      => 'medical-devices',
+        'HOT WATER BAG'    => 'medical-devices',
+        'ICE BAG'          => 'medical-devices',
+
+        // ── Surgical & First Aid (slug: surgical-first-aid) ──────────────────
+        'BANDAGE'          => 'surgical-first-aid',
+        'GAUZE'            => 'surgical-first-aid',
+        'SURGICAL TAPE'    => 'surgical-first-aid',
+        'ANTISEPTIC'       => 'surgical-first-aid',
+        'BETADINE'         => 'surgical-first-aid',
+        'DETTOL'           => 'surgical-first-aid',
+        'WOUND DRESSING'   => 'surgical-first-aid',
+        'CREPE BANDAGE'    => 'surgical-first-aid',
+        'COTTON'           => 'surgical-first-aid',
+        'GLOVES'           => 'surgical-first-aid',
+        // ── Ayurvedic Products (slug: ayurvedic-products) ────────────────────
+        'AYURVEDIC'        => 'ayurvedic-products',
+        'HERBAL'           => 'ayurvedic-products',
+        'TRIPHALA'         => 'ayurvedic-products',
+        'TRIKATU'          => 'ayurvedic-products',
+        'ARJUNA'           => 'ayurvedic-products',
+        'NEEM'             => 'ayurvedic-products',
+        'HARITAKI'         => 'ayurvedic-products',
+        'DABUR'            => 'ayurvedic-products',
+        'BAIDYANATH'       => 'ayurvedic-products',
+        'HIMALAYA HERBAL'  => 'ayurvedic-products',
+        'PATANJALI'        => 'ayurvedic-products',
+        'CHARAK'           => 'ayurvedic-products',
+
+        // ── Homeopathic Medicines (slug: homeopathic-medicines) ──────────────
+        'HOMEOPATH'        => 'homeopathic-medicines',
+        'HOMOEOPATH'       => 'homeopathic-medicines',
+        'HOMEOPATHIC DILUTION' => 'homeopathic-medicines',
+        'MOTHER TINCTURE'  => 'homeopathic-medicines',
+        'SBL '             => 'homeopathic-medicines',
+        'SCHWABE'          => 'homeopathic-medicines',
+        'BOIRON'           => 'homeopathic-medicines',
+        'RECKEWEG'         => 'homeopathic-medicines',
     ];
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -184,9 +492,12 @@ class AIMedicineController extends Controller
 
             $results[] = [
                 'slug'                  => $p['slug'] ?? null,
-                'name'                  => $fullName,
+                'name'                  => $this->cleanProductName($fullName),
                 'manufacturer'          => $manufacturer ? $this->titleCase(strtolower($manufacturer)) : null,
-                'category'              => $this->guessCategory($haystack),
+                'category'              => $this->guessCategory($haystack, implode(' ', array_filter(array_map(
+                    fn($c) => is_array($c) ? ($c['name'] ?? '') : (string) $c,
+                    array_slice((array) ($p['l3_categories'] ?? $p['categories'] ?? []), 0, 1)
+                )))),
                 'description'           => $description,
                 'composition'           => $composition ? $this->titleCase(strtolower($composition)) : null,
                 'dosage_form'           => 'Unit',
@@ -962,11 +1273,20 @@ class AIMedicineController extends Controller
 
         $haystack = strtoupper($name . ' ' . ($manufacturer ?? '') . ' ' . ($composition ?? ''));
 
+        // NetMeds/Fynd detail may expose categories array
+        $nmCats = $pd['categories'] ?? $pd['department'] ?? $pd['l3_categories'] ?? [];
+        $nmSourceCat = '';
+        if (is_array($nmCats) && !empty($nmCats)) {
+            $nmSourceCat = is_array($nmCats[0]) ? ($nmCats[0]['name'] ?? '') : (string) $nmCats[0];
+        } elseif (is_string($nmCats)) {
+            $nmSourceCat = $nmCats;
+        }
+
         return [
             'slug'                  => $pd['slug'] ?? $slug,
             'name'                  => $name,
             'manufacturer'          => $manufacturer ? $this->titleCase(strtolower($manufacturer)) : null,
-            'category'              => $this->guessCategory($haystack),
+            'category'              => $this->guessCategory($haystack, $nmSourceCat),
             'description'           => null,
             'composition'           => $composition ? $this->titleCase(strtolower($composition)) : null,
             'dosage_form'           => 'Unit',
@@ -1090,13 +1410,21 @@ class AIMedicineController extends Controller
                 ($p['manufacturer'] ?? '') . ' ' . $pf
             );
 
+            // PharmEasy search returns therapy / category taxonomy — use it directly
+            $sourceCategory = $p['therapyNames']
+                ?? $p['therapy']
+                ?? $p['categoryName']
+                ?? $p['primaryCategoryName']
+                ?? $p['category']
+                ?? '';
+
             $slug = $p['slug'] ?? null;
 
             $results[] = [
                 'slug'                  => $slug,
-                'name'                  => $p['name'],
+                'name'                  => $this->cleanProductName($p['name']),
                 'manufacturer'          => $manufacturer,
-                'category'              => $this->guessCategory($haystack),
+                'category'              => $this->guessCategory($haystack, (string) $sourceCategory),
                 'description'           => null, // fetched via generateDescription route
                 'composition'           => $p['moleculeName'] ?: null,
                 'dosage_form'           => $dosageForm,
@@ -1205,7 +1533,10 @@ class AIMedicineController extends Controller
                 'slug'                  => $p['slug'] ?? null,
                 'name'                  => $fullName,
                 'manufacturer'          => $manufacturer ? $this->titleCase(strtolower($manufacturer)) : null,
-                'category'              => $this->guessCategory($haystack),
+                'category'              => $this->guessCategory($haystack, implode(' ', array_filter(array_map(
+                    fn($c) => is_array($c) ? ($c['name'] ?? '') : (string) $c,
+                    array_slice((array) ($p['l3_categories'] ?? $p['categories'] ?? []), 0, 1)
+                )))),
                 'description'           => $description,
                 'composition'           => $composition ? $this->titleCase(strtolower($composition)) : null,
                 'dosage_form'           => 'Unit',
@@ -1289,11 +1620,14 @@ class AIMedicineController extends Controller
 
             $haystack = strtoupper($pname . ' ' . ($manufacturer ?? '') . ' ' . ($composition ?? ''));
 
+            // Apollo returns category / department fields
+            $apolloCat = $p['category'] ?? $p['categoryName'] ?? $p['department'] ?? $p['categorySlug'] ?? '';
+
             $results[] = [
                 'slug'                  => $p['slug'] ?? $p['urlKey'] ?? null,
-                'name'                  => $pname,
+                'name'                  => $this->cleanProductName($pname),
                 'manufacturer'          => $manufacturer ? $this->titleCase(strtolower($manufacturer)) : null,
-                'category'              => $this->guessCategory($haystack),
+                'category'              => $this->guessCategory($haystack, (string) $apolloCat),
                 'description'           => null,
                 'composition'           => $composition ? $this->titleCase(strtolower($composition)) : null,
                 'dosage_form'           => $p['dosageForm'] ?? $p['form'] ?? 'Unit',
@@ -1461,11 +1795,15 @@ class AIMedicineController extends Controller
         $therapy  = strtoupper($pd['therapy'] ?? $pd['therapyNames'] ?? '');
         $haystack = strtoupper(($pd['name'] ?? '') . ' ' . $therapy . ' ' . ($composition ?? '') . ' ' . $pf);
 
+        // Source taxonomy from PharmEasy detail
+        $sourceCategory = $pd['therapyNames'] ?? $pd['therapy']
+            ?? $pd['categoryName'] ?? $pd['primaryCategoryName'] ?? '';
+
         return [
             'slug'                  => $pd['slug'] ?? $slug,
             'name'                  => $pd['name'] ?? '',
             'manufacturer'          => $manufacturer,
-            'category'              => $this->guessCategory($haystack),
+            'category'              => $this->guessCategory($haystack, (string) $sourceCategory),
             'description'           => $description ?: null,
             'composition'           => $composition ?: null,
             'dosage_form'           => $dosageForm,
@@ -1759,12 +2097,293 @@ PROMPT;
         return $data;
     }
 
-    private function guessCategory(string $haystack): string
+    /**
+     * Determine our category slug for a product.
+     *
+     * Priority:
+     *  1. Source platform taxonomy (PharmEasy therapy, NetMeds category etc.) if provided
+     *  2. Keyword scan of the haystack (name + composition + manufacturer + packform)
+     *  3. Default fallback: vitamins
+     */
+    private function guessCategory(string $haystack, string $sourceCategory = ''): string
     {
-        foreach (self::CATEGORY_MAP as $kw => $cat) {
-            if (str_contains($haystack, $kw)) return $cat;
+        // 1. Try direct taxonomy mapping first
+        if ($sourceCategory !== '') {
+            $mapped = $this->mapSourceCategory($sourceCategory);
+            if ($mapped !== null) {
+                return $mapped;
+            }
         }
-        return 'fever-pain';
+
+        // 2. Keyword scan
+        $upper = strtoupper($haystack);
+        foreach (self::CATEGORY_MAP as $kw => $cat) {
+            if (str_contains($upper, strtoupper($kw))) {
+                return $cat;
+            }
+        }
+
+        // 3. Default
+        return 'vitamins';
+    }
+
+    /**
+     * Map a source-platform taxonomy string (PharmEasy therapy, NetMeds category,
+     * Apollo category) directly to one of our category slugs.
+     * Returns null if no confident match, so callers can fall back to guessCategory().
+     */
+    private function mapSourceCategory(string $sourceCategory): ?string
+    {
+        $s = strtoupper(trim($sourceCategory));
+        if ($s === '') return null;
+
+        // Direct taxonomy → our slug map (ordered most-specific first)
+        $map = [
+            // ── Pain / Fever ──────────────────────────────────────────────────
+            'PAIN'              => 'fever-pain',
+            'ANALGESIC'         => 'fever-pain',
+            'ANTIPYRETIC'       => 'fever-pain',
+            'FEVER'             => 'fever-pain',
+            'NSAID'             => 'fever-pain',
+            'MUSCLE RELAXANT'   => 'fever-pain',
+
+            // ── Vitamins ──────────────────────────────────────────────────────
+            'VITAMIN'           => 'vitamins',
+            'SUPPLEMENT'        => 'vitamins',
+            'NUTRACEUTIC'       => 'vitamins',
+            'MINERAL'           => 'vitamins',
+            'PROTEIN'           => 'vitamins',
+            'FISH OIL'          => 'vitamins',
+            'OMEGA'             => 'vitamins',
+
+            // ── Immunity ──────────────────────────────────────────────────────
+            'IMMUNITY'          => 'immunity',
+            'IMMUNE'            => 'immunity',
+
+            // ── Bone & Joint ──────────────────────────────────────────────────
+            'BONE'              => 'bone-joint',
+            'JOINT'             => 'bone-joint',
+            'CALCIUM'           => 'bone-joint',
+            'ARTHRITIS'         => 'bone-joint',
+            'OSTEOPOROSIS'      => 'bone-joint',
+
+            // ── Digestive ─────────────────────────────────────────────────────
+            'GASTROINTESTINAL'  => 'digestive',
+            'DIGESTIVE'         => 'digestive',
+            'ANTACID'           => 'digestive',
+            'LAXATIVE'          => 'digestive',
+            'PROBIOTIC'         => 'digestive',
+            'GI CARE'           => 'digestive',
+
+            // ── Diabetes ──────────────────────────────────────────────────────
+            'DIABETES'          => 'diabetes',
+            'DIABETIC'          => 'diabetes',
+            'ANTI DIABETIC'     => 'diabetes',
+            'ANTI-DIABETIC'     => 'diabetes',
+            'BLOOD GLUCOSE'     => 'diabetes',
+            'GLUCOMETER'        => 'diabetes',
+
+            // ── Heart & BP ────────────────────────────────────────────────────
+            'CARDIAC'           => 'heart-bp',
+            'CARDIO'            => 'heart-bp',
+            'ANTIHYPERTENSIVE'  => 'heart-bp',
+            'HYPERTENSION'      => 'heart-bp',
+            'BLOOD PRESSURE'    => 'heart-bp',
+            'CHOLESTEROL'       => 'heart-bp',
+            'STATIN'            => 'heart-bp',
+
+            // ── Cold & Allergy ────────────────────────────────────────────────
+            'ALLERGY'           => 'cold-allergy',
+            'ANTIHISTAMINE'     => 'cold-allergy',
+            'COLD AND COUGH'    => 'cold-allergy',
+            'COLD & COUGH'      => 'cold-allergy',
+            'COUGH'             => 'cold-allergy',
+            'NASAL'             => 'cold-allergy',
+            'SINUS'             => 'cold-allergy',
+
+            // ── Respiratory ───────────────────────────────────────────────────
+            'RESPIRATORY'       => 'respiratory-care',
+            'ASTHMA'            => 'respiratory-care',
+            'BRONCHIAL'         => 'respiratory-care',
+            'NEBULIZ'           => 'respiratory-care',
+            'PULMONARY'         => 'respiratory-care',
+
+            // ── Eye & Ear ─────────────────────────────────────────────────────
+            'EYE'               => 'eye-ear',
+            'EAR'               => 'eye-ear',
+            'OPHTHALM'          => 'eye-ear',
+            'OPHTHALMOLOGY'     => 'eye-ear',
+
+            // ── Skin Care ─────────────────────────────────────────────────────
+            'SKIN'              => 'skin-care',
+            'DERMATOLOGY'       => 'skin-care',
+            'DERMA'             => 'skin-care',
+            'ACNE'              => 'skin-care',
+            'SUNSCREEN'         => 'skin-care',
+            'MOISTUR'           => 'skin-care',
+            'ANTIFUNGAL'        => 'skin-care',
+
+            // ── Personal Care ─────────────────────────────────────────────────
+            'PERSONAL CARE'     => 'personal-care',
+            'FACE WASH'         => 'personal-care',
+            'BODY WASH'         => 'personal-care',
+            'FEMININE HYGIENE'  => 'personal-care',
+            'SANITARY'          => 'personal-care',
+            'DEODORANT'         => 'personal-care',
+
+            // ── Hair Care ─────────────────────────────────────────────────────
+            'HAIR CARE'         => 'hair-care',
+            'HAIR'              => 'hair-care',
+            'SCALP'             => 'hair-care',
+
+            // ── Oral Care ─────────────────────────────────────────────────────
+            'ORAL CARE'         => 'oral-care',
+            'ORAL HYGIENE'      => 'oral-care',
+            'DENTAL'            => 'oral-care',
+            'TOOTHPASTE'        => 'oral-care',
+            'MOUTHWASH'         => 'oral-care',
+
+            // ── Baby Care ─────────────────────────────────────────────────────
+            'BABY CARE'         => 'baby-care',
+            'BABY'              => 'baby-care',
+            'INFANT'            => 'baby-care',
+            'PEDIATRIC'         => 'baby-care',
+
+            // ── Women's Health ────────────────────────────────────────────────
+            'WOMEN'             => 'womens-health',
+            'GYNAE'             => 'womens-health',
+            'GYNAECOLOGY'       => 'womens-health',
+            'MENSTRUAL'         => 'womens-health',
+            'PRENATAL'          => 'womens-health',
+            'PREGNANCY'         => 'womens-health',
+            'PCOS'              => 'womens-health',
+
+            // ── Men's Health ──────────────────────────────────────────────────
+            "MEN'S HEALTH"      => 'mens-health',
+            'MEN HEALTH'        => 'mens-health',
+            'ANDROLOGY'         => 'mens-health',
+            'PROSTATE'          => 'mens-health',
+
+            // ── Sexual Wellness ───────────────────────────────────────────────
+            'SEXUAL WELLNESS'   => 'sexual-wellness',
+            'CONTRACEPTIVE'     => 'sexual-wellness',
+            'CONDOM'            => 'sexual-wellness',
+            'FERTILITY'         => 'sexual-wellness',
+
+            // ── Mother Care ───────────────────────────────────────────────────
+            'MOTHER CARE'       => 'mother-care',
+            'MATERNITY'         => 'mother-care',
+            'LACTATION'         => 'mother-care',
+            'NURSING'           => 'mother-care',
+
+            // ── Mental Wellness ───────────────────────────────────────────────
+            'MENTAL HEALTH'     => 'mental-wellness',
+            'SLEEP'             => 'mental-wellness',
+            'STRESS'            => 'mental-wellness',
+            'ANXIETY'           => 'mental-wellness',
+            'BRAIN'             => 'mental-wellness',
+
+            // ── Weight Management ─────────────────────────────────────────────
+            'WEIGHT MANAGEMENT' => 'weight-management',
+            'WEIGHT LOSS'       => 'weight-management',
+            'OBESITY'           => 'weight-management',
+            'SLIMMING'          => 'weight-management',
+
+            // ── Nutrition & Health Drinks ─────────────────────────────────────
+            'NUTRITION'         => 'nutrition-health-drinks',
+            'HEALTH DRINK'      => 'nutrition-health-drinks',
+            'SPORTS NUTRITION'  => 'nutrition-health-drinks',
+            'ENERGY DRINK'      => 'nutrition-health-drinks',
+            'ELECTROLYTE'       => 'nutrition-health-drinks',
+
+            // ── Liver Care ────────────────────────────────────────────────────
+            'LIVER'             => 'liver-care',
+            'HEPATO'            => 'liver-care',
+            'HEPATOPROTECTIVE'  => 'liver-care',
+
+            // ── Kidney Care ───────────────────────────────────────────────────
+            'KIDNEY'            => 'kidney-care',
+            'RENAL'             => 'kidney-care',
+            'URINARY'           => 'kidney-care',
+            'UROLOG'            => 'kidney-care',
+
+            // ── Medical Devices ───────────────────────────────────────────────
+            'MEDICAL DEVICE'    => 'medical-devices',
+            'GLUCOMETER'        => 'medical-devices',
+            'THERMOMETER'       => 'medical-devices',
+            'BLOOD PRESSURE MONITOR' => 'medical-devices',
+            'PULSE OXIMETER'    => 'medical-devices',
+            'WEIGHING SCALE'    => 'medical-devices',
+
+            // ── Surgical & First Aid ──────────────────────────────────────────
+            'SURGICAL'          => 'surgical-first-aid',
+            'FIRST AID'         => 'surgical-first-aid',
+            'WOUND CARE'        => 'surgical-first-aid',
+            'ANTISEPTIC'        => 'surgical-first-aid',
+            'BANDAGE'           => 'surgical-first-aid',
+
+            // ── Home Healthcare ───────────────────────────────────────────────
+            'HOME HEALTHCARE'   => 'home-healthcare',
+            'HOME CARE'         => 'home-healthcare',
+            'ORTHOPAEDIC'       => 'home-healthcare',
+            'MOBILITY AID'      => 'home-healthcare',
+
+            // ── Ayurvedic ─────────────────────────────────────────────────────
+            'AYURVEDIC'         => 'ayurvedic-products',
+            'AYURVEDA'          => 'ayurvedic-products',
+            'HERBAL'            => 'ayurvedic-products',
+            'UNANI'             => 'ayurvedic-products',
+
+            // ── Homeopathic ───────────────────────────────────────────────────
+            'HOMEOPATHIC'       => 'homeopathic-medicines',
+            'HOMOEOPATHIC'      => 'homeopathic-medicines',
+            'HOMEOPATHY'        => 'homeopathic-medicines',
+        ];
+
+        foreach ($map as $kw => $slug) {
+            if (str_contains($s, $kw)) {
+                return $slug;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Remove duplicate trailing pack-size tokens from a product name.
+     *
+     * PharmEasy names often look like:
+     *   "Dabur Khadiradi Gutika Tablet 40's 40 S"
+     *   "Dolo 650 Tablet 15's 15 S"
+     *
+     * Pattern: the name ends with  <qty>'s <qty> S   or  <qty> <unit> <qty> <unit>
+     * We collapse that into just the first occurrence.
+     */
+    private function cleanProductName(string $name): string
+    {
+        $name = trim($name);
+
+        // Remove trailing " <digits> S" when the same digits already appear before it
+        // e.g. "Tablet 40's 40 S" → "Tablet 40's"
+        $name = preg_replace_callback(
+            "/\\b(\\d+)['\x27\x60]?s?\\s+(\\d+)\\s+S\\b/i",
+            function ($m) {
+                // Only collapse if the two numbers are the same
+                return $m[1] === $m[2] ? $m[1] . "'s" : $m[0];
+            },
+            $name
+        );
+
+        // Remove trailing " <N> <Unit>" when "<N><Unit>" or "<N>'s" already exists
+        // e.g. "Tablet 40's 40 Tablet" → "Tablet 40's"
+        $units = 'Tablet|Capsule|Strip|Bottle|Pack|Sachet|Vial|Tube|Box|Piece|Unit|Ml|Mg|Gm|Kg|Nos';
+        $name = preg_replace(
+            '/(\d+\'?s?\s*)(' . $units . ')\.?\s+\d+\s+(?:' . $units . ')\.?\s*$/i',
+            '$1$2',
+            $name
+        );
+
+        return trim($name);
     }
 
     private function httpGet(string $url, string $referer = ''): ?string

@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.admin')
+﻿d@extends('admin.layouts.admin')
 @section('title', 'Categories')
 @section('page-title', 'Categories')
 @section('page-subtitle', $categories->count() . ' categories')

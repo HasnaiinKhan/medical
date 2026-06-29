@@ -13,8 +13,8 @@
      PHARMEASY AUTO-FILL PANEL  (pure vanilla JS, no Alpine)
 ═══════════════════════════════════════════════════════ --}}
 <style>
-.pe-panel        { display:none; margin-top:12px; border-radius:18px; border:1.5px solid #bfdbfe; background:linear-gradient(135deg,#eff6ff,#f5f3ff); padding:20px; box-shadow:0 4px 20px rgba(37,99,235,.10); }
-.pe-panel.open   { display:block; }
+.pe-panel        { display:none; margin-top:12px; border-radius:18px; border:1.5px solid #bfdbfe; background:linear-gradient(135deg,#eff6ff,#f5f3ff); padding:20px; box-shadow:0 4px 20px rgba(37,99,235,.10); overflow:visible; position:relative; z-index:20; }
+.pe-panel.open   { display:block !important; visibility:visible !important; opacity:1 !important; }
 .pe-search-row   { display:flex; gap:8px; margin-bottom:12px; }
 .pe-input        { flex:1; border:1.5px solid #bfdbfe; border-radius:12px; padding:10px 14px 10px 38px; font-size:13px; outline:none; background:#fff; }
 .pe-input:focus  { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.15); }
@@ -51,7 +51,7 @@
 .pe-toast        { position:fixed; bottom:24px; right:24px; z-index:9999; background:#2563eb; color:#fff; border-radius:14px; padding:12px 20px; font-size:13px; font-weight:700; box-shadow:0 8px 24px rgba(37,99,235,.3); display:flex; align-items:center; gap:8px; pointer-events:none; }
 </style>
 
-<div style="margin-bottom:24px;">
+<div style="margin-bottom:24px; position:relative; z-index:20; overflow:visible;">
 
     {{-- Toggle button --}}
     <button type="button" class="pe-toggle-btn" id="pe-toggle">
@@ -496,7 +496,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
 (function () {
-    var CSRF = document.querySelector('meta[name="csrf-token"]').content;
+    var CSRF       = document.querySelector('meta[name="csrf-token"]').content;
     var CATEGORY_MAP = {
         @foreach($categories as $cat)
         "{{ $cat->slug }}": "{{ $cat->id }}",
@@ -518,6 +518,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var metaBox    = document.getElementById('pe-meta');
     var grid       = document.getElementById('pe-grid');
 
+    if (!toggleBtn || !panel) return;
+
     var currentSource  = null;
     var currentResults = [];
     var selectedIdx    = null;
@@ -525,30 +527,29 @@ document.addEventListener('DOMContentLoaded', function() {
     var CROSS_ICON  = '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
     var SEARCH_ICON = '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>';
 
-    // Toggle panel open/close
+    // ── Toggle panel ──────────────────────────────────────────────────────────
     toggleBtn.addEventListener('click', function () {
         var isOpen = panel.classList.toggle('open');
         toggleLbl.textContent = isOpen ? ' Close' : ' Auto-Fill Agent';
         toggleIcon.innerHTML  = isOpen ? CROSS_ICON : SEARCH_ICON;
-        if (isOpen) queryInput.focus();
+        if (isOpen && queryInput) queryInput.focus();
     });
 
-    // Enter key on input
-    queryInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') { e.preventDefault(); doSearch(); }
-    });
+    // ── Search ────────────────────────────────────────────────────────────────
+    if (queryInput) {
+        queryInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); doSearch(); }
+        });
+    }
+    if (searchBtn) searchBtn.addEventListener('click', doSearch);
 
-    searchBtn.addEventListener('click', doSearch);
-
-    // ── Search ──────────────────────────────────────────────────────────────
     function doSearch() {
-        var q = queryInput.value.trim();
+        var q = queryInput ? queryInput.value.trim() : '';
         if (!q) return;
-
         setLoading(true);
         showError('');
-        metaBox.style.display = 'none';
-        grid.innerHTML = '';
+        if (metaBox) metaBox.style.display = 'none';
+        if (grid)    grid.innerHTML = '';
         currentResults = [];
         selectedIdx    = null;
 
@@ -571,18 +572,14 @@ document.addEventListener('DOMContentLoaded', function() {
         .finally(function () { setLoading(false); });
     }
 
-    // ── Render cards ─────────────────────────────────────────────────────────
+    // ── Render result cards ───────────────────────────────────────────────────
     function renderResults() {
+        if (!grid) return;
         grid.innerHTML = '';
+        if (!currentResults.length) { showError('No results found. Try a more specific name.'); return; }
 
-        if (!currentResults.length) {
-            showError('No results found. Try a more specific name.');
-            return;
-        }
-
-        var srcLabel = currentSource === 'pharmeasy' ? '🛒 PharmEasy' : '🤖 AI Generated';
-        metaBox.textContent = srcLabel + ' · ' + currentResults.length + ' result(s) found';
-        metaBox.style.display = 'block';
+        var srcLabel = currentSource === 'pharmeasy' ? 'PharmEasy' : 'AI Generated';
+        if (metaBox) { metaBox.textContent = srcLabel + ' · ' + currentResults.length + ' result(s)'; metaBox.style.display = 'block'; }
 
         currentResults.forEach(function (item, idx) {
             var card = document.createElement('div');
@@ -595,9 +592,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             var rxBadge  = item.prescription_required ? '<span class="pe-badge pe-badge-rx">Rx</span>' : '';
             var catBadge = item.category ? '<span class="pe-badge pe-badge-cat">' + esc(item.category) + '</span>' : '';
-            var price    = item.price_suggestion ? '<span class="pe-price">₹' + parseFloat(item.price_suggestion).toFixed(2) + '</span>' : '';
+            var price    = item.price_suggestion ? '<span class="pe-price">&#8377;' + parseFloat(item.price_suggestion).toFixed(2) + '</span>' : '';
             var mrp      = (item.mrp_suggestion && item.price_suggestion && parseFloat(item.mrp_suggestion) > parseFloat(item.price_suggestion))
-                         ? '<span class="pe-mrp">₹' + parseFloat(item.mrp_suggestion).toFixed(2) + '</span>' : '';
+                         ? '<span class="pe-mrp">&#8377;' + parseFloat(item.mrp_suggestion).toFixed(2) + '</span>' : '';
 
             card.innerHTML =
                 '<div class="pe-overlay"><div class="pe-spinner"></div></div>' +
@@ -608,7 +605,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     '</div>' +
                 '</div>' +
                 '<div class="pe-card-bottom">' + price + mrp + rxBadge + catBadge + '</div>' +
-                '<div class="pe-tick">✔ Applied to form</div>';
+                '<div class="pe-tick">&#10004; Applied</div>';
 
             card.addEventListener('click', function () { selectCard(idx); });
             grid.appendChild(card);
@@ -617,16 +614,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ── Select card ───────────────────────────────────────────────────────────
     function selectCard(idx) {
-        var cards = grid.querySelectorAll('.pe-card');
-        cards.forEach(function (c) { c.classList.remove('active'); });
+        if (!grid) return;
+        grid.querySelectorAll('.pe-card').forEach(function (c) { c.classList.remove('active'); });
         var card = grid.querySelector('[data-idx="' + idx + '"]');
         if (!card) return;
         card.classList.add('active', 'loading');
         selectedIdx = idx;
 
         var data = currentResults[idx];
-
-        // Always fetch full pharmacy detail when slug is available so gallery images are included.
         if (data.slug && (data.source_platform === 'PharmEasy' || data.source_platform === 'NetMeds' || currentSource === 'pharmeasy')) {
             fetch(DETAIL_URL, {
                 method:  'POST',
@@ -639,17 +634,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 card.classList.remove('loading');
                 applyToForm(data);
             })
-            .catch(function () {
-                card.classList.remove('loading');
-                applyToForm(data);
-            });
+            .catch(function () { card.classList.remove('loading'); applyToForm(data); });
         } else {
             card.classList.remove('loading');
             applyToForm(data);
         }
     }
 
-    // ── Apply data to form ────────────────────────────────────────────────────
+    // ── Apply to form ─────────────────────────────────────────────────────────
     function applyToForm(d) {
         if (!d) return;
 
@@ -661,193 +653,135 @@ document.addEventListener('DOMContentLoaded', function() {
         setVal('name',         d.name);
         setVal('manufacturer', d.manufacturer);
 
-        // Category select
-        if (d.category && CATEGORY_MAP[d.category]) {
-            var sel = document.querySelector('select[name="category_id"]');
-            if (sel) sel.value = CATEGORY_MAP[d.category];
+        // Category: match existing slug OR create new
+        if (d.category) {
+            if (CATEGORY_MAP[d.category]) {
+                var sel = document.querySelector('select[name="category_id"]');
+                if (sel) {
+                    sel.value = CATEGORY_MAP[d.category];
+                    var alpineEl = sel.closest('[x-data]');
+                    if (alpineEl && alpineEl._x_dataStack) {
+                        try { alpineEl._x_dataStack[0].creating = false; } catch(e) {}
+                    }
+                }
+            } else {
+                var newCatName  = d.category.replace(/-/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+                var newCatInput = document.querySelector('input[name="new_category_name"]');
+                if (newCatInput) {
+                    newCatInput.value = newCatName;
+                    var alpineEl2 = newCatInput.closest('[x-data]');
+                    if (alpineEl2 && alpineEl2._x_dataStack) {
+                        try { alpineEl2._x_dataStack[0].creating = true; } catch(e) {}
+                    }
+                }
+            }
         }
 
-        // Pricing
         if (d.mrp_suggestion)   setVal('mrp',   parseFloat(d.mrp_suggestion).toFixed(2));
         if (d.price_suggestion) setVal('price', parseFloat(d.price_suggestion).toFixed(2));
 
-        // Prescription checkbox
         var rx = document.querySelector('input[name="prescription_required"]');
         if (rx) rx.checked = !!d.prescription_required;
 
-        // ── Description: ALWAYS generate via AI. Use any existing data as context. ──
+        // Description
         var descEl = document.querySelector('[name="description"]');
-
-        // Build whatever context we have from the product data
         var ctxParts = [];
         if (d.description)           ctxParts.push(d.description);
         if (d.composition)           ctxParts.push('Composition: ' + d.composition + '.');
         if (d.uses && d.uses.length) ctxParts.push('Uses: ' + d.uses.join('; ') + '.');
         var baseDesc = ctxParts.join('\n\n');
 
-        // Count words helper
-        function wordCount(str) {
-            return str ? str.trim().replace(/\s+/g, ' ').split(' ').length : 0;
-        }
-
-        // Always call AI - unless we already have a proper description of ≥50 words
-        // (e.g. PharmEasy detail fetch already returned a full paragraph)
+        function wordCount(str) { return str ? str.trim().replace(/\s+/g, ' ').split(' ').length : 0; }
         var needsAI = wordCount(d.description || '') < 50;
 
         if (descEl) {
             if (needsAI) {
-                // Show placeholder while AI generates
                 descEl.value = '';
-                descEl.placeholder = '✨ Generating AI description…';
+                descEl.placeholder = 'Generating AI description...';
                 descEl.disabled = true;
-
                 fetch(DESC_URL, {
                     method:  'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
-                    body:    JSON.stringify({
-                        name:         d.name         || '',
-                        manufacturer: d.manufacturer || '',
-                        composition:  d.composition  || '',
-                        uses:         d.uses         || [],
-                        dosage_form:  d.dosage_form  || '',
-                        category:     d.category     || '',
-                        existing:     baseDesc        || '',
-                    })
+                    body:    JSON.stringify({ name: d.name||'', manufacturer: d.manufacturer||'', composition: d.composition||'', uses: d.uses||[], dosage_form: d.dosage_form||'', category: d.category||'', existing: baseDesc||'' })
                 })
                 .then(function (res) { return res.json(); })
                 .then(function (j) {
-                    descEl.disabled    = false;
-                    descEl.placeholder = '';
-                    if (j.description && wordCount(j.description) >= 50) {
-                        descEl.value = j.description;
-                        showDescBadge('✨ AI description generated');
-                    } else if (j.description) {
-                        // AI returned something but it's short - append to base context
-                        descEl.value = (baseDesc ? baseDesc + '\n\n' : '') + j.description;
-                        showDescBadge('✨ AI description generated');
-                    } else {
-                        // AI failed - use base context as fallback
-                        descEl.value = baseDesc;
-                    }
+                    descEl.disabled = false; descEl.placeholder = '';
+                    descEl.value = (j.description && wordCount(j.description) >= 20) ? j.description : (baseDesc || '');
+                    if (j.description) showDescBadge('AI description generated');
                 })
-                .catch(function () {
-                    descEl.disabled    = false;
-                    descEl.placeholder = '';
-                    descEl.value       = baseDesc;
-                });
+                .catch(function () { descEl.disabled = false; descEl.placeholder = ''; descEl.value = baseDesc; });
             } else {
-                // Already have ≥50 word description from pharmacy data - use it directly
                 descEl.value = baseDesc;
-                showDescBadge('📋 Description from ' + (d.source_platform || 'pharmacy'));
+                showDescBadge('Description from ' + (d.source_platform || 'pharmacy'));
             }
         }
 
         fillProductImages(d);
-
-        // Toast
-        var toast = document.createElement('div');
-        toast.className = 'pe-toast';
-        toast.innerHTML = '✔ Form filled - ' + (needsAI ? '✨ generating description…' : 'description ready!');
-        document.body.appendChild(toast);
-        setTimeout(function () { toast.remove(); }, 4000);
+        showToast('Form filled successfully!');
     }
 
-    // Small badge that briefly appears next to the description field
-    function showDescBadge(msg) {
-        var descEl = document.querySelector('[name="description"]');
-        if (!descEl) return;
-        var badge = document.createElement('p');
-        badge.style.cssText = 'font-size:11px;color:#2563eb;font-weight:600;margin-top:4px;';
-        badge.textContent = msg;
-        descEl.parentNode.appendChild(badge);
-        setTimeout(function () { badge.remove(); }, 4000);
-    }
-
-    function uniqueImageUrls(urls) {
-        var seen = {};
-        var result = [];
-        (urls || []).forEach(function (url) {
-            if (!url) return;
-            var key = String(url).split('?')[0];
-            if (!seen[key]) {
-                seen[key] = true;
-                result.push(url);
-            }
-        });
-        return result.slice(0, 8);
-    }
-
-    function resetImageSlots() {
-        var container = document.getElementById('image-slots');
-        if (!container) return;
-
-        var slots = container.querySelectorAll('.image-slot');
-        slots.forEach(function (slot, idx) {
-            if (idx > 0) slot.remove();
-        });
-
-        var primaryInput = document.querySelector('input[name="image_url"]');
-        if (primaryInput) {
-            primaryInput.value = '';
-            primaryInput.placeholder = 'https://example.com/image.jpg';
-            primaryInput.dispatchEvent(new Event('input'));
-        }
-    }
-
-    function ensureImageSlot(idx) {
-        var container = document.getElementById('image-slots');
-        if (!container) return null;
-
-        while (container.querySelectorAll('.image-slot').length <= idx) {
-            if (!addImageSlot()) break;
-        }
-
-        return container.querySelectorAll('.image-slot')[idx] || null;
-    }
-
-    function setSlotImage(idx, url) {
-        var slot = ensureImageSlot(idx);
-        if (!slot) return;
-
-        var input = idx === 0
-            ? slot.querySelector('input[name="image_url"]')
-            : slot.querySelector('input[name="extra_image_url[]"]');
-
-        if (!input) return;
-        input.value = url;
-        input.dispatchEvent(new Event('input'));
-    }
-
+    // ── Fill images ───────────────────────────────────────────────────────────
     function fillProductImages(d) {
-        var urls = uniqueImageUrls([d.image_url].concat(d.gallery_image_urls || []));
-        if (!urls.length) return;
+        var images = [];
+        if (d.image_url) images.push(d.image_url);
+        if (d.gallery_images && Array.isArray(d.gallery_images))
+            d.gallery_images.forEach(function(u){ if(u && images.indexOf(u)===-1) images.push(u); });
+        if (d.extra_images && Array.isArray(d.extra_images))
+            d.extra_images.forEach(function(u){ if(u && images.indexOf(u)===-1) images.push(u); });
+        if (!images.length) return;
 
-        resetImageSlots();
-        urls.forEach(function (url, idx) {
-            setSlotImage(idx, url);
+        var slots = document.querySelectorAll('.image-slot');
+        for (var x = 0; x < images.length - slots.length && slots.length + x < 8; x++) addImageSlot();
+        slots = document.querySelectorAll('.image-slot');
+
+        images.forEach(function(url, i) {
+            if (i >= slots.length) return;
+            var slot = slots[i];
+            var urlInput  = slot.querySelector('.img-url-input');
+            var preview   = slot.querySelector('.img-preview');
+            var fileInput = slot.querySelector('input[type="file"]');
+            if (fileInput) { try { fileInput.value=''; } catch(e){} fileInput.removeAttribute('data-file-selected'); var lbl=slot.querySelector('.file-label'); if(lbl) lbl.textContent='Click to choose image'; }
+            if (urlInput)  urlInput.value = url;
+            if (preview)   preview.innerHTML = '<img src="'+esc(url)+'" class="h-full w-full object-contain p-1" onerror="this.style.opacity=\'.15\'">';
         });
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
-    function setLoading(on) {
-        searchBtn.disabled = on;
-        btnText.textContent = on ? 'Searching…' : 'Search';
-        var spin = document.getElementById('pe-search-spinner');
-        if (spin) spin.style.display = on ? 'inline-block' : 'none';
-        // Full-page loader (admin layout provides window.adminLoader)
-        if (window.adminLoader) {
-            if (on) window.adminLoader.show();
-            else    window.adminLoader.hide();
-        }
+    function showDescBadge(msg) {
+        var el = document.querySelector('[name="description"]');
+        if (!el || !el.parentNode) return;
+        var b = document.createElement('p');
+        b.style.cssText = 'font-size:10px;color:#2563eb;font-weight:600;margin:4px 0 0;';
+        b.textContent = msg;
+        el.parentNode.appendChild(b);
+        setTimeout(function(){ if(b.parentNode) b.parentNode.removeChild(b); }, 4000);
     }
 
     function showError(msg) {
+        if (!errorBox) return;
         errorBox.textContent = msg;
         errorBox.style.display = msg ? 'block' : 'none';
     }
 
-    function esc(str) {
-        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    function setLoading(on) {
+        if (searchBtn) searchBtn.disabled = on;
+        if (btnText)   btnText.textContent = on ? 'Searching...' : 'Search';
+        var spin = document.getElementById('pe-search-spinner');
+        if (spin) spin.style.display = on ? 'inline-block' : 'none';
+        if (window.adminLoader) { on ? window.adminLoader.show() : window.adminLoader.hide(); }
+    }
+
+    function showToast(msg) {
+        var t = document.createElement('div');
+        t.className = 'pe-toast';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(function(){ t.style.transition='opacity .4s'; t.style.opacity='0'; setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 400); }, 3000);
+    }
+
+    function esc(s) {
+        return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
 })();

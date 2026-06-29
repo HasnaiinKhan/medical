@@ -166,7 +166,7 @@
                         <span id="cart-summary-delivery-fee" class="text-xs font-medium text-slate-500 italic">Calculated at checkout</span>
                     </div>
                     <p id="cart-delivery-text" class="text-xs text-slate-500 bg-blue-50 rounded-lg px-3 py-2 border border-blue-100">
-                        🚚 Delivery: Free (≤5km, ≥₹500) · ₹40 (5–10km) · ₹50 (10km+)
+                        Cart Value Above 500 and Under 5km Delivery is Free
                     </p>
                 </div>
 

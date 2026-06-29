@@ -4,7 +4,7 @@
 @section('page-subtitle', $medicine->name)
 
 @section('content')
-<form method="post" action="{{ route('admin.medicines.update', $medicine) }}" enctype="multipart/form-data">
+<form method="post" action="{{ route('admin.medicines.update', $medicine) }}" enctype="multipart/form-data" style="position:relative; z-index:10; overflow:visible;">
     @csrf
     @method('PUT')
     @include('admin.medicines._form')

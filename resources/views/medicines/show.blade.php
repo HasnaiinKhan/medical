@@ -21,35 +21,80 @@
     <span class="text-slate-700 font-medium truncate max-w-xs">{{ $medicine->name }}</span>
 </nav>
 
-<div class="grid gap-8 lg:grid-cols-2">
+<div class="grid gap-8 lg:grid-cols-2" id="product-grid" style="position:relative;">
 
     {{-- ===== IMAGE PANEL ===== --}}
     <div class="space-y-3" x-data="{ active: 0 }">
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 via-blue-50 to-cyan-100 shadow-inner" style="height: 320px;">
+        {{-- Main image — hover triggers the external zoom panel --}}
+        <div class="relative rounded-2xl bg-gradient-to-br from-blue-50 via-blue-50 to-cyan-100 shadow-inner"
+             style="height:320px; overflow:hidden; cursor:crosshair;"
+             id="img-zoom-container">
+
             <template x-for="(src, i) in {{ json_encode($allImages) }}" :key="i">
                 <img :src="src" :alt="'{{ addslashes($medicine->name) }}'"
-                     class="absolute inset-0 h-full w-full object-contain object-center p-4 transition-opacity duration-300"
+                     class="absolute inset-0 h-full w-full object-contain object-center p-4 transition-opacity duration-300 img-zoom-target"
                      :class="active === i ? 'opacity-100' : 'opacity-0'"
                      loading="eager"
                      onerror="this.style.display='none'">
             </template>
+
+            {{-- Small crosshair square that follows cursor inside the image --}}
+            <div id="img-zoom-crosshair"
+                 style="display:none; position:absolute; pointer-events:none; z-index:10;
+                        border:2px solid #2563eb; background:rgba(37,99,235,.08);
+                        box-shadow:0 0 0 1px rgba(255,255,255,.6);">
+            </div>
+
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="z-index:-1">
                 <span class="text-9xl font-black text-blue-800/10 select-none">{{ strtoupper(substr($medicine->name, 0, 1)) }}</span>
             </div>
             @if($medicine->prescription_required)
-                <div class="absolute top-4 left-4 flex items-center gap-1.5 rounded-xl bg-amber-100 px-3 py-1.5 text-sm font-semibold text-amber-800 ring-1 ring-amber-200 shadow-sm">
+                <div class="absolute top-4 left-4 flex items-center gap-1.5 rounded-xl bg-amber-100 px-3 py-1.5 text-sm font-semibold text-amber-800 ring-1 ring-amber-200 shadow-sm" style="z-index:5;">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     Prescription Required
                 </div>
             @endif
             @if($medicine->mrp_paise > $medicine->price_paise)
-                <div class="absolute top-4 right-4 flex h-14 w-14 flex-col items-center justify-center rounded-full bg-blue-600 text-white shadow-lg">
+                <div class="absolute top-4 right-4 flex h-14 w-14 flex-col items-center justify-center rounded-full bg-blue-600 text-white shadow-lg" style="z-index:5;">
                     <span class="text-xs font-bold leading-none">{{ $medicine->discountPercent() }}%</span>
                     <span class="text-xs font-semibold leading-none">OFF</span>
                 </div>
             @endif
+
+            {{-- Hover hint --}}
+            <div id="img-zoom-hint"
+                 style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:5;
+                        background:rgba(37,99,235,.82);color:#fff;font-size:10px;font-weight:600;
+                        border-radius:8px;padding:4px 10px;pointer-events:none;
+                        display:flex;align-items:center;gap:5px;white-space:nowrap;">
+                <svg style="width:6px;height:6px;flex-shrink:0;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/>
+                </svg>
+                Hover to zoom
+            </div>
         </div>
 
+        {{-- ===== EXTERNAL ZOOM RESULT PANEL ===== --}}
+        {{-- Positioned absolutely over the right (product info) column --}}
+        <div id="img-zoom-result"
+             style="display:none;
+                    position:absolute;
+                    top:0;
+                    left:calc(50% + 8px);
+                    width:calc(50% - 8px);
+                    height:320px;
+                    z-index:100;
+                    border-radius:16px;
+                    border:2px solid #bfdbfe;
+                    background:#fff;
+                    box-shadow:0 12px 40px rgba(37,99,235,.18);
+                    overflow:hidden;
+                    background-repeat:no-repeat;">
+            <div style="position:absolute;top:8px;right:10px;font-size:10px;font-weight:600;
+                        color:#2563eb;background:#eff6ff;border-radius:6px;padding:2px 8px;">
+                <i class="fa-solid fa-magnifying-glass-plus" style="color: rgba(66, 34, 196, 1);"></i> Zoomed View
+            </div>
+        </div>
         @if(count($allImages) > 1)
             <div class="flex gap-2 overflow-x-auto pb-1">
                 @foreach($allImages as $i => $src)
@@ -246,3 +291,101 @@
 @endif
 
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const ZOOM = 3.5;
+
+    const container = document.getElementById('img-zoom-container');
+    const crosshair = document.getElementById('img-zoom-crosshair');
+    const result    = document.getElementById('img-zoom-result');
+    const hint      = document.getElementById('img-zoom-hint');
+    if (!container || !result) return;
+
+    function isDesktop() { return window.innerWidth >= 1024; }
+
+    function getActiveImg() {
+        return [...container.querySelectorAll('.img-zoom-target')]
+            .find(img => img.style.display !== 'none' && !img.classList.contains('opacity-0'))
+            || container.querySelector('.img-zoom-target');
+    }
+
+    function showZoom() {
+        if (!isDesktop()) return;
+        result.style.display = 'block';
+        if (crosshair) crosshair.style.display = 'block';
+        if (hint) hint.style.display = 'none';
+    }
+
+    function hideZoom() {
+        result.style.display = 'none';
+        if (crosshair) crosshair.style.display = 'none';
+    }
+
+    function moveLens(e) {
+        if (!isDesktop()) return;
+        const img = getActiveImg();
+        if (!img || !img.complete || !img.naturalWidth) return;
+
+        const rect  = container.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+
+        // Rendered image bounds (object-fit:contain with 16px padding)
+        const PAD   = 16;
+        const cW    = rect.width  - PAD * 2;
+        const cH    = rect.height - PAD * 2;
+        const natW  = img.naturalWidth  || 400;
+        const natH  = img.naturalHeight || 400;
+        const scale = Math.min(cW / natW, cH / natH);
+        const rendW = natW * scale;
+        const rendH = natH * scale;
+        const imgL  = PAD + (cW - rendW) / 2;
+        const imgT  = PAD + (cH - rendH) / 2;
+
+        // Result panel dimensions
+        const rW = result.offsetWidth  || 300;
+        const rH = result.offsetHeight || 320;
+
+        // Crosshair size = result panel viewport mapped to source
+        const chW    = rW / ZOOM;
+        const chH    = rH / ZOOM;
+        const halfCW = chW / 2;
+        const halfCH = chH / 2;
+
+        // Clamp cursor so crosshair stays within image
+        x = Math.max(imgL + halfCW, Math.min(x, imgL + rendW - halfCW));
+        y = Math.max(imgT + halfCH, Math.min(y, imgT + rendH - halfCH));
+
+        // Position the crosshair square inside the container
+        if (crosshair) {
+            crosshair.style.width  = chW + 'px';
+            crosshair.style.height = chH + 'px';
+            crosshair.style.left   = (x - halfCW) + 'px';
+            crosshair.style.top    = (y - halfCH)  + 'px';
+        }
+
+        // Update result panel background
+        const bgW = rendW * ZOOM;
+        const bgH = rendH * ZOOM;
+        const rx  = x - imgL;
+        const ry  = y - imgT;
+        const bpX = -(rx * ZOOM - rW / 2);
+        const bpY = -(ry * ZOOM - rH / 2);
+
+        result.style.backgroundImage    = `url('${img.src}')`;
+        result.style.backgroundSize     = `${bgW}px ${bgH}px`;
+        result.style.backgroundPosition = `${bpX}px ${bpY}px`;
+    }
+
+    container.addEventListener('mouseenter', showZoom);
+    container.addEventListener('mouseleave', hideZoom);
+    container.addEventListener('mousemove',  moveLens);
+
+    window.addEventListener('resize', function () {
+        if (!isDesktop()) hideZoom();
+    });
+})();
+</script>
+@endpush
