@@ -12,6 +12,7 @@ class HomeController extends Controller
     {
         $featured = Medicine::query()
             ->with('category')
+            ->where('is_active', true)
             ->orderByDesc('id')
             ->take(8)
             ->get();

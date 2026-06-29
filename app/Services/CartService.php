@@ -60,7 +60,7 @@ class CartService
             return collect();
         }
 
-        $medicines = Medicine::query()->whereIn('id', $ids)->get()->keyBy('id');
+        $medicines = Medicine::query()->whereIn('id', $ids)->where('is_active', true)->get()->keyBy('id');
 
         return collect($this->items())->map(function (int $qty, int $id) use ($medicines) {
             $medicine = $medicines->get($id);
@@ -87,7 +87,7 @@ class CartService
             return ['lines' => collect(), 'removed' => [], 'clamped' => []];
         }
 
-        $medicines = Medicine::query()->whereIn('id', $ids)->get()->keyBy('id');
+        $medicines = Medicine::query()->whereIn('id', $ids)->where('is_active', true)->get()->keyBy('id');
         $cart      = $this->items();
         $removed   = [];
         $clamped   = [];

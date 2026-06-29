@@ -45,7 +45,7 @@
                     class="relative block rounded-2xl border-2 border-dashed p-6 sm:p-10 text-center transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                     <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-700 text-2xl shadow-inner">
-                        📄
+                        <i class="fa-solid fa-file-arrow-up" style="color: rgb(0, 0, 0);"></i>
                     </div>
                     <p class="text-sm sm:text-base font-semibold text-slate-800" x-text="fileName || 'Tap to browse or drop CSV here'"></p>
                     <p class="mt-1 text-xs text-slate-500">Supports .csv files up to 2MB</p>

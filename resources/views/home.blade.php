@@ -432,7 +432,7 @@
     <div class="popular-scroll">
         @foreach ($featured as $m)
             @php
-            $colors = ['from-blue-50 to-blue-100','from-blue-50 to-indigo-100','from-purple-50 to-violet-100','from-amber-50 to-orange-100','from-rose-50 to-pink-100','from-sky-50 to-cyan-100'];
+            $colors = ['white'];
             $color  = $colors[$loop->index % count($colors)];
             $delay  = ($loop->index % 4) + 1;
             @endphp

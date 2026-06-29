@@ -108,6 +108,7 @@ class AdminMedicineController extends Controller
             'price_paise'           => (int) round($data['price'] * 100),
             'prescription_required' => (bool) ($data['prescription_required'] ?? false),
             'stock'                 => (int) $data['stock'],
+            'is_active'             => (bool) ($request->input('is_active', false)),
             'image_url'             => $primaryImage,
             'extra_images'          => $extraImages,
         ]);
@@ -125,6 +126,19 @@ class AdminMedicineController extends Controller
 
         return redirect()->route('admin.medicines.index')
             ->with('status', "Medicine '{$name}' deleted.");
+    }
+
+    public function toggleActive(Medicine $medicine): \Illuminate\Http\JsonResponse
+    {
+        $medicine->update(['is_active' => ! $medicine->is_active]);
+
+        return response()->json([
+            'ok'        => true,
+            'is_active' => $medicine->is_active,
+            'message'   => $medicine->is_active
+                ? "'{$medicine->name}' is now live."
+                : "'{$medicine->name}' is now hidden from customers.",
+        ]);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

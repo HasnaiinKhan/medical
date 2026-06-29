@@ -23,6 +23,7 @@ class MedicineController extends Controller
 
         $medicineQuery = Medicine::query()
             ->with('category')
+            ->where('is_active', true)
             ->when($q !== '', function ($query) use ($q) {
                 $query->where(function ($sub) use ($q) {
                     $sub->where('name', 'like', '%'.$q.'%')
@@ -43,6 +44,7 @@ class MedicineController extends Controller
             ->withQueryString();
 
         $brands = Medicine::query()
+            ->where('is_active', true)
             ->when($q !== '', function ($query) use ($q) {
                 $query->where(function ($sub) use ($q) {
                     $sub->where('name', 'like', '%'.$q.'%')
@@ -92,6 +94,7 @@ class MedicineController extends Controller
 
         $suggestions = Medicine::query()
             ->with('category')
+            ->where('is_active', true)
             ->when($category, function ($query, $slug) {
                 $query->whereHas('category', fn ($c) => $c->where('slug', $slug));
             })
@@ -127,10 +130,14 @@ class MedicineController extends Controller
 
     public function show(Medicine $medicine): View
     {
+        // Block direct access to inactive products
+        abort_if(! $medicine->is_active, 404);
+
         $medicine->load('category');
 
         $related = Medicine::query()
             ->where('category_id', $medicine->category_id)
+            ->where('is_active', true)
             ->whereKeyNot($medicine->id)
             ->take(4)
             ->get();

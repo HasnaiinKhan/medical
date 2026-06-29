@@ -5,6 +5,37 @@
 
 @section('content')
 
+<style>
+/* ── Medicine active-toggle button ─────────────────────────────────── */
+.medicine-active-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+}
+.med-toggle-on  { background: #f0fdf4; color: #15803d; }
+.med-toggle-on:hover  { background: #dcfce7; }
+.med-toggle-off { background: #f1f5f9; color: #64748b; }
+.med-toggle-off:hover { background: #e2e8f0; }
+
+.toggle-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.med-toggle-on  .toggle-dot { background: #22c55e; }
+.med-toggle-off .toggle-dot { background: #94a3b8; }
+</style>
+
 @php
     $outOfStockList = \App\Models\Medicine::where('stock', '<=', 0)->orderBy('name')->get(['id','name','slug','stock']);
     $lowStockList   = \App\Models\Medicine::where('stock', '>', 0)->where('stock', '<=', 5)->orderBy('stock')->get(['id','name','slug','stock']);
@@ -188,12 +219,12 @@ function dismissMedicineAlert(alertId) {
                     <th class="text-left">Price</th>
                     <th class="text-left">Stock</th>
                     <th class="text-left">Rx</th>
-                    <th class="text-right">Actions</th>
+                    <th class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($medicines as $m)
-                    <tr>
+                    <tr id="medicine-row-{{ $m->id }}" style="{{ $m->is_active ? '' : 'opacity:.45; background:#f8fafc;' }}">
                         <td class="text-slate-400 text-xs">{{ $m->id }}</td>
                         <td>
                             <div class="flex items-center gap-3">
@@ -226,19 +257,24 @@ function dismissMedicineAlert(alertId) {
                             @endif
                         </td>
                         <td class="text-right">
-                            <div class="flex items-center justify-end gap-1.5 flex-wrap sm:flex-nowrap">
-                                <a href="{{ route('admin.medicines.edit', $m) }}"
-                                   class="btn-sm bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-800 w-full sm:w-auto" style="text-align:center;">
-                                    Edit
-                                </a>
-                                <form method="post" action="{{ route('admin.medicines.destroy', $m) }}"
-                                      id="delete-form-{{ $m->id }}" class="w-full sm:w-auto">
+                            <div style="display:inline-flex;align-items:center;gap:5px;">
+                                {{-- Live/Hidden badge --}}
+                                <button type="button"
+                                        data-toggle-url="{{ route('admin.medicines.toggleActive', $m) }}"
+                                        data-id="{{ $m->id }}"
+                                        data-name="{{ addslashes($m->name) }}"
+                                        data-active="{{ $m->is_active ? '1' : '0' }}"
+                                        class="medicine-active-toggle {{ $m->is_active ? 'med-toggle-on' : 'med-toggle-off' }}">
+                                    <span class="toggle-dot"></span>
+                                    <span class="toggle-label">{{ $m->is_active ? 'Live' : 'Hidden' }}</span>
+                                </button>
+                                {{-- Edit --}}
+                                <a href="{{ route('admin.medicines.edit', $m) }}" class="btn-sm" style="background:#f1f5f9;color:#475569;">Edit</a>
+                                {{-- Delete --}}
+                                <form method="post" action="{{ route('admin.medicines.destroy', $m) }}" id="delete-form-{{ $m->id }}" style="display:inline;">
                                     @csrf @method('DELETE')
-                                    <button type="button"
-                                            onclick="openDeleteModal({{ $m->id }}, '{{ addslashes($m->name) }}')"
-                                            class="btn-sm bg-red-50 text-red-600 hover:bg-red-100 w-full">
-                                        Delete
-                                    </button>
+                                    <button type="button" onclick="openDeleteModal({{ $m->id }}, '{{ addslashes($m->name) }}')"
+                                            class="btn-sm" style="background:#fef2f2;color:#dc2626;">Delete</button>
                                 </form>
                             </div>
                         </td>
@@ -262,9 +298,117 @@ function dismissMedicineAlert(alertId) {
     @endif
 </div>
 
+{{-- ── STATUS TOGGLE CONFIRM MODAL ── --}}
+<div id="status-toggle-modal"
+     style="display:none; position:fixed; inset:0; z-index:9999;
+            background:rgba(15,23,42,0.55); backdrop-filter:blur(4px);
+            align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#fff; border-radius:20px; box-shadow:0 25px 50px rgba(0,0,0,.25);
+                padding:28px 24px; width:100%; max-width:400px;">
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+            <div style="width:48px; height:48px; border-radius:50%; background:#eff6ff;
+                        display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:22px;">
+                <i class="fa-solid fa-arrows-rotate" style="color: rgba(0, 4, 255, 1);"></i>    
+            </div>
+            <div>
+                <p style="margin:0; font-size:16px; font-weight:700; color:#0f172a;">Change Selling Status</p>
+                <p style="margin:3px 0 0; font-size:12px; color:#64748b;">This will update product visibility immediately</p>
+            </div>
+        </div>
+        <p style="font-size:13px; color:#475569; margin:0 0 8px;">
+            Are you sure you want to
+            <strong id="stm-action-label" style="color:#1e293b;">change status</strong>
+            for:
+        </p>
+        <p id="stm-product-name"
+           style="font-size:14px; font-weight:700; color:#2563eb; background:#eff6ff;
+                  border:1px solid #bfdbfe; border-radius:8px; padding:10px 14px;
+                  margin:0 0 22px; word-break:break-word;"></p>
+        <div style="display:flex; gap:10px;">
+            <button type="button" id="stm-cancel-btn"
+                    style="flex:1; border:1px solid #e2e8f0; background:#fff; border-radius:12px;
+                           padding:11px; font-size:13px; font-weight:600; color:#475569; cursor:pointer;"
+                    onmouseover="this.style.background='#f8fafc'"
+                    onmouseout="this.style.background='#fff'">
+                Cancel
+            </button>
+            <button type="button" id="stm-confirm-btn"
+                    style="flex:1; border:none; border-radius:12px; padding:11px; font-size:13px;
+                           font-weight:700; color:#fff; background:#16a34a; cursor:pointer;"
+                    onmouseover="this.style.filter='brightness(.9)'"
+                    onmouseout="this.style.filter='none'">
+                Yes, Enable
+            </button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
-{{-- ── DELETE CONFIRM MODAL ── --}}
+@push('scripts')
+<script>
+(function () {
+    var CSRF  = document.querySelector('meta[name="csrf-token"]').content;
+    var modal = document.getElementById('status-toggle-modal');
+
+    document.querySelectorAll('.medicine-active-toggle').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var isActive = this.dataset.active === '1';
+
+            document.getElementById('stm-product-name').textContent = this.dataset.name || 'this product';
+            document.getElementById('stm-action-label').textContent = isActive
+                ? 'disable selling (hide from customers)'
+                : 'enable selling (show to customers)';
+
+            var confirmBtn = document.getElementById('stm-confirm-btn');
+            confirmBtn.style.background = isActive ? '#dc2626' : '#16a34a';
+            confirmBtn.textContent      = isActive ? 'Yes, Disable' : 'Yes, Enable';
+
+            modal._pendingBtn   = this;
+            modal.style.display = 'flex';
+        });
+    });
+
+    document.getElementById('stm-confirm-btn').addEventListener('click', function () {
+        var btn = modal._pendingBtn;
+        modal.style.display = 'none';
+        if (!btn) return;
+
+        var url       = btn.dataset.toggleUrl;
+        var isActive  = btn.dataset.active === '1';
+        var nowActive = !isActive;
+        var row       = document.getElementById('medicine-row-' + btn.dataset.id);
+        var label     = btn.querySelector('.toggle-label');
+
+        btn.dataset.active = nowActive ? '1' : '0';
+        label.textContent  = nowActive ? 'Live' : 'Hidden';
+        btn.classList.toggle('med-toggle-on',  nowActive);
+        btn.classList.toggle('med-toggle-off', !nowActive);
+        if (row) { row.style.opacity = nowActive ? '' : '0.45'; row.style.background = nowActive ? '' : '#f8fafc'; }
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+            body: '_method=PATCH',
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (!d.ok) revert(); })
+        .catch(revert);
+
+        function revert() {
+            btn.dataset.active = isActive ? '1' : '0';
+            label.textContent  = isActive ? 'Live' : 'Hidden';
+            btn.classList.toggle('med-toggle-on',  isActive);
+            btn.classList.toggle('med-toggle-off', !isActive);
+            if (row) { row.style.opacity = isActive ? '' : '0.45'; row.style.background = isActive ? '' : '#f8fafc'; }
+        }
+    });
+
+    document.getElementById('stm-cancel-btn').addEventListener('click', function () { modal.style.display = 'none'; });
+    modal.addEventListener('click', function (e) { if (e.target === this) this.style.display = 'none'; });
+})();
+</script>
+@endpush
 <div id="delete-medicine-modal"
      style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(15,23,42,0.55); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:16px;">
     <div style="background:#fff; border-radius:20px; box-shadow:0 25px 50px rgba(0,0,0,.25); padding:28px 24px; width:100%; max-width:400px;">

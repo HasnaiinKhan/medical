@@ -22,6 +22,7 @@ class Medicine extends Model
         'price_paise',
         'prescription_required',
         'stock',
+        'is_active',
         'image_url',
         'extra_images',
     ];
@@ -46,6 +47,7 @@ class Medicine extends Model
     {
         return [
             'prescription_required' => 'boolean',
+            'is_active'             => 'boolean',
             'extra_images'          => 'array',
         ];
     }

@@ -81,6 +81,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Medicine CRUD
     Route::resource('medicines', AdminMedicineController::class)->except(['show']);
+    Route::patch('medicines/{medicine}/toggle-active', [AdminMedicineController::class, 'toggleActive'])->name('medicines.toggleActive');
 
     // Categories
     Route::get('categories',              [AdminCategoryController::class, 'index'])->name('categories.index');

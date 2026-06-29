@@ -26,8 +26,8 @@
     {{-- ===== IMAGE PANEL ===== --}}
     <div class="space-y-3" x-data="{ active: 0 }">
         {{-- Main image — hover triggers the external zoom panel --}}
-        <div class="relative rounded-2xl bg-gradient-to-br from-blue-50 via-blue-50 to-cyan-100 shadow-inner"
-             style="height:320px; overflow:hidden; cursor:crosshair;"
+        <div class="relative rounded-2xl to-cyan-100 shadow-inner"
+             style="height:320px; overflow:hidden; cursor:crosshair; background-color:white;"
              id="img-zoom-container">
 
             <template x-for="(src, i) in {{ json_encode($allImages) }}" :key="i">
@@ -96,7 +96,7 @@
             </div>
         </div>
         @if(count($allImages) > 1)
-            <div class="flex gap-2 overflow-x-auto pb-1">
+            <div class="flex gap-2 overflow-x-auto pb-1 m-4 p-4">
                 @foreach($allImages as $i => $src)
                     <button type="button"
                             @click="active = {{ $i }}"

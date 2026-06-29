@@ -312,19 +312,92 @@
 
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h3 class="text-sm font-bold text-slate-900 mb-4">Options</h3>
-            <label class="flex items-center gap-3 cursor-pointer">
-                <div class="relative">
+
+            <style>
+                /* Pure CSS toggle switch */
+                .sw-label {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    cursor: pointer;
+                    margin-bottom: 14px;
+                }
+                .sw-label:last-child { margin-bottom: 0; }
+                .sw-track {
+                    position: relative;
+                    width: 40px;
+                    height: 22px;
+                    flex-shrink: 0;
+                }
+                .sw-track input[type="checkbox"] {
+                    position: absolute;
+                    opacity: 0;
+                    width: 0;
+                    height: 0;
+                }
+                .sw-track .sw-bg {
+                    position: absolute;
+                    inset: 0;
+                    border-radius: 999px;
+                    background: #cbd5e1;
+                    transition: background .2s;
+                }
+                .sw-track input:checked ~ .sw-bg {
+                    background: #2563eb;
+                }
+                .sw-track.sw-green input:checked ~ .sw-bg {
+                    background: #16a34a;
+                }
+                .sw-track .sw-knob {
+                    position: absolute;
+                    top: 3px;
+                    left: 3px;
+                    width: 16px;
+                    height: 16px;
+                    border-radius: 50%;
+                    background: #fff;
+                    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+                    transition: transform .2s;
+                    pointer-events: none;
+                }
+                .sw-track input:checked ~ .sw-knob {
+                    transform: translateX(18px);
+                }
+                .sw-info p { margin: 0; }
+                .sw-title { font-size: 13px; font-weight: 600; color: #1e293b; }
+                .sw-desc  { font-size: 11px; color: #64748b; margin-top: 2px !important; }
+            </style>
+
+            {{-- Prescription Required --}}
+            <label class="sw-label">
+                <div class="sw-track">
                     <input type="checkbox" name="prescription_required" value="1"
-                           {{ old('prescription_required', $medicine->prescription_required ?? false) ? 'checked' : '' }}
-                           class="sr-only peer">
-                    <div class="w-10 h-5 bg-slate-200 rounded-full peer-checked:bg-blue-700 transition-colors"></div>
-                    <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
+                           {{ old('prescription_required', $medicine->prescription_required ?? false) ? 'checked' : '' }}>
+                    <div class="sw-bg"></div>
+                    <div class="sw-knob"></div>
                 </div>
-                <div>
-                    <p class="text-sm font-semibold text-slate-800">Prescription Required</p>
-                    <p class="text-xs text-slate-500">Show Rx badge on product</p>
+                <div class="sw-info">
+                    <p class="sw-title">Prescription Required</p>
+                    <p class="sw-desc">Show Rx badge on product</p>
                 </div>
             </label>
+
+            {{-- Selling Active (edit only) --}}
+            @isset($medicine)
+            <label class="sw-label">
+                <div class="sw-track sw-green">
+                    <input type="checkbox" name="is_active" value="1"
+                           {{ old('is_active', $medicine->is_active ?? true) ? 'checked' : '' }}>
+                    <div class="sw-bg"></div>
+                    <div class="sw-knob"></div>
+                </div>
+                <div class="sw-info">
+                    <p class="sw-title">Selling Active</p>
+                    <p class="sw-desc">Uncheck to hide this product from customers</p>
+                </div>
+            </label>
+            @endisset
+
         </div>
 
         
