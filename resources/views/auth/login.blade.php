@@ -213,11 +213,19 @@
                 @enderror
             </div>
 
-            {{-- Remember --}}
-            <div style="display:flex;align-items:center;gap:8px;">
-                <input type="checkbox" name="remember" id="remember"
-                       style="width:16px;height:16px;accent-color:#2563eb;cursor:pointer;">
-                <label for="remember" style="font-size:13px;color:#64748b;cursor:pointer;">Remember me for 30 days</label>
+            {{-- Remember + Forgot --}}
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <input type="checkbox" name="remember" id="remember"
+                           style="width:16px;height:16px;accent-color:#2563eb;cursor:pointer;">
+                    <label for="remember" style="font-size:13px;color:#64748b;cursor:pointer;">Remember me for 30 days</label>
+                </div>
+                <a href="{{ route('password.request') }}"
+                   style="font-size:13px;font-weight:700;color:#2563eb;text-decoration:none;white-space:nowrap;"
+                   onmouseover="this.style.textDecoration='underline'"
+                   onmouseout="this.style.textDecoration='none'">
+                    Forgot password?
+                </a>
             </div>
 
             {{-- Submit --}}
