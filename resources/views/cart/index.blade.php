@@ -50,9 +50,10 @@
 @if ($lines->isEmpty())
     {{-- Empty cart --}}
     <div class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white py-16 text-center shadow-sm">
-        <img src="{{ asset('Images/emptycart1.png') }}"
+        <img src="{{ asset('Images/shopping-cart.png') }}"
              alt="Empty cart"
-             class="h-36 w-auto object-contain mb-4 opacity-80"
+             class="h-36 w-auto object-contain mb-4"
+             style="margin-right:17px;"
              loading="lazy">
         <h2 class="text-xl font-bold text-slate-700">Your cart is empty</h2>
         <p class="mt-2 text-sm text-slate-500 max-w-xs">Looks like you haven't added any medicines yet. Browse our catalogue to get started.</p>
