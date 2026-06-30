@@ -63,6 +63,17 @@ class Order extends Model
         return round($this->total_paise / 100, 2);
     }
 
+    /**
+     * Statuses in which a customer can still cancel their own order.
+     * Once shipped or beyond, cancellation is locked.
+     */
+    private const USER_CANCELLABLE_STATUSES = ['placed', 'confirmed'];
+
+    public function canBeCancelledByUser(): bool
+    {
+        return in_array($this->status, self::USER_CANCELLABLE_STATUSES, true);
+    }
+
     public function canRequestRefund(): bool
     {
         // Only allow refund requests after the order has been delivered

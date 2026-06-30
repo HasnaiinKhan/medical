@@ -130,11 +130,11 @@
     <div class="mt-6 flex flex-col gap-3 sm:flex-row">
         <a href="{{ route('medicines.index') }}"
            class="btn-primary flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white shadow-md">
-            🛍️ Continue Shopping
+            <i class="fa-solid fa-bag-shopping" style="color: rgb(255, 255, 255);"></i> Continue Shopping
         </a>
         <a href="{{ route('orders.index') }}"
            class="flex-1 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
-            📋 View My Orders
+            <i class="fa-regular fa-clipboard" style="color: rgb(66, 0, 255);"></i> View My Orders
         </a>
     </div>
 

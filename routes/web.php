@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/my-orders', [OrderHistoryController::class, 'index'])->name('orders.index');
     Route::get('/my-orders/{order}', [OrderHistoryController::class, 'show'])->name('orders.show');
     Route::post('/my-orders/{order}/reorder', [OrderHistoryController::class, 'reorder'])->name('orders.reorder');
+    Route::post('/my-orders/{order}/cancel', [OrderHistoryController::class, 'cancel'])->name('orders.cancel');
 
     // Refunds (customer)
     Route::get('/my-orders/{order}/refund', [RefundController::class, 'create'])->name('refunds.create');

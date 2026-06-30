@@ -55,7 +55,7 @@
             font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
             background: #f0f7ff;
             color: var(--text);
-            overflow-x: hidden;
+            overflow-x: clip;
             max-width: 100%;
             -webkit-font-smoothing: antialiased;
             /* Space for bottom mobile nav */

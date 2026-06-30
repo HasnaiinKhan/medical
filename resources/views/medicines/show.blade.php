@@ -21,10 +21,10 @@
     <span class="text-slate-700 font-medium truncate max-w-xs">{{ $medicine->name }}</span>
 </nav>
 
-<div class="grid gap-8 lg:grid-cols-2" id="product-grid" style="position:relative;">
+<div class="grid gap-8 lg:grid-cols-2" id="product-grid" style="align-items:start;">
 
     {{-- ===== IMAGE PANEL ===== --}}
-    <div class="space-y-3" x-data="{ active: 0 }">
+    <div class="space-y-3" id="img-sticky-panel" x-data="{ active: 0 }" style="position:sticky; top:150px;">
         {{-- Main image — hover triggers the external zoom panel --}}
         <div class="relative rounded-2xl to-cyan-100 shadow-inner"
              style="height:320px; overflow:hidden; cursor:crosshair; background-color:white;"
@@ -67,34 +67,11 @@
                         background:rgba(37,99,235,.82);color:#fff;font-size:10px;font-weight:600;
                         border-radius:8px;padding:4px 10px;pointer-events:none;
                         display:flex;align-items:center;gap:5px;white-space:nowrap;">
-                <svg style="width:6px;height:6px;flex-shrink:0;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/>
-                </svg>
+                <i class="fa-solid fa-magnifying-glass-plus" style="font-size:11px;"></i>
                 Hover to zoom
             </div>
         </div>
 
-        {{-- ===== EXTERNAL ZOOM RESULT PANEL ===== --}}
-        {{-- Positioned absolutely over the right (product info) column --}}
-        <div id="img-zoom-result"
-             style="display:none;
-                    position:absolute;
-                    top:0;
-                    left:calc(50% + 8px);
-                    width:calc(50% - 8px);
-                    height:320px;
-                    z-index:100;
-                    border-radius:16px;
-                    border:2px solid #bfdbfe;
-                    background:#fff;
-                    box-shadow:0 12px 40px rgba(37,99,235,.18);
-                    overflow:hidden;
-                    background-repeat:no-repeat;">
-            <div style="position:absolute;top:8px;right:10px;font-size:10px;font-weight:600;
-                        color:#2563eb;background:#eff6ff;border-radius:6px;padding:2px 8px;">
-                <i class="fa-solid fa-magnifying-glass-plus" style="color: rgba(66, 34, 196, 1);"></i> Zoomed View
-            </div>
-        </div>
         @if(count($allImages) > 1)
             <div class="flex gap-2 overflow-x-auto pb-1 m-4 p-4">
                 @foreach($allImages as $i => $src)
@@ -119,7 +96,7 @@
     </div>
 
     {{-- ===== PRODUCT INFO ===== --}}
-    <div class="flex flex-col">
+    <div class="flex flex-col" id="product-info-col">
         <div class="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-slate-700 w-fit mb-2">
             <a href="{{ route('medicines.index', ['category' => $medicine->category->slug]) }}" class="hover:underline">
                 {{ $medicine->category->name }}
@@ -231,6 +208,24 @@
     </div>
 </div>
 
+{{-- ===== ZOOM RESULT PANEL (fixed, positioned via JS) ===== --}}
+<div id="img-zoom-result"
+     style="display:none;
+            position:fixed;
+            z-index:100;
+            border-radius:16px;
+            border:2px solid #bfdbfe;
+            background:#fff;
+            box-shadow:0 12px 40px rgba(37,99,235,.18);
+            overflow:clip;
+            background-repeat:no-repeat;
+            pointer-events:none;">
+    <div style="position:absolute;top:8px;right:10px;font-size:10px;font-weight:600;
+                color:#2563eb;background:#eff6ff;border-radius:6px;padding:2px 8px;">
+        <i class="fa-solid fa-magnifying-glass-plus" style="color:rgba(66,34,196,1);"></i> Zoomed View
+    </div>
+</div>
+
 {{-- Related --}}
 @if($related->isNotEmpty())
     <section class="mt-12 border-t border-slate-200 pt-10">
@@ -301,6 +296,7 @@
     const crosshair = document.getElementById('img-zoom-crosshair');
     const result    = document.getElementById('img-zoom-result');
     const hint      = document.getElementById('img-zoom-hint');
+    const grid      = document.getElementById('product-grid');
     if (!container || !result) return;
 
     function isDesktop() { return window.innerWidth >= 1024; }
@@ -311,8 +307,26 @@
             || container.querySelector('.img-zoom-target');
     }
 
+    function positionResult() {
+        // Position the fixed zoom panel to align with the right column
+        // using live viewport coordinates from the image container
+        const cRect = container.getBoundingClientRect();
+        const gRect = grid ? grid.getBoundingClientRect() : cRect;
+        const gap   = 16;
+        const left  = cRect.right + gap;
+        const width = gRect.right - left;
+        const top   = cRect.top;
+        const height= cRect.height;
+
+        result.style.left   = left + 'px';
+        result.style.top    = top  + 'px';
+        result.style.width  = Math.max(width, 200) + 'px';
+        result.style.height = height + 'px';
+    }
+
     function showZoom() {
         if (!isDesktop()) return;
+        positionResult();
         result.style.display = 'block';
         if (crosshair) crosshair.style.display = 'block';
         if (hint) hint.style.display = 'none';
@@ -321,12 +335,16 @@
     function hideZoom() {
         result.style.display = 'none';
         if (crosshair) crosshair.style.display = 'none';
+        if (hint) hint.style.display = 'flex';
     }
 
     function moveLens(e) {
         if (!isDesktop()) return;
         const img = getActiveImg();
         if (!img || !img.complete || !img.naturalWidth) return;
+
+        // Keep result panel aligned as user scrolls
+        positionResult();
 
         const rect  = container.getBoundingClientRect();
         let x = e.clientX - rect.left;

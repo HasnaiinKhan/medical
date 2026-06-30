@@ -7,6 +7,7 @@ use App\Services\CartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class OrderHistoryController extends Controller
@@ -25,12 +26,55 @@ class OrderHistoryController extends Controller
 
     public function show(Order $order): View
     {
-        // Ensure the order belongs to the logged-in user
+        abort_unless($order->user_id === Auth::id(), 403);
+        $order->load('items');
+        return view('orders.show', compact('order'));
+    }
+
+    /**
+     * Customer cancels their own order.
+     * Only allowed when status is 'placed' or 'confirmed'.
+     * Uses a DB transaction: status update + stock restore are atomic.
+     */
+    public function cancel(Request $request, Order $order): RedirectResponse
+    {
+        // 1. Ownership check — prevent URL manipulation
         abort_unless($order->user_id === Auth::id(), 403);
 
-        $order->load('items');
+        // 2. Business-rule check — already shipped or beyond
+        if (! $order->canBeCancelledByUser()) {
+            return back()->with('error',
+                'This order can no longer be cancelled because it has already been ' . $order->status . '.'
+            );
+        }
 
-        return view('orders.show', compact('order'));
+        // 3. Idempotency — already cancelled
+        if ($order->status === 'cancelled') {
+            return back()->with('error', 'This order has already been cancelled.');
+        }
+
+        $reason = trim((string) $request->input('cancellation_reason', ''));
+
+        // 4. Atomic: update status + restore stock
+        DB::transaction(function () use ($order, $reason) {
+            $order->update([
+                'status'              => 'cancelled',
+                'cancellation_reason' => $reason ?: 'Cancelled by customer.',
+                'cancelled_by'        => 'user',
+                'cancelled_at'        => now(),
+            ]);
+
+            // Restore stock for each item
+            $order->loadMissing('items.medicine');
+            foreach ($order->items as $item) {
+                if ($item->medicine) {
+                    $item->medicine->increment('stock', $item->quantity);
+                }
+            }
+        });
+
+        return redirect()->route('orders.show', $order)
+            ->with('status', 'Your order #' . $order->order_number . ' has been cancelled.');
     }
 
     public function reorder(Order $order): RedirectResponse
@@ -39,22 +83,20 @@ class OrderHistoryController extends Controller
 
         $order->loadMissing('items.medicine');
 
-        $added    = 0;
-        $skipped  = [];
+        $added   = 0;
+        $skipped = [];
 
         foreach ($order->items as $item) {
             $medicine = $item->medicine;
 
-            // Medicine deleted or out of stock — skip
             if (! $medicine || $medicine->stock <= 0) {
                 $skipped[] = $item->medicine_name_snapshot;
                 continue;
             }
 
-            // How much can still be added (respect stock and what's already in cart)
-            $inCart    = $this->cart->quantity($medicine->id);
-            $canAdd    = max(0, $medicine->stock - $inCart);
-            $qty       = min($item->quantity, $canAdd);
+            $inCart  = $this->cart->quantity($medicine->id);
+            $canAdd  = max(0, $medicine->stock - $inCart);
+            $qty     = min($item->quantity, $canAdd);
 
             if ($qty > 0) {
                 $this->cart->add($medicine->id, $qty);

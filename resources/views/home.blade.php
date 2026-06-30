@@ -483,7 +483,7 @@
                         </form>
 
                         <form method="post" action="{{ route('cart.update', $m) }}"
-                              class="js-cart-update-form flex w-full items-center justify-between rounded-2xl border border-slate-200 overflow-hidden mt-3 {{ isset($cartItems[$m->id]) && $cartItems[$m->id] > 0 ? '' : 'hidden' }}"
+                              class="js-cart-update-form flex w-full h-12 items-center justify-between rounded-2xl border border-slate-200 overflow-hidden mt-3 {{ isset($cartItems[$m->id]) && $cartItems[$m->id] > 0 ? '' : 'hidden' }}"
                               data-cart-medicine-id="{{ $m->id }}">
                             @csrf
                             @method('PATCH')

@@ -157,9 +157,18 @@
         </form>
         @if($order->canRequestRefund())
             <a href="{{ route('refunds.create', $order) }}"
+               id="refund-request-link"
                class="flex-1 flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 py-3 text-sm font-semibold text-red-700 hover:bg-red-100 transition-colors shadow-sm">
                 ↩ Request Refund
             </a>
+        @endif
+        {{-- Cancel Order — visible only while still cancellable --}}
+        @if($order->canBeCancelledByUser())
+            <button type="button"
+                    id="user-cancel-order-btn"
+                    class="flex-1 flex items-center justify-center gap-2 rounded-xl border border-red-300 bg-red-50 py-3 text-sm font-semibold text-red-700 hover:bg-red-100 transition-colors shadow-sm">
+                ✕ Cancel Order
+            </button>
         @endif
     </div>
 
@@ -218,6 +227,121 @@
 
 @endsection
 
+{{-- ── CANCEL ORDER MODAL ── --}}
+@if($order->canBeCancelledByUser())
+@php $isOnlinePaid = ($order->payment_method === 'online' && $order->payment_status === 'paid'); @endphp
+<div id="user-cancel-modal"
+     style="display:none; position:fixed; inset:0; z-index:99999;
+            background:rgba(15,23,42,0.6); backdrop-filter:blur(4px);
+            align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto;">
+    <div style="background:#fff; border-radius:20px; box-shadow:0 25px 50px rgba(0,0,0,.25);
+                padding:28px 24px; width:100%; max-width:500px; margin:auto;">
+
+        {{-- Header --}}
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+            <div style="width:48px; height:48px; border-radius:50%; background:#fee2e2; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:22px;">✕</div>
+            <div>
+                <p style="margin:0; font-size:16px; font-weight:700; color:#0f172a;">Cancel Order</p>
+                <p style="margin:3px 0 0; font-size:12px; color:#64748b;">Order #{{ $order->order_number }} &middot; ₹{{ number_format($order->totalRupees(), 2) }}</p>
+            </div>
+        </div>
+
+        @if($isOnlinePaid)
+        {{-- Online paid notice --}}
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px 14px; margin-bottom:16px;">
+            <p style="margin:0; font-size:13px; font-weight:700; color:#1e40af;">💳 You paid online — refund required</p>
+            <p style="margin:5px 0 0; font-size:12px; color:#3b82f6; line-height:1.5;">
+                Since this order was paid online, please provide your bank or UPI details. Our team will process your refund within 5–7 business days after cancellation.
+            </p>
+        </div>
+        @else
+        <p style="font-size:13px; color:#475569; line-height:1.6; margin:0 0 16px;">
+            Are you sure you want to cancel this order? Items will be restocked automatically.
+        </p>
+        @endif
+
+        <form method="POST" action="{{ route('orders.cancel', $order) }}" id="user-cancel-form">
+            @csrf
+
+            {{-- Reason --}}
+            <div style="margin-bottom:14px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:#64748b; margin-bottom:5px;">Reason <span style="color:#94a3b8; font-weight:400;">(optional)</span></label>
+                <textarea name="cancellation_reason" rows="2" placeholder="e.g. Ordered by mistake…"
+                          style="width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:9px 12px; font-size:13px; resize:none; outline:none; box-sizing:border-box;">{{ old('cancellation_reason') }}</textarea>
+            </div>
+
+            @if($isOnlinePaid)
+            {{-- ── Refund method ── --}}
+            <div style="margin-bottom:16px;">
+                <p style="font-size:12px; font-weight:700; color:#1e293b; margin:0 0 10px; text-transform:uppercase; letter-spacing:.04em;">Refund Method</p>
+                <div style="display:flex; gap:10px; margin-bottom:14px;" id="refund-method-tabs">
+                    <button type="button" data-method="bank"
+                            class="refund-tab refund-tab-active"
+                            style="flex:1; border:2px solid #2563eb; background:#eff6ff; color:#1e40af; border-radius:12px; padding:10px; font-size:13px; font-weight:700; cursor:pointer;">
+                        🏦 Bank Transfer
+                    </button>
+                    <button type="button" data-method="upi"
+                            class="refund-tab"
+                            style="flex:1; border:2px solid #e2e8f0; background:#fff; color:#475569; border-radius:12px; padding:10px; font-size:13px; font-weight:700; cursor:pointer;">
+                        📱 UPI
+                    </button>
+                </div>
+                <input type="hidden" name="refund_method_choice" id="refund_method_choice" value="bank">
+
+                {{-- Bank fields --}}
+                <div id="bank-fields">
+                    <div style="margin-bottom:10px;">
+                        <label style="display:block; font-size:12px; font-weight:600; color:#64748b; margin-bottom:5px;">Account Holder Name <span style="color:#ef4444;">*</span></label>
+                        <input name="bank_account_name" type="text" placeholder="As per bank records"
+                               value="{{ old('bank_account_name') }}"
+                               style="width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:9px 12px; font-size:13px; outline:none; box-sizing:border-box;">
+                        @error('bank_account_name')<p style="color:#ef4444;font-size:11px;margin:3px 0 0;">{{ $message }}</p>@enderror
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:600; color:#64748b; margin-bottom:5px;">Account Number <span style="color:#ef4444;">*</span></label>
+                            <input name="bank_account_number" type="text" placeholder="9–18 digits"
+                                   value="{{ old('bank_account_number') }}"
+                                   style="width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:9px 12px; font-size:13px; outline:none; box-sizing:border-box;">
+                            @error('bank_account_number')<p style="color:#ef4444;font-size:11px;margin:3px 0 0;">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:600; color:#64748b; margin-bottom:5px;">IFSC Code <span style="color:#ef4444;">*</span></label>
+                            <input name="bank_ifsc" type="text" placeholder="e.g. SBIN0001234" maxlength="11"
+                                   value="{{ old('bank_ifsc') }}"
+                                   style="width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:9px 12px; font-size:13px; outline:none; box-sizing:border-box; text-transform:uppercase;">
+                            @error('bank_ifsc')<p style="color:#ef4444;font-size:11px;margin:3px 0 0;">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+                </div>
+
+                {{-- UPI field --}}
+                <div id="upi-fields" style="display:none;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:#64748b; margin-bottom:5px;">UPI ID <span style="color:#ef4444;">*</span></label>
+                    <input name="upi_id" type="text" placeholder="e.g. yourname@upi or 9876543210@paytm"
+                           value="{{ old('upi_id') }}"
+                           style="width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:9px 12px; font-size:13px; outline:none; box-sizing:border-box;">
+                    <p style="font-size:11px; color:#94a3b8; margin:4px 0 0;">Format: name@bank or phone@upi</p>
+                    @error('upi_id')<p style="color:#ef4444;font-size:11px;margin:3px 0 0;">{{ $message }}</p>@enderror
+                </div>
+            </div>
+            @endif
+
+            <div style="display:flex; gap:10px; margin-top:4px;">
+                <button type="button" id="user-cancel-no"
+                        style="flex:1; border:1px solid #e2e8f0; background:#fff; border-radius:12px; padding:11px; font-size:13px; font-weight:600; color:#475569; cursor:pointer;">
+                    No, Keep Order
+                </button>
+                <button type="submit" id="user-cancel-yes"
+                        style="flex:1; border:none; border-radius:12px; padding:11px; font-size:13px; font-weight:700; color:#fff; background:#dc2626; cursor:pointer;">
+                    {{ $isOnlinePaid ? 'Cancel & Request Refund' : 'Yes, Cancel Order' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+
 @push('scripts')
 <style>
     @keyframes ors-spin { to { transform: rotate(360deg); } }
@@ -263,6 +387,60 @@
         if (loaderTitle) loaderTitle.textContent = title;
         if (loaderSub)   loaderSub.textContent   = sub;
         loader.classList.add('active');
+    }
+
+    // Cancel Order modal
+    var cancelBtn   = document.getElementById('user-cancel-order-btn');
+    var cancelModal = document.getElementById('user-cancel-modal');
+    var cancelNo    = document.getElementById('user-cancel-no');
+    var cancelForm  = document.getElementById('user-cancel-form');
+    var cancelYes   = document.getElementById('user-cancel-yes');
+
+    if (cancelBtn && cancelModal) {
+        cancelBtn.addEventListener('click', function () {
+            cancelModal.style.display = 'flex';
+        });
+        cancelNo.addEventListener('click', function () {
+            cancelModal.style.display = 'none';
+        });
+        cancelModal.addEventListener('click', function (e) {
+            if (e.target === cancelModal) cancelModal.style.display = 'none';
+        });
+        // Prevent double-submit
+        cancelForm.addEventListener('submit', function () {
+            cancelYes.disabled     = true;
+            cancelYes.textContent  = 'Cancelling...';
+            showLoader('Cancelling your order...', 'Please wait');
+        });
+
+        // Bank / UPI tab switching
+        var tabs        = document.querySelectorAll('.refund-tab');
+        var methodInput = document.getElementById('refund_method_choice');
+        var bankFields  = document.getElementById('bank-fields');
+        var upiFields   = document.getElementById('upi-fields');
+
+        tabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                var method = this.dataset.method;
+                if (methodInput) methodInput.value = method;
+
+                tabs.forEach(function (t) {
+                    t.style.borderColor = '#e2e8f0';
+                    t.style.background  = '#fff';
+                    t.style.color       = '#475569';
+                });
+                this.style.borderColor = '#2563eb';
+                this.style.background  = '#eff6ff';
+                this.style.color       = '#1e40af';
+
+                if (bankFields) bankFields.style.display = method === 'bank' ? 'block' : 'none';
+                if (upiFields)  upiFields.style.display  = method === 'upi'  ? 'block' : 'none';
+
+                document.querySelectorAll('#bank-fields input').forEach(function (i) { i.required = (method === 'bank'); });
+                var upiInput = document.querySelector('#upi-fields input[name="upi_id"]');
+                if (upiInput) upiInput.required = (method === 'upi');
+            });
+        });
     }
 
     // Request Refund link
