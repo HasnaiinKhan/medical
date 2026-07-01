@@ -399,7 +399,7 @@ class RazorpayController extends Controller
     public function thankyou(Order $order): View
     {
         abort_unless($order->user_id === Auth::id(), 403);
-        $order->load('items');
+        $order->load('items.medicine');
 
         return view('checkout.thankyou', compact('order'));
     }

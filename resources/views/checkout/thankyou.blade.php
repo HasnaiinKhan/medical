@@ -73,7 +73,14 @@
                         {{ strtoupper(substr($item->medicine_name_snapshot, 0, 1)) }}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-slate-800 line-clamp-1">{{ $item->medicine_name_snapshot }}</p>
+                        <p class="text-sm font-medium text-slate-800 line-clamp-1">
+                            @if($item->medicine && $item->medicine->is_active)
+                                <a href="{{ route('medicines.show', $item->medicine) }}"
+                                   class="hover:text-blue-700 hover:underline transition-colors">{{ $item->medicine_name_snapshot }}</a>
+                            @else
+                                {{ $item->medicine_name_snapshot }}
+                            @endif
+                        </p>
                         <p class="text-xs text-slate-500">Qty: {{ $item->quantity }} × ₹{{ number_format($item->unit_price_paise / 100, 2) }}</p>
                     </div>
                     <span class="text-sm font-bold text-slate-900 flex-shrink-0">
