@@ -174,7 +174,7 @@
 
     {{-- WhatsApp help --}}
     @php
-        $waPhone  = config('services.whatsapp.number', '917600264090');
+        $waPhone  = config('services.whatsapp.number', '919737275558');
         $waMsg    = "Hi! I need help with my order {$order->order_number} on Rx Plus 365.";
     @endphp
     <a href="https://wa.me/{{ $waPhone }}?text={{ urlencode($waMsg) }}" target="_blank"
@@ -208,7 +208,7 @@
                         🚫 Your refund request was rejected.
                         @if($latestRefund->admin_notes) Reason: {{ $latestRefund->admin_notes }} @endif
                         <br><br>
-                        If you think we made a mistake you can contact this number:   <a href="tel:+917600264090">+917600264090</a> 
+                        If you think we made a mistake you can contact this number:   <a href="tel:+919737275558">+919737275558</a> 
 
                     </div>
                 @elseif($latestRefund->status === 'failed')

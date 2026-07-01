@@ -465,8 +465,13 @@ class AIMedicineController extends Controller
             $packSize     = trim(($attrs['packsize'] ?? '') . ' ' . ($attrs['packsizeunit'] ?? ''));
 
             $fullName = $pname;
-            if ($packSize && !str_contains(strtolower($pname), strtolower(trim($packSize)))) {
-                $fullName = $pname . ' ' . $packSize;
+            if ($packSize) {
+                // Normalise both sides: strip apostrophes/spaces so "32's" == "32 s" == "32s"
+                $normPname    = preg_replace("/['\s]/", '', strtolower($pname));
+                $normPackSize = preg_replace("/['\s]/", '', strtolower($packSize));
+                if ($normPackSize && !str_contains($normPname, $normPackSize)) {
+                    $fullName = $pname . ' ' . $packSize;
+                }
             }
 
             $haystack = strtoupper($fullName . ' ' . ($manufacturer ?? '') . ' ' . ($composition ?? ''));
@@ -1504,8 +1509,13 @@ class AIMedicineController extends Controller
 
             // Full name with pack size if useful
             $fullName = $pname;
-            if ($packSize && !str_contains(strtolower($pname), strtolower(trim($packSize)))) {
-                $fullName = $pname . ($packSize ? ' ' . $packSize : '');
+            if ($packSize) {
+                // Normalise both sides: strip apostrophes/spaces so "44's" == "44 s" == "44s"
+                $normPname    = preg_replace("/['\s]/", '', strtolower($pname));
+                $normPackSize = preg_replace("/['\s]/", '', strtolower($packSize));
+                if ($normPackSize && !str_contains($normPname, $normPackSize)) {
+                    $fullName = $pname . ' ' . $packSize;
+                }
             }
 
             $haystack = strtoupper($fullName . ' ' . ($manufacturer ?? '') . ' ' . ($composition ?? ''));
@@ -1531,7 +1541,7 @@ class AIMedicineController extends Controller
 
             $results[] = [
                 'slug'                  => $p['slug'] ?? null,
-                'name'                  => $fullName,
+                'name'                  => $this->cleanProductName($fullName),
                 'manufacturer'          => $manufacturer ? $this->titleCase(strtolower($manufacturer)) : null,
                 'category'              => $this->guessCategory($haystack, implode(' ', array_filter(array_map(
                     fn($c) => is_array($c) ? ($c['name'] ?? '') : (string) $c,
@@ -1936,11 +1946,11 @@ class AIMedicineController extends Controller
         $text = $this->callAiForDescription($prompt, $name);
 
         // If the first attempt came back short, retry once with a stricter prompt
-        if ($text && str_word_count($text) < 50) {
+        if ($text && str_word_count($text) < 70) {
             Log::warning("MediBot descGen: first attempt only " . str_word_count($text) . " words for [{$name}], retrying");
             $retryPrompt = $this->descriptionPrompt(
                 $name, $manufacturer, $composition, $uses, $dosageForm, $category,
-                "IMPORTANT: The previous attempt was too short. You MUST write at least 60 words. Previous attempt: {$text}"
+                "CRITICAL: Your previous response was too short. You MUST write a full paragraph of 80-120 words. Do not stop early. Previous attempt: {$text}"
             );
             $retry = $this->callAiForDescription($retryPrompt, $name . ' [retry]');
             if ($retry && str_word_count($retry) >= str_word_count($text)) {
@@ -1971,7 +1981,7 @@ class AIMedicineController extends Controller
                     CURLOPT_RETURNTRANSFER => true, CURLOPT_POST => true,
                     CURLOPT_POSTFIELDS     => json_encode([
                         'contents'         => [['parts' => [['text' => $prompt]]]],
-                        'generationConfig' => ['temperature' => 0.4, 'maxOutputTokens' => 300],
+                        'generationConfig' => ['temperature' => 0.7, 'maxOutputTokens' => 512],
                     ]),
                     CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
                     CURLOPT_TIMEOUT => 20, CURLOPT_SSL_VERIFYPEER => false,
@@ -2003,10 +2013,10 @@ class AIMedicineController extends Controller
                     CURLOPT_POSTFIELDS     => json_encode([
                         'model'       => config('services.groq.model', 'llama-3.1-8b-instant'),
                         'messages'    => [
-                            ['role' => 'system', 'content' => 'You write professional product descriptions of at least 60 words. Return ONLY the description text.'],
+                            ['role' => 'system', 'content' => 'You are a professional medical copywriter for an Indian pharmacy. Write exactly one rich, informative paragraph of 80-120 words. Return ONLY the paragraph — no labels, no headings, no bullet points.'],
                             ['role' => 'user',   'content' => $prompt],
                         ],
-                        'temperature' => 0.4, 'max_tokens' => 300,
+                        'temperature' => 0.7, 'max_tokens' => 512,
                     ]),
                     CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $groqKey, 'Content-Type: application/json'],
                     CURLOPT_TIMEOUT => 20, CURLOPT_SSL_VERIFYPEER => false,
@@ -2035,29 +2045,32 @@ class AIMedicineController extends Controller
         string $name, string $manufacturer, string $composition,
         array $uses, string $dosageForm, string $category, string $existing
     ): string {
-        $usesText  = !empty($uses) ? implode(', ', array_slice($uses, 0, 5)) : '';
+        $usesText  = !empty($uses) ? implode(', ', array_slice($uses, 0, 6)) : '';
         $contextParts = array_filter([
             $manufacturer ? "Manufactured by {$manufacturer}."     : '',
             $dosageForm   ? "Dosage form: {$dosageForm}."          : '',
             $composition  ? "Active ingredients: {$composition}."  : '',
-            $usesText     ? "Uses: {$usesText}."                   : '',
-            $existing     ? "Context: {$existing}."                : '',
+            $usesText     ? "Primary uses: {$usesText}."           : '',
+            $existing     ? "Additional context: {$existing}."     : '',
         ]);
         $context = implode(' ', $contextParts);
 
         return <<<PROMPT
-Write a professional product description for an Indian pharmacy website product listing.
+You are a professional medical copywriter for an Indian online pharmacy. Write a detailed, high-quality product description for the medicine listed below.
 
-Product: {$name}
+Product name: {$name}
 {$context}
 
-Requirements:
-- MUST be at least 60 words and no more than 150 words
-- Count every word carefully - do not stop before 60 words
-- Professional, informative tone suitable for a pharmacy website
-- Cover what the product is, its key benefits, active ingredients (if applicable), and who it is for
-- Do NOT include price, dosage instructions, or side effects
-- Return ONLY the plain description paragraph - no headings, no bullet points, no extra commentary
+STRICT REQUIREMENTS:
+- Write EXACTLY ONE paragraph of 80 to 120 words — no more, no less
+- Start the paragraph directly with the product name or what it is — do NOT use a heading or label
+- The paragraph must be informative, warm, and customer-friendly — suitable for display on a pharmacy product page
+- Explain what the product is, what condition or need it addresses, what its key active ingredient(s) do, and who typically benefits from it
+- Use plain English — avoid medical jargon where possible; if a technical term is used, briefly explain it
+- Do NOT mention price, dosage instructions, specific dosage amounts, side effects, warnings, or any disclaimer
+- Return ONLY the paragraph text — absolutely no headings, bullet points, labels, quotation marks, or extra commentary
+
+Write the paragraph now:
 PROMPT;
     }
 
@@ -2363,18 +2376,27 @@ PROMPT;
     {
         $name = trim($name);
 
-        // Remove trailing " <digits> S" when the same digits already appear before it
-        // e.g. "Tablet 40's 40 S" → "Tablet 40's"
-        $name = preg_replace_callback(
-            "/\\b(\\d+)['\x27\x60]?s?\\s+(\\d+)\\s+S\\b/i",
-            function ($m) {
-                // Only collapse if the two numbers are the same
-                return $m[1] === $m[2] ? $m[1] . "'s" : $m[0];
-            },
-            $name
-        );
+        // ── Strip trailing " N s" / " N S" / " N's" only when that same N
+        //    already appears at least once earlier in the string.
+        // e.g. "Teddyy Diaper Pant 44's 44 s" → "Teddyy Diaper Pant 44's"
+        //      "MamyPoko (New Born) 32's 32 S" → "MamyPoko (New Born) 32's"
+        //      "Diaper 44 s"                   → unchanged (44 appears only once)
+        if (preg_match_all('/\b(\d+)\b/', $name, $numMatches)) {
+            foreach (array_unique($numMatches[1]) as $num) {
+                // Count how many times this exact number appears in the name
+                $count = preg_match_all('/\b' . preg_quote($num, '/') . '\b/', $name);
+                if ($count < 2) continue; // only one occurrence — nothing to strip
 
-        // Remove trailing " <N> <Unit>" when "<N><Unit>" or "<N>'s" already exists
+                // Strip the trailing " N s/S/N's" duplicate
+                $name = preg_replace(
+                    '/\s+' . preg_quote($num, '/') . "['\x27]?s\s*$/i",
+                    '',
+                    $name
+                );
+            }
+        }
+
+        // ── Strip trailing " N <Unit>" duplicate ─────────────────────────────
         // e.g. "Tablet 40's 40 Tablet" → "Tablet 40's"
         $units = 'Tablet|Capsule|Strip|Bottle|Pack|Sachet|Vial|Tube|Box|Piece|Unit|Ml|Mg|Gm|Kg|Nos';
         $name = preg_replace(

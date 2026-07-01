@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Order Confirmed - {{ $order->order_number }}</title>
+<title>{{ $order->order_number }}</title>
 <style type="text/css">
   body,table,td,p,a,li { -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
   table { border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; }
@@ -35,9 +35,9 @@
         <tr>
           <td class="hpad" align="center"
               style="background-color:#1a56db;padding:28px 40px 36px;">
-            <p style="margin:0 0 4px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.75);font-family:Arial,Helvetica,sans-serif;">Order Confirmed</p>
-            <h1 class="h1" style="margin:0 0 8px 0;font-size:24px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">Thank You for Your Order!</h1>
-            <p style="margin:0 0 16px 0;font-size:14px;color:rgba(255,255,255,0.8);font-family:Arial,Helvetica,sans-serif;">We have received your order and it is being processed.</p>
+            <p style="margin:0 0 4px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.75);font-family:Arial,Helvetica,sans-serif;">Medikart</p>
+            <h1 class="h1" style="margin:0 0 8px 0;font-size:24px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">Your items are on their way</h1>
+            <p style="margin:0 0 16px 0;font-size:14px;color:rgba(255,255,255,0.8);font-family:Arial,Helvetica,sans-serif;">We have your order and are getting it ready.</p>
             <table cellpadding="0" cellspacing="0" role="presentation" align="center">
               <tr>
                 <td style="background-color:rgba(255,255,255,0.15);border-radius:4px;padding:6px 18px;">
@@ -161,7 +161,7 @@
         <tr>
           <td class="fpad" align="center"
               style="background-color:#f7fafc;border-top:1px solid #e2e8f0;padding:20px 40px;">
-            <p style="margin:0 0 4px 0;font-size:12px;color:#a0aec0;font-family:Arial,Helvetica,sans-serif;">&copy; {{ date('Y') }} Rx Plus 365, Ahmedabad. This is an automated email, please do not reply.</p>
+            <p style="margin:0 0 4px 0;font-size:12px;color:#a0aec0;font-family:Arial,Helvetica,sans-serif;">&copy; {{ date('Y') }} Medikart, Ahmedabad.</p>
             <p style="margin:0;font-size:12px;color:#a0aec0;font-family:Arial,Helvetica,sans-serif;">Questions? <a href="mailto:support@medikart.in" style="color:#718096;text-decoration:underline;">support@medikart.in</a></p>
           </td>
         </tr>
@@ -172,3 +172,4 @@
 </table>
 </body>
 </html>
+

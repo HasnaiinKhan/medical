@@ -1,6 +1,6 @@
 @php
     $enabled = config('services.whatsapp.enabled', true);
-    $phone   = config('services.whatsapp.number', '917600264090');
+    $phone   = config('services.whatsapp.number', '919737275558');
 @endphp
 
 @if($enabled)

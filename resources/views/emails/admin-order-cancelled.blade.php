@@ -33,7 +33,7 @@
             <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
               <tr>
                 <td>
-                  <p style="margin:0 0 2px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5);font-family:Arial,Helvetica,sans-serif;">Admin Alert</p>
+                  <p style="margin:0 0 2px 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.5);font-family:Arial,Helvetica,sans-serif;">Medikart</p>
                   <p style="margin:0;font-size:18px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">Order Cancelled</p>
                 </td>
                 <td align="right">
@@ -155,7 +155,7 @@
         <!-- FOOTER -->
         <tr>
           <td class="fpad" align="center" style="background-color:#f7fafc;border-top:1px solid #e2e8f0;padding:16px 32px;">
-            <p style="margin:0;font-size:12px;color:#a0aec0;font-family:Arial,Helvetica,sans-serif;">Rx Plus 365 Admin Alert &mdash; {{ date('Y') }} &mdash; Do not reply to this email.</p>
+            <p style="margin:0;font-size:12px;color:#a0aec0;font-family:Arial,Helvetica,sans-serif;">Medikart &mdash; {{ date('Y') }}</p>
           </td>
         </tr>
 
@@ -165,3 +165,4 @@
 </table>
 </body>
 </html>
+

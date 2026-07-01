@@ -140,7 +140,7 @@
 
     {{-- WhatsApp share --}}
     @php
-        $waPhone = config('services.whatsapp.number', '917600264090');
+        $waPhone = config('services.whatsapp.number', '919737275558');
         $waMsg   = "Hi! I just placed an order on Rx Plus 365 🎉\nOrder: {$order->order_number}\nAmount: ₹" . number_format($order->totalRupees(), 2) . "\nThank you Rx Plus 365!";
     @endphp
     <div class="mt-4 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3">

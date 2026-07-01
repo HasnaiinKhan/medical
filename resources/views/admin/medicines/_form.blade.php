@@ -798,10 +798,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function fillProductImages(d) {
         var images = [];
         if (d.image_url) images.push(d.image_url);
-        if (d.gallery_images && Array.isArray(d.gallery_images))
-            d.gallery_images.forEach(function(u){ if(u && images.indexOf(u)===-1) images.push(u); });
-        if (d.extra_images && Array.isArray(d.extra_images))
-            d.extra_images.forEach(function(u){ if(u && images.indexOf(u)===-1) images.push(u); });
+        // backend returns gallery_image_urls; support legacy gallery_images / extra_images too
+        var gallery = d.gallery_image_urls || d.gallery_images || d.extra_images || [];
+        if (Array.isArray(gallery))
+            gallery.forEach(function(u){ if(u && images.indexOf(u) === -1) images.push(u); });
         if (!images.length) return;
 
         var slots = document.querySelectorAll('.image-slot');

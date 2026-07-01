@@ -195,7 +195,7 @@
     <tr>
       <td>
         <img src="{{ public_path('Images/company logo/RxPlus.png') }}"
-             alt="Rx Plus 365"
+             alt="Medikart"
              style="height:48px;width:auto;object-fit:contain;display:block;">
         <div class="brand-sub">Your Trusted Online Pharmacy, Ahmedabad</div>
       </td>
@@ -331,10 +331,11 @@
 
 <!-- Footer -->
 <div class="inv-footer">
-  <strong>Rx Plus 365</strong> — Your Trusted Online Pharmacy, Ahmedabad, Gujarat<br>
+  <strong>Medikart</strong> — Your Trusted Online Pharmacy, Ahmedabad, Gujarat<br>
   support@medikart.in &nbsp;|&nbsp; This is a computer-generated invoice and does not require a signature.<br>
-  Thank you for choosing Rx Plus 365. Always consult a doctor before taking any medication.
+  Thank you for choosing Medikart. Always consult a doctor before taking any medication.
 </div>
 
 </body>
 </html>
+

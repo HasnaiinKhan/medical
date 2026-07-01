@@ -492,8 +492,8 @@ const initialMethod = (document.querySelector('input[name="payment_method"]:chec
     const badge = document.getElementById('summary-payment-badge');
     if (badge) {
         badge.innerHTML = isOnline
-            ? '<span class="text-lg">💳</span><p class="text-xs font-medium text-slate-700">Secure online payment via Razorpay</p>'
-            : '<span class="text-lg">💵</span><p class="text-xs font-medium text-amber-800">Pay cash when your order arrives</p>';
+            ? '<span class="text-lg"><img src="{{ asset('Images/credit-card.gif') }}" alt="COD" class="h-7 w-7 object-contain"></span><p class="text-xs font-medium text-slate-700">Secure online payment via Razorpay</p>'
+            : '<span class="text-lg"><img src="{{ asset('Images/dollar.gif') }}" alt="COD" class="h-7 w-7 object-contain"></span><p class="text-xs font-medium text-amber-800">Pay cash when your order arrives</p>';
         badge.className = 'mt-4 rounded-xl border p-3 flex items-center gap-2 ' +
             (isOnline ? 'bg-blue-50 border-blue-100' : 'bg-amber-50 border-amber-100');
     }
@@ -526,8 +526,8 @@ document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
             isOnline ? 'Pay & Place Order' : 'Place Order (COD)';
         const badge = document.getElementById('summary-payment-badge');
         badge.innerHTML = isOnline
-            ? '<span class="text-lg">💳</span><p class="text-xs font-medium text-slate-700">Secure online payment via Razorpay</p>'
-            : '<span class="text-lg">💵</span><p class="text-xs font-medium text-amber-800">Pay cash when your order arrives</p>';
+            ? '<span class="text-lg"><img src="{{ asset('Images/credit-card.gif') }}" alt="COD" class="h-7 w-7 object-contain"></span><p class="text-xs font-medium text-slate-700">Secure online payment via Razorpay</p>'
+            : '<span class="text-lg"><img src="{{ asset('Images/dollar.gif') }}" alt="COD" class="h-7 w-7 object-contain"></span><p class="text-xs font-medium text-amber-800">Pay cash when your order arrives</p>';
         badge.className = 'mt-4 rounded-xl border p-3 flex items-center gap-2 ' +
             (isOnline ? 'bg-blue-50 border-blue-100' : 'bg-amber-50 border-amber-100');
     });

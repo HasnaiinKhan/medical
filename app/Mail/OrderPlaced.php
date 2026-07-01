@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Services\InvoiceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -20,7 +21,10 @@ class OrderPlaced extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Confirmed - ' . $this->order->order_number . ' | Rx Plus 365',
+            subject: 'Order Confirmed: ' . $this->order->order_number . ' - Rx Plus 365',
+            replyTo: [new Address('support@rxplus365.com', 'Rx Plus 365 Support')],
+            tags: ['order-confirmed'],
+            metadata: ['order_id' => (string) $this->order->id],
         );
     }
 
@@ -31,20 +35,20 @@ class OrderPlaced extends Mailable
         );
     }
 
-    public function attachments(): array
-    {
-        try {
-            $invoice  = app(InvoiceService::class);
-            $pdf      = $invoice->generate($this->order);
-            $filename = $invoice->filename($this->order);
+    // public function attachments(): array
+    // {
+    //     try {
+    //         $invoice  = app(InvoiceService::class);
+    //         $pdf      = $invoice->generate($this->order);
+    //         $filename = $invoice->filename($this->order);
 
-            return [
-                Attachment::fromData(fn () => $pdf, $filename)
-                    ->withMime('application/pdf'),
-            ];
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Invoice attachment failed for OrderPlaced: ' . $e->getMessage());
-            return [];
-        }
-    }
+    //         return [
+    //             Attachment::fromData(fn () => $pdf, $filename)
+    //                 ->withMime('application/pdf'),
+    //         ];
+    //     } catch (\Throwable $e) {
+    //         \Illuminate\Support\Facades\Log::error('Invoice attachment failed for OrderPlaced: ' . $e->getMessage());
+    //         return [];
+    //     }
+    // }
 }

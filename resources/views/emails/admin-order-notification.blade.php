@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New Order {{ $order->order_number }} - Rx Plus 365 Admin</title>
+<title>New Order {{ $order->order_number }} - Medikart Admin</title>
 <style type="text/css">
   body, table, td, p, a, span { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
   table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
@@ -36,7 +36,7 @@
     <table class="card" width="600" cellpadding="0" cellspacing="0" role="presentation"
            style="background-color:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #d1d9e6;">
 
-      {{-- ═══════════════════════════════════════
+              {{-- ═══════════════════════════════════════
            HEADER — dark with order badge + amount
            ═══════════════════════════════════════ --}}
       <tr>
@@ -45,7 +45,7 @@
             <tr>
               <td style="vertical-align:middle;">
                 {{-- Brand line --}}
-                <p style="margin:0 0 3px 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,0.4);font-family:Arial,Helvetica,sans-serif;">Admin Alert</p>
+                <p style="margin:0 0 3px 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,0.4);font-family:Arial,Helvetica,sans-serif;">Medikart</p>
                 <p class="h-title" style="margin:0 0 10px 0;font-size:19px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">New Order Received</p>
                 {{-- Order number badge --}}
                 <table cellpadding="0" cellspacing="0" role="presentation">
@@ -57,18 +57,18 @@
                     {{-- Payment method badge --}}
                     @if($order->payment_method === 'online')
                     <td style="background-color:#065f46;border-radius:4px;padding:4px 12px;">
-                      <span style="font-size:11px;font-weight:700;color:#6ee7b7;font-family:Arial,Helvetica,sans-serif;">PAID ONLINE</span>
+                      <span style="font-size:11px;font-weight:700;color:#6ee7b7;font-family:Arial,Helvetica,sans-serif;">ONLINE</span>
                     </td>
                     @else
                     <td style="background-color:#78350f;border-radius:4px;padding:4px 12px;">
-                      <span style="font-size:11px;font-weight:700;color:#fcd34d;font-family:Arial,Helvetica,sans-serif;">CASH ON DELIVERY</span>
+                      <span style="font-size:11px;font-weight:700;color:#fcd34d;font-family:Arial,Helvetica,sans-serif;">COD</span>
                     </td>
                     @endif
                   </tr>
                 </table>
               </td>
               <td style="vertical-align:middle;text-align:right;padding-left:16px;">
-                <p style="margin:0 0 2px 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);font-family:Arial,Helvetica,sans-serif;">Order Total</p>
+                <p style="margin:0 0 2px 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);font-family:Arial,Helvetica,sans-serif;">Total</p>
                 <p class="total-amount" style="margin:0 0 4px 0;font-size:24px;font-weight:700;color:#ffffff;font-family:Arial,Helvetica,sans-serif;">Rs.&nbsp;{{ number_format($order->totalRupees(), 2) }}</p>
                 <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.4);font-family:Arial,Helvetica,sans-serif;">{{ $order->created_at->format('d M Y, h:i A') }}</p>
               </td>
@@ -87,7 +87,7 @@
             <tr>
               <td style="background-color:#ecfdf5;border-top:3px solid #10b981;border-bottom:1px solid #a7f3d0;padding:11px 32px;">
                 <p style="margin:0;font-size:13px;font-weight:600;color:#065f46;font-family:Arial,Helvetica,sans-serif;">
-                  Payment confirmed via Razorpay. Order is ready to process.
+                  Online order — ready to process.
                 </p>
               </td>
             </tr>
@@ -97,7 +97,7 @@
             <tr>
               <td style="background-color:#fffbeb;border-top:3px solid #f59e0b;border-bottom:1px solid #fde68a;padding:11px 32px;">
                 <p style="margin:0;font-size:13px;font-weight:600;color:#92400e;font-family:Arial,Helvetica,sans-serif;">
-                  Cash on Delivery order. Customer will pay Rs.&nbsp;{{ number_format($order->totalRupees(), 2) }} on arrival.
+                  Cash on delivery — collect Rs.&nbsp;{{ number_format($order->totalRupees(), 2) }} on arrival.
                 </p>
               </td>
             </tr>
@@ -270,8 +270,8 @@
       <tr>
         <td class="fpad" align="center"
             style="background-color:#0f172a;border-top:1px solid #1e293b;padding:18px 32px;">
-          <p style="margin:0 0 3px 0;font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);font-family:Arial,Helvetica,sans-serif;">Rx Plus 365 Admin Alert &mdash; {{ date('Y') }}</p>
-          <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.3);font-family:Arial,Helvetica,sans-serif;">Automated notification. Do not reply to this email.</p>
+          <p style="margin:0 0 3px 0;font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);font-family:Arial,Helvetica,sans-serif;">Medikart &mdash; {{ date('Y') }}</p>
+          <p style="margin:0;font-size:11px;color:rgba(255,255,255,0.3);font-family:Arial,Helvetica,sans-serif;">Internal order summary.</p>
         </td>
       </tr>
 
@@ -284,3 +284,4 @@
 
 </body>
 </html>
+

@@ -192,7 +192,7 @@
 {{-- WhatsApp Settings --}}
 @php
     $waEnabled = config('services.whatsapp.enabled', true);
-    $waPhone   = config('services.whatsapp.number', '917600264090');
+    $waPhone   = config('services.whatsapp.number', '919737275558');
 @endphp
 
 {{-- ── Charts ── --}}

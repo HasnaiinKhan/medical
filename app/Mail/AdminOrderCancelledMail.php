@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\Models\Order;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -17,7 +18,10 @@ class AdminOrderCancelledMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Cancelled #' . $this->order->order_number . ' - Rx Plus 365 Admin',
+            subject: 'Order Cancelled: ' . $this->order->order_number . ' - Rx Plus 365',
+            replyTo: [new Address('support@rxplus365.com', 'Rx Plus 365')],
+            tags: ['admin-order-cancelled'],
+            metadata: ['order_id' => (string) $this->order->id],
         );
     }
 

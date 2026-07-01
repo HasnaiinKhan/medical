@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Services\InvoiceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -20,7 +21,10 @@ class OrderShipped extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Order is On the Way - ' . $this->order->order_number . ' | Rx Plus 365',
+            subject: 'Your Order ' . $this->order->order_number . ' Has Been Shipped - Rx Plus 365',
+            replyTo: [new Address('support@rxplus365.com', 'Rx Plus 365 Support')],
+            tags: ['order-shipped'],
+            metadata: ['order_id' => (string) $this->order->id],
         );
     }
 
