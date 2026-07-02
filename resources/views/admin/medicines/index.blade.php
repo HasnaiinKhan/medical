@@ -1,7 +1,7 @@
 ﻿@extends('admin.layouts.admin')
 @section('title', 'Medicines')
 @section('page-title', 'Medicines')
-@section('page-subtitle', $medicines->total() . ' medicines in catalogue')
+@section('page-subtitle', $medicines->total() . ' medicines' . ($status !== 'all' ? ' · ' . ucfirst($status) : ' in catalogue'))
 
 @section('content')
 
@@ -169,9 +169,36 @@ function dismissMedicineAlert(alertId) {
 
 {{-- Toolbar --}}
 <div class="mb-5 flex flex-col gap-3">
+
+    {{-- Status filter tabs --}}
+    <div class="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-sm w-fit">
+        @php
+            $tabs = [
+                'all'      => ['label' => 'All',      'count' => $totalCount,    'icon' => '📋'],
+                'active'   => ['label' => 'Live',     'count' => $activeCount,   'icon' => '🟢'],
+                'inactive' => ['label' => 'Inactive', 'count' => $inactiveCount, 'icon' => '⚫'],
+            ];
+        @endphp
+        @foreach($tabs as $key => $tab)
+            <a href="{{ route('admin.medicines.index', array_filter(['status' => $key === 'all' ? null : $key, 'q' => $q ?: null, 'category' => request('category') ?: null])) }}"
+               class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all
+                      {{ $status === $key ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700' }}">
+                <span>{{ $tab['icon'] }}</span>
+                {{ $tab['label'] }}
+                <span class="rounded-full px-1.5 py-0.5 text-[10px] font-bold
+                             {{ $status === $key ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }}">
+                    {{ $tab['count'] }}
+                </span>
+            </a>
+        @endforeach
+    </div>
+
     <form action="{{ route('admin.medicines.index') }}" method="get" class="flex gap-2 flex-wrap items-center">
         @if(request('category'))
             <input type="hidden" name="category" value="{{ request('category') }}">
+        @endif
+        @if($status !== 'all')
+            <input type="hidden" name="status" value="{{ $status }}">
         @endif
         <div class="relative flex-1 min-w-[160px]">
             <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>

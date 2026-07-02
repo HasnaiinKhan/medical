@@ -18,6 +18,7 @@ class AdminMedicineController extends Controller
     {
         $q            = trim((string) $request->get('q', ''));
         $categorySlug = $request->get('category');
+        $status       = $request->get('status', 'all'); // all | active | inactive
 
         $medicines = Medicine::with('category')
             ->when($q, fn ($query) => $query->where(function ($sub) use ($q) {
@@ -27,13 +28,23 @@ class AdminMedicineController extends Controller
             ->when($categorySlug, fn ($query) =>
                 $query->whereHas('category', fn ($c) => $c->where('slug', $categorySlug))
             )
+            ->when($status === 'active',   fn ($query) => $query->where('is_active', true))
+            ->when($status === 'inactive', fn ($query) => $query->where('is_active', false))
             ->orderBy('name')
             ->paginate(20)
             ->withQueryString();
 
         $categories = Category::orderBy('name')->get();
 
-        return view('admin.medicines.index', compact('medicines', 'categories', 'q'));
+        // Counts for the status tabs
+        $totalCount    = Medicine::count();
+        $activeCount   = Medicine::where('is_active', true)->count();
+        $inactiveCount = Medicine::where('is_active', false)->count();
+
+        return view('admin.medicines.index', compact(
+            'medicines', 'categories', 'q', 'status',
+            'totalCount', 'activeCount', 'inactiveCount'
+        ));
     }
 
     public function create(): View

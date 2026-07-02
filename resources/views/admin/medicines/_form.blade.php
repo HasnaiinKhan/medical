@@ -888,21 +888,55 @@ document.addEventListener('DOMContentLoaded', function() {
         var gallery = d.gallery_image_urls || d.gallery_images || d.extra_images || [];
         if (Array.isArray(gallery))
             gallery.forEach(function(u){ if(u && images.indexOf(u) === -1) images.push(u); });
+
+        var container = document.getElementById('image-slots');
+        if (!container) return;
+
+        // ── Step 1: remove all extra slots (keep only slot 0 = primary) ──────
+        container.querySelectorAll('.image-slot').forEach(function(slot, i) {
+            if (i > 0) slot.remove();
+        });
+
+        // ── Step 2: clear slot 0 (primary) completely ────────────────────────
+        var primarySlot = container.querySelector('.image-slot');
+        if (primarySlot) {
+            var pUrlInput  = primarySlot.querySelector('.img-url-input');
+            var pPreview   = primarySlot.querySelector('.img-preview');
+            var pFileInput = primarySlot.querySelector('input[type="file"]');
+            if (pFileInput) {
+                try { pFileInput.value = ''; } catch(e) {}
+                pFileInput.removeAttribute('data-file-selected');
+                var pLbl = primarySlot.querySelector('.file-label');
+                if (pLbl) pLbl.textContent = 'Click to choose image (JPG, PNG, WEBP - max 4MB)';
+            }
+            if (pUrlInput)  pUrlInput.value = '';
+            if (pPreview)   pPreview.innerHTML =
+                '<svg class="h-7 w-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>' +
+                '</svg>';
+        }
+
         if (!images.length) return;
 
-        var slots = document.querySelectorAll('.image-slot');
-        for (var x = 0; x < images.length - slots.length && slots.length + x < 8; x++) addImageSlot();
-        slots = document.querySelectorAll('.image-slot');
+        // ── Step 3: add extra slots for images beyond the first ──────────────
+        for (var x = 1; x < images.length && x < 8; x++) addImageSlot();
 
+        // ── Step 4: fill each slot with the new product's images ─────────────
+        var slots = container.querySelectorAll('.image-slot');
         images.forEach(function(url, i) {
             if (i >= slots.length) return;
-            var slot = slots[i];
+            var slot      = slots[i];
             var urlInput  = slot.querySelector('.img-url-input');
             var preview   = slot.querySelector('.img-preview');
             var fileInput = slot.querySelector('input[type="file"]');
-            if (fileInput) { try { fileInput.value=''; } catch(e){} fileInput.removeAttribute('data-file-selected'); var lbl=slot.querySelector('.file-label'); if(lbl) lbl.textContent='Click to choose image'; }
-            if (urlInput)  urlInput.value = url;
-            if (preview)   preview.innerHTML = '<img src="'+esc(url)+'" class="h-full w-full object-contain p-1" onerror="this.style.opacity=\'.15\'">';
+            if (fileInput) {
+                try { fileInput.value = ''; } catch(e) {}
+                fileInput.removeAttribute('data-file-selected');
+                var lbl = slot.querySelector('.file-label');
+                if (lbl) lbl.textContent = 'Click to choose image (JPG, PNG, WEBP - max 4MB)';
+            }
+            if (urlInput) urlInput.value = url;
+            if (preview)  preview.innerHTML = '<img src="' + esc(url) + '" class="h-full w-full object-contain p-1" onerror="this.style.opacity=\'.15\'">';
         });
     }
 
