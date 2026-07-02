@@ -22,6 +22,8 @@ class Medicine extends Model
         'price_paise',
         'prescription_required',
         'stock',
+        'strips_per_pack',
+        'tablets_per_strip',
         'is_active',
         'image_url',
         'extra_images',
@@ -112,5 +114,33 @@ class Medicine extends Model
     public function displayName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * Returns a formatted strip/tablet summary string, e.g.
+     * "3 Strips × 10 Tablets = 30 Tablets Total"
+     * Returns null when neither field is set.
+     */
+    public function stripSummary(): ?string
+    {
+        $strips  = $this->strips_per_pack;
+        $tablets = $this->tablets_per_strip;
+
+        if ($strips && $tablets) {
+            $total = $strips * $tablets;
+            return "{$strips} Strip" . ($strips  > 1 ? 's' : '') .
+                   " × {$tablets} Tablet" . ($tablets > 1 ? 's' : '') .
+                   " = {$total} Tablet" . ($total > 1 ? 's' : '') . " Total";
+        }
+
+        if ($strips) {
+            return "{$strips} Strip" . ($strips > 1 ? 's' : '') . " per Pack";
+        }
+
+        if ($tablets) {
+            return "{$tablets} Tablet" . ($tablets > 1 ? 's' : '') . " per Strip";
+        }
+
+        return null;
     }
 }

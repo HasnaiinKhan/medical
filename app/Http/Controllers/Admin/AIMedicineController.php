@@ -514,7 +514,7 @@ class AIMedicineController extends Controller
                 'gallery_image_urls'    => $galleryUrls,
                 'source_url'            => $p['slug'] ? "https://www.netmeds.com/products/" . $p['slug'] : "https://www.netmeds.com",
                 'source_platform'       => 'NetMeds',
-            ];
+            ] + $this->parseStripInfo($fullName, $packSize);
         }
 
         return $results;
@@ -1035,6 +1035,59 @@ class AIMedicineController extends Controller
     // Accepts raw URL strings (or null). Strips query strings for comparison.
     // Returns ordered, unique, non-empty HTTPS URLs.
     // ─────────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // Parse strips_per_pack and tablets_per_strip from product name / pack size.
+    // Examples handled:
+    //   "Dolo 650 Tablet - 15s"         → tablets_per_strip=15
+    //   "Calpol 500mg Tablet 3x10"       → strips_per_pack=3, tablets_per_strip=10
+    //   "Azithral 500 Tablet (6 Tablets)"→ tablets_per_strip=6
+    //   "Strip of 10 Tablets"            → tablets_per_strip=10
+    //   "1 Strip of 15 Tablets"          → strips_per_pack=1, tablets_per_strip=15
+    // ─────────────────────────────────────────────────────────────────────────
+    private function parseStripInfo(string $name, string $packSize = ''): array
+    {
+        $text = strtolower(trim($name . ' ' . $packSize));
+
+        $stripsPerPack    = null;
+        $tabletsPerStrip  = null;
+
+        // Pattern 1: "NxM" — e.g. "3x10", "2 x 15", "3 X 10 Tablets"
+        if (preg_match('/(\d+)\s*[xX×]\s*(\d+)/', $text, $m)) {
+            $stripsPerPack   = (int) $m[1];
+            $tabletsPerStrip = (int) $m[2];
+        }
+
+        // Pattern 2: "N strip(s) of M tablet(s)" — e.g. "1 strip of 10 tablets"
+        if (!$tabletsPerStrip && preg_match('/(\d+)\s+strip[s]?\s+of\s+(\d+)\s+(?:tablet|capsule)/i', $text, $m)) {
+            $stripsPerPack   = (int) $m[1];
+            $tabletsPerStrip = (int) $m[2];
+        }
+
+        // Pattern 3: "strip of M" (no leading count) — e.g. "strip of 15 tablets"
+        if (!$tabletsPerStrip && preg_match('/strip\s+of\s+(\d+)/i', $text, $m)) {
+            $tabletsPerStrip = (int) $m[1];
+        }
+
+        // Pattern 4: trailing count "- 15s", "- 15 tablets", "(10 Tablets)", "15 tabs"
+        if (!$tabletsPerStrip && preg_match('/[-\s(](\d+)\s*(?:s\b|tab[s]?|tablet[s]?|cap[s]?|capsule[s]?)/i', $text, $m)) {
+            $tabletsPerStrip = (int) $m[1];
+        }
+
+        // Pattern 5: plain trailing number "Tablet 10" (only if short)
+        if (!$tabletsPerStrip && preg_match('/\btablet[s]?\s+(\d+)\b/i', $text, $m)) {
+            $tabletsPerStrip = (int) $m[1];
+        }
+
+        // Sanity check — discard implausible values (price-like or too large)
+        if ($tabletsPerStrip  && ($tabletsPerStrip  > 500 || $tabletsPerStrip  < 1)) $tabletsPerStrip  = null;
+        if ($stripsPerPack    && ($stripsPerPack    > 100 || $stripsPerPack    < 1)) $stripsPerPack    = null;
+
+        return [
+            'strips_per_pack'   => $stripsPerPack,
+            'tablets_per_strip' => $tabletsPerStrip,
+        ];
+    }
+
     private function deduplicateImageUrls(array $urls): array
     {
         $seen   = [];
@@ -1303,7 +1356,7 @@ class AIMedicineController extends Controller
             'gallery_image_urls'    => $uniqueUrls,
             'source_url'            => $pageUrl,
             'source_platform'       => 'NetMeds',
-        ];
+        ] + $this->parseStripInfo($name, $attrs['packsize'] ?? '');
     }
 
     // ═════════════════════════════════════════════════════════════════════════
@@ -1443,7 +1496,7 @@ class AIMedicineController extends Controller
                     ? "https://pharmeasy.in/online-medicine-order/{$slug}"
                     : null,
                 'source_platform'       => 'PharmEasy',
-            ];
+            ] + $this->parseStripInfo($p['name'], $p['packSize'] ?? $p['pack_size'] ?? '');
         }
         return $results;
     }
@@ -1560,7 +1613,7 @@ class AIMedicineController extends Controller
                     ? "https://www.netmeds.com/products/" . $p['slug']
                     : "https://www.netmeds.com",
                 'source_platform'       => 'NetMeds',
-            ];
+            ] + $this->parseStripInfo($fullName, $packSize);
         }
 
         return $results;
@@ -1825,7 +1878,7 @@ class AIMedicineController extends Controller
             'gallery_image_urls'    => $uniqueUrls,
             'source_url'            => "https://pharmeasy.in/online-medicine-order/{$slug}",
             'source_platform'       => 'PharmEasy',
-        ];
+        ] + $this->parseStripInfo($pd['name'] ?? '', $pd['packSize'] ?? $pd['pack_size'] ?? '');
     }
 
     // ═════════════════════════════════════════════════════════════════════════

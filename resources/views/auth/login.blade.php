@@ -114,7 +114,7 @@
             <div style="width:44px;height:44px;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;border:1px solid rgba(255,255,255,.25);">✚</div>
             <div>
                 <p style="color:#fff;font-size:18px;font-weight:800;line-height:1;">Rx Plus 365</p>
-                <p style="color:rgba(255,255,255,.65);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;">Pharmacy</p>
+                <!-- <p style="color:rgba(255,255,255,.65);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;">Pharmacy</p> -->
             </div>
         </a>
     </div>

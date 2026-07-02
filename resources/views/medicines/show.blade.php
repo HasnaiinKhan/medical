@@ -8,6 +8,7 @@
     $cartItems   = app(\App\Services\CartService::class)->items();
     $cartQty     = $cartItems[$medicine->id] ?? 0;
     $allImages   = $medicine->allImages();
+    $stripSummary = $medicine->stripSummary();
 @endphp
 
 {{-- Breadcrumb --}}
@@ -157,6 +158,78 @@
                 </div>
             </div>
         </div>
+
+        {{-- ===== STRIP / PACK CARD ===== --}}
+        @if($medicine->strips_per_pack || $medicine->tablets_per_strip)
+        <style>
+        .strip-card{margin-top:20px;position:relative;overflow:hidden;border-radius:16px;padding:20px 22px;background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 60%,#a7f3d0 100%);border:2px solid #6ee7b7;box-shadow:0 4px 12px rgba(16,185,129,.15);}
+        .strip-card::after{content:'💊';position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:72px;opacity:.12;pointer-events:none;line-height:1;}
+        .strip-lbl{font-size:11px;font-weight:800;color:#047857;text-transform:uppercase;letter-spacing:.1em;margin:0 0 12px;display:flex;align-items:center;gap:8px;}
+        .strip-lbl::before{content:'';width:24px;height:3px;background:#10b981;border-radius:2px;display:inline-block;}
+        .strip-summary{font-size:17px;font-weight:800;color:#065f46;margin:0 0 16px;display:flex;align-items:center;gap:10px;line-height:1.4;}
+        .strip-summary-icon{font-size:24px;filter:drop-shadow(0 2px 4px rgba(5,150,105,.2));}
+        .strip-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+        .strip-pill{display:inline-flex;align-items:center;gap:5px;background:#fff;border:2px solid #a7f3d0;border-radius:10px;padding:7px 14px;font-size:13px;color:#374151;box-shadow:0 2px 6px rgba(16,185,129,.12);font-weight:500;}
+        .strip-pill strong{color:#065f46;font-size:15px;font-weight:800;}
+        .strip-sep{color:#6b7280;font-size:18px;font-weight:800;padding:0 4px;}
+        .strip-total{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border-radius:10px;padding:7px 16px;font-size:13px;font-weight:800;box-shadow:0 3px 10px rgba(5,150,105,.35);letter-spacing:.02em;}
+        .strip-total strong{font-size:15px;}
+        @media (max-width:640px){
+            .strip-card{padding:16px 18px;}
+            .strip-summary{font-size:15px;}
+            .strip-pill{padding:6px 12px;font-size:12px;}
+            .strip-pill strong{font-size:14px;}
+            .strip-total{padding:6px 14px;font-size:12px;}
+        }
+        </style>
+        <div class="strip-card">
+            <p class="strip-lbl">📦 Pack Contents</p>
+            @if($medicine->strips_per_pack && $medicine->tablets_per_strip)
+                <div class="strip-summary">
+                    <span class="strip-summary-icon">💊</span>
+                    <span>{{ $medicine->strips_per_pack }} Strip{{ $medicine->strips_per_pack > 1 ? 's' : '' }} × {{ $medicine->tablets_per_strip }} Tablet{{ $medicine->tablets_per_strip > 1 ? 's' : '' }} = <strong>{{ $medicine->strips_per_pack * $medicine->tablets_per_strip }} Total Tablets</strong></span>
+                </div>
+                <div class="strip-row">
+                    <div class="strip-pill">
+                        <strong>{{ $medicine->strips_per_pack }}</strong>
+                        Strip{{ $medicine->strips_per_pack > 1 ? 's' : '' }}
+                    </div>
+                    <span class="strip-sep">×</span>
+                    <div class="strip-pill">
+                        <strong>{{ $medicine->tablets_per_strip }}</strong>
+                        Tablet{{ $medicine->tablets_per_strip > 1 ? 's' : '' }}/Strip
+                    </div>
+                    <span class="strip-sep">=</span>
+                    <div class="strip-total">
+                        <strong>{{ $medicine->strips_per_pack * $medicine->tablets_per_strip }}</strong>
+                        Total Tablet{{ ($medicine->strips_per_pack * $medicine->tablets_per_strip) > 1 ? 's' : '' }}
+                    </div>
+                </div>
+            @elseif($medicine->strips_per_pack)
+                <div class="strip-summary">
+                    <span class="strip-summary-icon">📦</span>
+                    <span><strong>{{ $medicine->strips_per_pack }} Strip{{ $medicine->strips_per_pack > 1 ? 's' : '' }}</strong> per Pack</span>
+                </div>
+                <div class="strip-row">
+                    <div class="strip-pill">
+                        <strong>{{ $medicine->strips_per_pack }}</strong> 
+                        Strip{{ $medicine->strips_per_pack > 1 ? 's' : '' }} per Pack
+                    </div>
+                </div>
+            @elseif($medicine->tablets_per_strip)
+                <div class="strip-summary">
+                    <span class="strip-summary-icon">💊</span>
+                    <span><strong>{{ $medicine->tablets_per_strip }} Tablet{{ $medicine->tablets_per_strip > 1 ? 's' : '' }}</strong> per Strip</span>
+                </div>
+                <div class="strip-row">
+                    <div class="strip-pill">
+                        <strong>{{ $medicine->tablets_per_strip }}</strong> 
+                        Tablet{{ $medicine->tablets_per_strip > 1 ? 's' : '' }} per Strip
+                    </div>
+                </div>
+            @endif
+        </div>
+        @endif
 
         {{-- Add to cart --}}
         <form method="post" action="{{ route('cart.add') }}"

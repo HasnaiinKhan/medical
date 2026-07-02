@@ -1,4 +1,4 @@
-﻿d@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 @section('title', 'Categories')
 @section('page-title', 'Categories')
 @section('page-subtitle', $categories->count() . ' categories')
@@ -80,9 +80,10 @@
 
                                 @if($cat->medicines_count === 0)
                                     <form method="post" action="{{ route('admin.categories.destroy', $cat) }}"
-                                          onsubmit="return confirm('Delete category \'{{ addslashes($cat->name) }}\'?')">
+                                          id="cat-delete-form-{{ $cat->id }}" style="display:inline;">
                                         @csrf @method('DELETE')
-                                        <button type="submit"
+                                        <button type="button"
+                                                onclick="openCatDeleteModal({{ $cat->id }}, '{{ addslashes($cat->name) }}')"
                                                 class="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors">
                                             Delete
                                         </button>
@@ -103,3 +104,73 @@
 </div>
 
 @endsection
+
+{{-- ── Category Delete Confirm Modal ── --}}
+@push('scripts')
+<div id="cat-delete-modal"
+     style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.55);
+            backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px;">
+    <div style="background:#fff;border-radius:20px;box-shadow:0 25px 50px rgba(0,0,0,.25);
+                padding:28px 24px;width:100%;max-width:400px;">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+            <div style="width:48px;height:48px;border-radius:50%;background:#fee2e2;
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg style="width:22px;height:22px;color:#dc2626;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+            </div>
+            <div>
+                <p style="margin:0;font-size:16px;font-weight:700;color:#0f172a;">Delete Category</p>
+                <p style="margin:3px 0 0;font-size:12px;color:#64748b;">This action cannot be undone</p>
+            </div>
+        </div>
+        <p style="font-size:13px;color:#475569;margin:0 0 6px;">Are you sure you want to permanently delete:</p>
+        <p id="cat-delete-name"
+           style="font-size:14px;font-weight:700;color:#dc2626;background:#fff5f5;
+                  border:1px solid #fecaca;border-radius:8px;padding:10px 14px;
+                  margin:0 0 22px;word-break:break-word;"></p>
+        <div style="display:flex;gap:10px;">
+            <button type="button" id="cat-delete-cancel"
+                    style="flex:1;border:1px solid #e2e8f0;background:#fff;border-radius:12px;
+                           padding:11px;font-size:13px;font-weight:600;color:#475569;cursor:pointer;"
+                    onmouseover="this.style.background='#f8fafc'"
+                    onmouseout="this.style.background='#fff'">Cancel</button>
+            <button type="button" id="cat-delete-confirm"
+                    style="flex:1;border:none;border-radius:12px;padding:11px;font-size:13px;
+                           font-weight:700;color:#fff;background:#dc2626;cursor:pointer;"
+                    onmouseover="this.style.background='#b91c1c'"
+                    onmouseout="this.style.background='#dc2626'">Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var modal      = document.getElementById('cat-delete-modal');
+    var nameEl     = document.getElementById('cat-delete-name');
+    var cancelBtn  = document.getElementById('cat-delete-cancel');
+    var confirmBtn = document.getElementById('cat-delete-confirm');
+    var pendingId  = null;
+
+    window.openCatDeleteModal = function (id, name) {
+        pendingId = id;
+        nameEl.textContent = name;
+        modal.style.display = 'flex';
+    };
+
+    function close() { modal.style.display = 'none'; pendingId = null; }
+
+    cancelBtn.addEventListener('click', close);
+    modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+
+    confirmBtn.addEventListener('click', function () {
+        if (pendingId) {
+            var form = document.getElementById('cat-delete-form-' + pendingId);
+            if (form) form.submit();
+        }
+        close();
+    });
+})();
+</script>
+@endpush

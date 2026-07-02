@@ -73,7 +73,8 @@
 
         /* ── Header ── */
         .site-header {
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 40%, #2563eb 70%, #3b82f6 100%);
+    /* background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 40%, #2563eb 70%, #3b82f6 100%); */
+    background: linear-gradient(135deg, #ffffffff 0%, #8b97bfff 40%, #003dc2ff 70%, #3b82f6 100%);
     box-shadow: 0 2px 20px rgba(30,58,138,.35);
 
     position: fixed;
@@ -420,6 +421,7 @@
         @media (min-width: 640px) {
             .hdr-desktop-only { display: inline-flex; }
         }
+
 
         /* Shared nav link style */
         .hdr-nav-link {
@@ -896,9 +898,9 @@
             
                 {{-- Logo --}}
                 <a href="{{ route('home') }}" class="flex items-center gap-2.5 group flex-shrink-0" style="text-decoration:none;">
-                    <img src="{{ asset('Images/companylogo/Rxpluswithwhitebg.png') }}"
+                    <img src="{{ asset('Images/companylogo/RxPlus.png') }}"
                          alt="Rx Plus 365"
-                         style="height:68px;width:auto;object-fit:contain;display:block;">
+                         style="height:55px;width:auto;object-fit:contain;display:block;">
                 </a>
 
                  
@@ -1128,9 +1130,9 @@
                 </div>
                 <div class="flex flex-1 flex-wrap items-center gap-2 min-w-0">
                     <input id="pin-input" maxlength="6" inputmode="numeric" placeholder="Enter pincode…"
-                           class="new h-auto rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-xs text-white placeholder:text-blue-300/60 focus:border-white/40 focus:bg-white/15 focus:outline-none transition-all min-w-0">
+                           class="new h-auto rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-xs text-white placeholder:text-white focus:border-white/40 focus:bg-white/15 focus:outline-none transition-all min-w-0">
                     <button type="button" id="pin-lookup-btn"
-                            class="rounded-lg bg-white/10 border border-white/20 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/20 transition-all flex-shrink-0">
+                            class="rounded-lg bg-blue border border-white/20 px-3 py-1.5  bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold transition-colors flex-shrink-0" >
                         Check
                     </button>
                     <button type="button" id="pin-confirm-btn" hidden

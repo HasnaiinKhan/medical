@@ -82,6 +82,24 @@ $cartItems = app(\App\Services\CartService::class)->items();
                 <h2 class="line-clamp-2 text-xs sm:text-sm font-semibold leading-snug text-slate-900">{{ $m->name }}</h2>
                 <p class="mt-0.5 text-[10px] sm:text-xs text-slate-500">{{ $m->manufacturer }}</p>
 
+                @if($m->strips_per_pack || $m->tablets_per_strip)
+                    <div class="mt-1 flex flex-wrap items-center gap-1 text-[10px] sm:text-xs text-slate-600">
+                        @if($m->strips_per_pack && $m->tablets_per_strip)
+                            <span class="inline-flex items-center rounded-md bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                                {{ $m->strips_per_pack }}×{{ $m->tablets_per_strip }} tabs
+                            </span>
+                        @elseif($m->strips_per_pack)
+                            <span class="inline-flex items-center rounded-md bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                                {{ $m->strips_per_pack }} strip{{ $m->strips_per_pack > 1 ? 's' : '' }}
+                            </span>
+                        @elseif($m->tablets_per_strip)
+                            <span class="inline-flex items-center rounded-md bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                                {{ $m->tablets_per_strip }} tab{{ $m->tablets_per_strip > 1 ? 's' : '' }}/strip
+                            </span>
+                        @endif
+                    </div>
+                @endif
+
                 <div class="mt-1.5 sm:mt-2 flex flex-wrap items-baseline gap-1">
                     <span class="text-xs sm:text-base font-bold text-slate-900">&#8377;{{ number_format($m->priceRupees(), 2) }}</span>
                     @if ($m->mrp_paise > $m->price_paise)

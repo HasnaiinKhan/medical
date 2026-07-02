@@ -308,6 +308,13 @@
                     <div class="bb-card-tags">
                         <span x-show="item.category" class="bb-tag bb-tag-cat" x-text="item.category"></span>
                         <span x-show="item.prescription_required" class="bb-tag bb-tag-rx">Rx</span>
+                        <span x-show="item.strips_per_pack || item.tablets_per_strip"
+                              class="bb-tag"
+                              style="background:#f0fdf4;color:#15803d;border:1px solid #86efac;"
+                              x-text="(item.strips_per_pack && item.tablets_per_strip)
+                                  ? item.strips_per_pack+'×'+item.tablets_per_strip+' tabs'
+                                  : (item.strips_per_pack ? item.strips_per_pack+' strips' : item.tablets_per_strip+' tabs/strip')">
+                        </span>
                     </div>
 
                     <div class="bb-card-desc-status">
@@ -521,6 +528,7 @@
                 // Header: fixed columns + 4 separate image columns
                 var rows = [['name','manufacturer','category','mrp','price',
                              'prescription_required','stock','description',
+                             'strips_per_pack','tablets_per_strip',
                              'image_url','image_url_2','image_url_3','image_url_4'].join(',')];
 
                 selectedItems.forEach(function(item, selIdx) {
@@ -558,6 +566,8 @@
                         esc(item.prescription_required?'true':'false'),
                         esc('100'),
                         esc(desc),
+                        esc(item.strips_per_pack||''),
+                        esc(item.tablets_per_strip||''),
                         esc(allImages[0]),
                         esc(allImages[1]),
                         esc(allImages[2]),

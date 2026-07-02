@@ -67,7 +67,8 @@ class MedicineImportExportController extends Controller
             Medicine::upsert($chunk, ['slug'], [
                 'category_id', 'name', 'manufacturer', 'description',
                 'mrp_paise', 'price_paise', 'prescription_required',
-                'stock', 'image_url', 'extra_images',
+                'stock', 'strips_per_pack', 'tablets_per_strip',
+                'image_url', 'extra_images',
             ]);
             $imported += count($chunk);
             $chunk = [];
@@ -151,6 +152,8 @@ class MedicineImportExportController extends Controller
                     $data['prescription_required'] ?? false, FILTER_VALIDATE_BOOLEAN
                 ),
                 'stock'                 => (int) ($data['stock'] ?? 100),
+                'strips_per_pack'       => ($v = (int) ($data['strips_per_pack'] ?? 0)) > 0 ? $v : null,
+                'tablets_per_strip'     => ($v = (int) ($data['tablets_per_strip'] ?? 0)) > 0 ? $v : null,
                 'image_url'             => $primaryImageUrl ?: null,
                 'extra_images'          => $extraImages ? json_encode($extraImages) : null,
                 'created_at'            => now(),
@@ -279,6 +282,7 @@ class MedicineImportExportController extends Controller
             fputcsv($handle, [
                 'name', 'manufacturer', 'category', 'mrp', 'price',
                 'prescription_required', 'stock', 'description',
+                'strips_per_pack', 'tablets_per_strip',
                 'image_url', 'image_url_2', 'image_url_3', 'image_url_4',
             ]);
 
@@ -293,6 +297,8 @@ class MedicineImportExportController extends Controller
                     $m->prescription_required ? 'true' : 'false',
                     $m->stock,
                     $m->description ?? '',
+                    $m->strips_per_pack   ?? '',
+                    $m->tablets_per_strip ?? '',
                     $m->image_url ?? '',
                     $extras[0] ?? '',
                     $extras[1] ?? '',
@@ -316,12 +322,15 @@ class MedicineImportExportController extends Controller
             fputcsv($handle, [
                 'name', 'manufacturer', 'category', 'mrp', 'price',
                 'prescription_required', 'stock', 'description',
+                'strips_per_pack', 'tablets_per_strip',
                 'image_url', 'image_url_2', 'image_url_3', 'image_url_4',
             ]);
             fputcsv($handle, [
                 'Dolo 650 Tablet', 'Micro Labs', 'Fever & Pain',
                 '45.00', '38.00', 'false', '200',
-                'Paracetamol 650mg for fever and pain relief.', '', '', '', '',
+                'Paracetamol 650mg for fever and pain relief.',
+                '3', '10',
+                '', '', '', '',
             ]);
             fclose($handle);
         }, 'medicines_template.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);

@@ -307,7 +307,7 @@
             <div class="left-logo-icon">✚</div>
             <div>
                 <p class="left-logo-name">Rx Plus 365</p>
-                <p class="left-logo-sub">Pharmacy</p>
+                <!-- <p class="left-logo-sub">Pharmacy</p> -->
             </div>
         </a>
     </div>

@@ -266,7 +266,7 @@ function dismissMedicineAlert(alertId) {
                                         data-active="{{ $m->is_active ? '1' : '0' }}"
                                         class="medicine-active-toggle {{ $m->is_active ? 'med-toggle-on' : 'med-toggle-off' }}">
                                     <span class="toggle-dot"></span>
-                                    <span class="toggle-label">{{ $m->is_active ? 'Live' : 'Hidden' }}</span>
+                                    <span class="toggle-label">{{ $m->is_active ? 'Live' : 'Inactive' }}</span>
                                 </button>
                                 {{-- Edit --}}
                                 <a href="{{ route('admin.medicines.edit', $m) }}" class="btn-sm" style="background:#f1f5f9;color:#475569;">Edit</a>
@@ -381,7 +381,7 @@ function dismissMedicineAlert(alertId) {
         var label     = btn.querySelector('.toggle-label');
 
         btn.dataset.active = nowActive ? '1' : '0';
-        label.textContent  = nowActive ? 'Live' : 'Hidden';
+        label.textContent  = nowActive ? 'Live' : 'Inactive';
         btn.classList.toggle('med-toggle-on',  nowActive);
         btn.classList.toggle('med-toggle-off', !nowActive);
         if (row) { row.style.opacity = nowActive ? '' : '0.45'; row.style.background = nowActive ? '' : '#f8fafc'; }
@@ -397,7 +397,7 @@ function dismissMedicineAlert(alertId) {
 
         function revert() {
             btn.dataset.active = isActive ? '1' : '0';
-            label.textContent  = isActive ? 'Live' : 'Hidden';
+            label.textContent  = isActive ? 'Live' : 'Inactive';
             btn.classList.toggle('med-toggle-on',  isActive);
             btn.classList.toggle('med-toggle-off', !isActive);
             if (row) { row.style.opacity = isActive ? '' : '0.45'; row.style.background = isActive ? '' : '#f8fafc'; }

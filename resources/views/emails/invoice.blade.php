@@ -331,7 +331,7 @@
 
 <!-- Footer -->
 <div class="inv-footer">
-  <strong>Medikart</strong> — Your Trusted Online Pharmacy, Ahmedabad, Gujarat<br>
+  <strong>Medikart</strong> - Your Trusted Online Pharmacy, Ahmedabad, Gujarat<br>
   support@medikart.in &nbsp;|&nbsp; This is a computer-generated invoice and does not require a signature.<br>
   Thank you for choosing Medikart. Always consult a doctor before taking any medication.
 </div>

@@ -204,6 +204,54 @@
             </div>
         </div>
 
+        {{-- ===== STRIP / PACK INFO ===== --}}
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <h3 class="text-sm font-bold text-slate-900">Strip / Pack Information</h3>
+                <span style="background:#f1f5f9;color:#64748b;border-radius:99px;padding:2px 10px;font-size:11px;font-weight:600;">Optional</span>
+                <span style="background:#dbeafe;color:#1d4ed8;border-radius:99px;padding:2px 10px;font-size:11px;font-weight:600;">Auto-filled by AI scraper</span>
+            </div>
+            <p style="font-size:12px;color:#94a3b8;margin:0 0 18px;">For tablet/capsule products. The AI auto-fill agent will populate these from the pharmacy scraper. You can also enter them manually.</p>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">Strips per Pack</label>
+                    <div style="position:relative;">
+                        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;">📦</span>
+                        <input name="strips_per_pack" type="number" min="1" max="9999"
+                               value="{{ old('strips_per_pack', $medicine->strips_per_pack ?? '') }}"
+                               placeholder="e.g. 3"
+                               id="strips_per_pack_input"
+                               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                               style="padding-left:32px">
+                    </div>
+                    <p style="font-size:11px;color:#94a3b8;margin:4px 0 0;">How many strips come in one pack/box</p>
+                    @error('strips_per_pack')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wide">Tablets per Strip</label>
+                    <div style="position:relative;">
+                        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;">💊</span>
+                        <input name="tablets_per_strip" type="number" min="1" max="9999"
+                               value="{{ old('tablets_per_strip', $medicine->tablets_per_strip ?? '') }}"
+                               placeholder="e.g. 10"
+                               id="tablets_per_strip_input"
+                               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+                               style="padding-left:32px">
+                    </div>
+                    <p style="font-size:11px;color:#94a3b8;margin:4px 0 0;">How many tablets/capsules per strip</p>
+                    @error('tablets_per_strip')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                </div>
+            </div>
+            {{-- Live preview --}}
+            <div id="strip-preview" style="display:none;margin-top:14px;background:linear-gradient(135deg,#eff6ff,#e0f2fe);border:1.5px solid #93c5fd;border-radius:12px;padding:12px 16px;">
+                <p style="font-size:10px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.06em;margin:0 0 6px;">Preview on product page</p>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:20px;">💊</span>
+                    <span id="strip-preview-text" style="font-size:14px;font-weight:700;color:#1e40af;"></span>
+                </div>
+            </div>
+        </div>
+
         {{-- ===== PRODUCT IMAGES ===== --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
@@ -417,6 +465,35 @@
 
 @push('scripts')
 <script>
+// ── Strip / Pack live preview ──────────────────────────────────────────────────
+(function () {
+    var stripsInput  = document.querySelector('input[name="strips_per_pack"]');
+    var tabletsInput = document.querySelector('input[name="tablets_per_strip"]');
+    var preview      = document.getElementById('strip-preview');
+    var previewText  = document.getElementById('strip-preview-text');
+
+    function updateStripPreview() {
+        var s = parseInt(stripsInput  ? stripsInput.value  : '') || 0;
+        var t = parseInt(tabletsInput ? tabletsInput.value : '') || 0;
+        if (!preview || !previewText) return;
+        if (s > 0 && t > 0) {
+            previewText.textContent = s + ' Strip' + (s > 1 ? 's' : '') + ' × ' + t + ' Tablet' + (t > 1 ? 's' : '') + ' = ' + (s * t) + ' Tablet' + ((s * t) > 1 ? 's' : '') + ' Total';
+            preview.style.display = 'block';
+        } else if (s > 0) {
+            previewText.textContent = s + ' Strip' + (s > 1 ? 's' : '') + ' per Pack';
+            preview.style.display = 'block';
+        } else if (t > 0) {
+            previewText.textContent = t + ' Tablet' + (t > 1 ? 's' : '') + ' per Strip';
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+    if (stripsInput)  stripsInput.addEventListener('input',  updateStripPreview);
+    if (tabletsInput) tabletsInput.addEventListener('input', updateStripPreview);
+    updateStripPreview(); // show on page load if editing existing medicine
+})();
+
 // ── Image slot helpers ────────────────────────────────────────────────────────
 var _slotCount = document.querySelectorAll('.image-slot').length;
 
@@ -424,7 +501,7 @@ function addImageSlot() {
     var container = document.getElementById('image-slots');
     if (!container) return null;
     var total = container.querySelectorAll('.image-slot').length;
-    if (total >= 8) { alert('Maximum 8 images allowed.'); return null; }
+    if (total >= 8) { adminToast('Maximum 8 images allowed.', 'warn'); return null; }
 
     var idx = _slotCount++;          // unique index for name attrs
     var isExtra = (idx > 0);         // slot 0 is always primary; new dynamic slots are extra
@@ -510,7 +587,7 @@ function handleFileSelect(input) {
 
     // Validate size (4 MB)
     if (file.size > 4 * 1024 * 1024) {
-        alert('Image must be under 4 MB. Please choose a smaller file.');
+        adminToast('Image must be under 4 MB. Please choose a smaller file.', 'warn');
         input.value = '';
         return;
     }
@@ -755,6 +832,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var rx = document.querySelector('input[name="prescription_required"]');
         if (rx) rx.checked = !!d.prescription_required;
+
+        // Strip / Pack info
+        if (d.strips_per_pack   != null) setVal('strips_per_pack',   d.strips_per_pack);
+        if (d.tablets_per_strip != null) setVal('tablets_per_strip', d.tablets_per_strip);
+        // Trigger the live preview update in case the fields have a listener
+        ['strips_per_pack','tablets_per_strip'].forEach(function(n){
+            var el = document.querySelector('[name="'+n+'"]');
+            if (el) el.dispatchEvent(new Event('input'));
+        });
 
         // Description
         var descEl = document.querySelector('[name="description"]');
